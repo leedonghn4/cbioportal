@@ -56,6 +56,9 @@ public class ResetDatabase {
 
         DaoSangerCensus daoSangerCensus = DaoSangerCensus.getInstance();
         daoSangerCensus.deleteAllRecords();
+
+        DaoGeneSet daoGeneSet = new DaoGeneSet();
+        daoGeneSet.deleteAllRecords();
     }
 
     public static void resetDatabase() throws DaoException {
