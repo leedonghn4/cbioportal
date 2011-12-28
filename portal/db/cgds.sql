@@ -31,6 +31,7 @@ drop table IF EXISTS micro_rna_alteration;
 drop table IF EXISTS clinical;
 drop table IF EXISTS interaction;
 drop table if EXISTS sanger_cancer_census;
+drop table if EXISTS gene_set;
 
 drop table IF EXISTS protein_array_info;
 drop table IF EXISTS protein_array_target;
@@ -345,3 +346,13 @@ CREATE TABLE IF NOT EXISTS `sanger_cancer_census` (
   `OTHER_GERMLINE_MUT` tinyint(1) NOT NULL,
   `OTHER_DISEASE` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Sanger Cancer Gene Census';
+
+--
+-- Table structure for table `gene_set`
+--
+
+CREATE TABLE IF NOT EXISTS `gene_set` (
+  `NAME` varchar(255) NOT NULL,
+  `DESCRIPTION` varchar(255) NOT NULL,
+  `GENE_LIST` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
