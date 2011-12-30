@@ -12,6 +12,7 @@ import org.mskcc.portal.oncoPrintSpecLanguage.OncoPrintSpecification;
 import org.mskcc.portal.oncoPrintSpecLanguage.ParserOutput;
 import org.mskcc.portal.r_bridge.SurvivalAnalysis;
 import org.mskcc.portal.remote.GetClinicalData;
+import org.rosuda.REngine.REngineException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -87,10 +88,10 @@ public class ScanGeneSets {
         HashSet<String> geneticProfileIdSet = new HashSet<String>();
 
         // Start of Constants
-        geneticProfileIdSet.add("gbm_mutations");
-        geneticProfileIdSet.add("gbm_cna_consensus");
-        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId("tcga_gbm");
-        CaseList caseList = getCaseList(cancerStudy, "gbm_3way_complete");
+        geneticProfileIdSet.add("ucec_tcga_mutations");
+        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId("ucec_tcga");
+        CaseList caseList = getCaseList(cancerStudy, "ucec_endo");
+        //CaseList caseList = getCaseList(cancerStudy, "ucec_endo12");
         // End of Constants
 
         ArrayList <ClinicalData> clinicalDataList =
@@ -104,6 +105,7 @@ public class ScanGeneSets {
         ArrayList<GeneSet> geneSetList = daoGeneSet.getAllGeneSets();
         ArrayList<Double> osPValueList = new ArrayList<Double>();
         ArrayList<Double> dfsPValueList = new ArrayList<Double>();
+        System.out.println ("NAME\tGENES\tFREQUENCY\tOS_P\tDFS_P");
         for (GeneSet currentGeneSet:  geneSetList) {
             ArrayList<CanonicalGene> targetGeneList = currentGeneSet.getGeneList();
 
@@ -116,14 +118,20 @@ public class ScanGeneSets {
                 }
                 System.out.print(TAB);
                 System.out.print(dataSummary.getPercentCasesAffected() + TAB);
-
-                SurvivalAnalysis survivalAnalysis = new SurvivalAnalysis(clinicalDataList, dataSummary);
-                double osPValue = survivalAnalysis.getOsLogRankPValue();
-                double dfsPValue = survivalAnalysis.getDfsLogRankPValue();
-                osPValueList.add(osPValue);
-                dfsPValueList.add(dfsPValue);
-                System.out.print (osPValue + TAB);
-                System.out.print (dfsPValue+ TAB);
+                try {
+                    SurvivalAnalysis survivalAnalysis = new SurvivalAnalysis(clinicalDataList, dataSummary);
+                    double osPValue = survivalAnalysis.getOsLogRankPValue();
+                    double dfsPValue = survivalAnalysis.getDfsLogRankPValue();
+                    osPValueList.add(osPValue);
+                    dfsPValueList.add(dfsPValue);
+                    System.out.print (osPValue + TAB);
+                    System.out.print (dfsPValue);
+                } catch (REngineException e) {
+                    osPValueList.add(Double.NaN);
+                    dfsPValueList.add(Double.NaN);
+                    System.out.print (Double.NaN + TAB);
+                    System.out.print (Double.NaN);
+                }
                 System.out.println();
             }
         }

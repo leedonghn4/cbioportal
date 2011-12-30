@@ -42,12 +42,17 @@ public class ImportGeneSets {
             String description = parts[1];
             ArrayList<CanonicalGene> geneList = new ArrayList<CanonicalGene>();
             for (int i=2; i< parts.length; i++) {
-                long entrezGeneId = Long.parseLong(parts[i]);
-                CanonicalGene currentGene = daoGene.getGene(entrezGeneId);
+                CanonicalGene currentGene;
+                try {
+                    long entrezGeneId = Long.parseLong(parts[i]);
+                    currentGene = daoGene.getGene(entrezGeneId);
+                } catch (NumberFormatException e) {
+                    currentGene = daoGene.getNonAmbiguousGene(parts[i]);
+                }
                 if (currentGene != null) {
                     geneList.add(currentGene);
                 } else {
-                    pMonitor.setCurrentMessage("Cannot find gene:  " + entrezGeneId);
+                    pMonitor.setCurrentMessage("Cannot find gene:  " + parts[i]);
                 }
             }
             daoGeneSet.addGeneSet(name, description, geneList);
