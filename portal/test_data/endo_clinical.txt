@@ -1,0 +1,49 @@
+bcr_patient_barcode	age_at_initial_pathologic_diagnosis	days_to_birth	2009FIGOstageCorrected	histological_typeCorrected	tumor_grade	year_of_initial_pathologic_diagnosis	primaryTherapyOutcomeSuccess	daysToNewTumorEventAfterInitialTreatment	Recurred/Progressed	NewVitalStatus	NewPersNeoplasmStatus	NewDaystoFU	NewDaystoAlive	NewDaystoDead
+TCGA-A5-A0GJ	44	-16421	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2005	Complete Response	12	Yes	LIVING	TUMOR FREE	1447	1447	[Not Available]
+TCGA-B5-A11S	63	-23085	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2009	Complete Response	40	Yes	LIVING	TUMOR FREE	831	710	[Not Available]
+TCGA-A5-A0R8	81	-29777	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2010	Complete Response	42	Yes	LIVING	TUMOR FREE	125	125	[Not Available]
+TCGA-BS-A0TE	35	-12982	Stage IIIA	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2005	Progressive Disease	58	Yes	DECEASED	WITH TUMOR	146	146	146
+TCGA-EY-A1G7	86	-31602	Stage II	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2008	Complete Response	95	Yes	DECEASED	WITH TUMOR	189	[Not Available]	189
+TCGA-AP-A1E4	54	-19814	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2010	Progressive Disease	158	Yes	LIVING	TUMOR FREE	407	[Not Available]	[Not Available]
+TCGA-AX-A05Y	57	-20904	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2004	[Not Available]	193	Yes	LIVING	TUMOR FREE	2191	[Not Available]	[Not Available]
+TCGA-B5-A0K3	62	-22677	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2009	[Not Available]	241	Yes	DECEASED	WITH TUMOR	700	700	829
+TCGA-AP-A0LH	60	-22169	Stage IA	Mixed serous and endometrioid	Grade 3	2002	Complete Response	301	Yes	DECEASED	WITH TUMOR	1106	[Not Available]	1106
+TCGA-A5-A0GV	67	-24540	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2009	Not Applicable	304	Yes	LIVING	TUMOR FREE	485	485	[Not Available]
+TCGA-B5-A0K7	64	-23437	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2009	Complete Response	321	Yes	LIVING	TUMOR FREE	519	407	[Not Available]
+TCGA-A5-A1OG	65	-23956	Stage IIIC2	Uterine serous endometrial adenocarcinoma	Grade 3	2010	Complete Response	337	Yes	LIVING	WITH TUMOR	348	[Not Available]	[Not Available]
+TCGA-AX-A05S	81	-29928	Stage IIIC	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2008	[Not Available]	337	Yes	DECEASED	WITH TUMOR	[Not Available]	[Not Available]	413
+TCGA-AP-A05O	68	-24977	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2009	Complete Response	340	Yes	LIVING	TUMOR FREE	371	384	[Not Available]
+TCGA-B5-A0JZ	60	-22105	Stage IIIC1	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2008	Progressive Disease	356	Yes	LIVING	TUMOR FREE	871	689	[Not Available]
+TCGA-AP-A052	59	-21721	Stage IVB	Uterine serous endometrial adenocarcinoma	Grade 3	2004	Complete Response	393	Yes	DECEASED	WITH TUMOR	669	669	669
+TCGA-BS-A0TA	58	-21504	Stage IVB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2005	Stable Disease	394	Yes	LIVING	WITH TUMOR	714	714	[Not Available]
+TCGA-B5-A11X	66	-24217	Stage IIIC2	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2010	[Not Available]	396	Yes	LIVING	TUMOR FREE	595	337	[Not Available]
+TCGA-AX-A0IS	52	-19173	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2008	[Not Available]	448	Yes	LIVING	WITH TUMOR	1065	[Not Available]	[Not Available]
+TCGA-D1-A0ZN	60	-22025	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2009	Complete Response	448	Yes	LIVING	TUMOR FREE	512	512	[Not Available]
+TCGA-AP-A0LO	45	-16492	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2005	Complete Response	516	Yes	DECEASED	WITH TUMOR	1016	[Not Available]	1016
+TCGA-BS-A0UA	68	-24872	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2004	Complete Response	519	Yes	LIVING	TUMOR FREE	2540	[Not Available]	[Not Available]
+TCGA-A5-A2K4	69	-25269	Stage IIIA	Uterine serous endometrial adenocarcinoma	Grade 3	2009	Complete Response	528	Yes	DECEASED	WITH TUMOR	[Not Available]	[Not Available]	871
+TCGA-AP-A054	64	-23404	Stage IIIC1	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2004	Complete Response	566	Yes	DECEASED	WITH TUMOR	709	709	709
+TCGA-D1-A0ZP	59	-21580	Stage IVA	Uterine serous endometrial adenocarcinoma	Grade 3	2009	Complete Response	629	Yes	LIVING	TUMOR FREE	911	690	[Not Available]
+TCGA-BS-A0T9	39	-14253	Stage IVB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2005	Complete Response	633	Yes	DECEASED	WITH TUMOR	1428	1428	1428
+TCGA-B5-A11I	65	-23856	Stage IVB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2005	Complete Response	691	Yes	LIVING	WITH TUMOR	2303	2051	[Not Available]
+TCGA-B5-A0JV	63	-23295	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2007	[Not Available]	698	Yes	LIVING	TUMOR FREE	1237	1125	[Not Available]
+TCGA-AP-A0LL	56	-20699	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2004	Complete Response	790	Yes	LIVING	WITH TUMOR	2141	2141	[Not Available]
+TCGA-A5-A0G3	61	-22420	Stage IIIC2	Uterine serous endometrial adenocarcinoma	Grade 3	2007	Complete Response	795	Yes	LIVING	WITH TUMOR	1079	1079	[Not Available]
+TCGA-AP-A1DP	70	-25601	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2008	Complete Response	830	Yes	DECEASED	WITH TUMOR	[Not Available]	[Not Available]	1081
+TCGA-AX-A1CF	69	-25300	Stage IVB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2004	Not Applicable	875	Yes	LIVING	WITH TUMOR	2337	[Not Available]	[Not Available]
+TCGA-AP-A1DQ	76	-27815	Stage IIIC1	Uterine serous endometrial adenocarcinoma	Grade 3	2008	Complete Response	904	Yes	LIVING	WITH TUMOR	1275	[Not Available]	[Not Available]
+TCGA-AP-A0L8	70	-25733	Stage IIIC2	Uterine serous endometrial adenocarcinoma	Grade 3	2000	Complete Response	1452	Yes	DECEASED	WITH TUMOR	1484	[Not Available]	1484
+TCGA-BS-A0UM	64	-23400	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2005	Complete Response	1454	Yes	LIVING	WITH TUMOR	2191	[Not Available]	[Not Available]
+TCGA-B5-A11F	55	-20171	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	1995	Complete Response	1610	Yes	LIVING	TUMOR FREE	5650	5440	[Not Available]
+TCGA-A5-A0G2	57	-20953	Stage IIIB	Uterine serous endometrial adenocarcinoma	Grade 3	1997	Complete Response		Yes	LIVING	WITH TUMOR	4053	4143	[Not Available]
+TCGA-A5-A0GA	67	-24658	Stage IIIC2	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2006	Partial Response		Yes	DECEASED	WITH TUMOR	543	543	543
+TCGA-AP-A1E3	45	-16544	Stage IIIC1	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2009	Partial Response		Yes	LIVING	WITH TUMOR	679	[Not Available]	[Not Available]
+TCGA-AX-A1CK	58	-21200	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2005	[Not Available]		Yes	LIVING	WITH TUMOR	2052	[Not Available]	[Not Available]
+TCGA-BK-A0C9	57	-20876	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 1)	Grade 1	2009	Complete Response		Yes	LIVING	WITH TUMOR	386	386	[Not Available]
+TCGA-BS-A0TG	60	-22043	Stage IIIA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2005	Complete Response		Yes	LIVING	WITH TUMOR	1880	2034	[Not Available]
+TCGA-D1-A169	63	-23238	Stage IVB	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2008			Yes	LIVING	WITH TUMOR	905	[Not Available]	[Not Applicable]
+TCGA-D1-A2G5	50	-18322	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2007			Yes	LIVING	WITH TUMOR	1260	[Not Available]	[Not Applicable]
+TCGA-FI-A2EW	71	-26267	Stage II	Uterine serous endometrial adenocarcinoma	Grade 3	2005			Yes	LIVING	WITH TUMOR	1795	[Not Available]	[Not Applicable]
+TCGA-A5-A0GB	65	-23883	Stage IB	Endometrioid endometrial adenocarcinoma (Grade 3)	Grade 3	2008	Complete Response		Unknown	LIVING	TUMOR FREE	275	275	[Not Available]
+TCGA-A5-A0R7	55	-20250	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2010	Not Applicable		Unknown	LIVING	TUMOR FREE	40	40	[Not Available]
+TCGA-A5-A0R9	51	-18981	Stage IA	Endometrioid endometrial adenocarcinoma (Grade 2)	Grade 2	2009	Complete Response		Unknown	LIVING	TUMOR FREE	294	294	[Not Available]
