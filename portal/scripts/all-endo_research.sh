@@ -27,4 +27,7 @@
 #./importProfileData.pl --data $CGDS_STAGING_HOME/ucec/data_CNA.txt --meta $CGDS_STAGING_HOME/ucec/meta_CNA.txt --dbmsAction clobber
 
 # Import Gene Sets
-./importGeneSets.pl ../sample_data/gene_sets/c2.cp.v3.0.entrez.gmt
+#./importGeneSets.pl ../sample_data/gene_sets/c2.cp.v3.0.entrez.gmt
+
+# Import MutSig
+./importGeneSets.pl ~/endo/UCEC.sig_gene_sets.txt 
