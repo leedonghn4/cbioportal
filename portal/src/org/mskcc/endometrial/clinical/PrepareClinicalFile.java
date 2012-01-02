@@ -4,6 +4,7 @@ import java.io.*;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Date;
 
 /**
  * Prepares the Endometrial Clinical File.
@@ -59,6 +60,11 @@ public class PrepareClinicalFile {
     private StringBuffer newTable = new StringBuffer();
     private HashMap<String, String> msiMap = new HashMap<String, String>();
     private HashSet<String> sequencedCaseSet = new HashSet<String>();
+    private HashSet<String> endoGrade1Set = new HashSet<String>();
+    private HashSet<String> endoGrade2Set = new HashSet<String>();
+    private HashSet<String> endoGrade3Set = new HashSet<String>();
+    private HashSet<String> serousSet = new HashSet<String>();
+    private HashSet<String> mixedSet = new HashSet<String>();
 
     /**
      * Constructor.
@@ -82,6 +88,7 @@ public class PrepareClinicalFile {
         while (line != null) {
             String parts[] = line.split("\t");
             String caseId = parts[0];
+            String histSubType = parts[4];
             String daysToNewTumorEventAfterInitialTreatment = parts[8];
             String vitalStatus = parts[10];
             String daysToFu = parts[12];
@@ -111,10 +118,93 @@ public class PrepareClinicalFile {
                 newTable.append (TAB + "N");
             }
 
+            categorizeByHistologicalSubType(histSubType, caseId);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    public void writeCaseLists(String outputDir) throws IOException {
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_endo_grade1_all",
+                "Subtype:  Endometrial:  Grade 1 - All",false, outputDir);
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_endo_grade1_sequenced",
+                "Subtype:  Endometrial:  Grade 1 - Sequenced", true, outputDir);
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_endo_grade2_all",
+                "Subtype:  Endometrial:  Grade 2 - All", false, outputDir);
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_endo_grade2_sequenced",
+                "Subtype:  Endometrial:  Grade 2 - Sequenced", true, outputDir);
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_endo_grade3_all",
+                "Subtype:  Endometrial:  Grade 3 - All", false, outputDir);
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_endo_grade3_sequenced",
+                "Subtype:  Endometrial:  Grade 3 - Sequenced", true, outputDir);
+        outputCaseSet(serousSet, sequencedCaseSet, "ucec_serous_all",
+                "Subtype:  Endometrial:  Serous - All", false, outputDir);
+        outputCaseSet(serousSet, sequencedCaseSet, "ucec_serous_sequenced",
+                "Subtype:  Endometrial:  Serous - Sequenced", true, outputDir);
+
+        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_mixed_all",
+                "Subtype:  Mixed Serous and Endometrial - All", false, outputDir);
+        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_mixed_sequenced",
+                "Subtype:  Mixed Serous and Endometrial - Sequenced", true, outputDir);
+        
+        HashSet<String> allEndoSet = new HashSet<String>();
+        allEndoSet.addAll(endoGrade1Set);
+        allEndoSet.addAll(endoGrade2Set);
+        allEndoSet.addAll(endoGrade3Set);
+        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_endo_all",
+                "Subtype:  Endometrial:  Grades 1-3 - All",false, outputDir);
+        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_endo_sequenced",
+                "Subtype:  Endometrial:  Grades 1-3 - Sequenced", true, outputDir);
+    }
+
+    private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
+            String stableId, String name, boolean onlyIncludeSequencedCases,
+            String outputDir) throws IOException {
+        StringBuffer caseIds = new StringBuffer();
+        int sampleCount = 0;
+        for (String caseId:  caseSet) {
+            if (onlyIncludeSequencedCases) {
+                if (sequencedCaseSet.contains(caseId)) {
+                    caseIds.append(caseId + TAB);
+                    sampleCount++;
+                }
+            } else {
+                caseIds.append(caseId + TAB);
+                sampleCount++;
+            }
+        }
+        
+        name = name + " [" + sampleCount + " samples]";
+        String description = name + " [Auto generated on " + new Date() + "].";
+        File outputFile = new File(outputDir + "/case_lists/" + stableId + ".txt");
+        System.out.println ("Writing case set:  " + outputFile.getAbsolutePath());
+        FileWriter outWriter = new FileWriter(outputFile);
+        outWriter.write("cancer_study_identifier: ucec_tcga\n");
+        outWriter.write("stable_id: " + stableId + "\n");
+        outWriter.write("case_list_name: " + name + "\n");
+        outWriter.write("case_list_description: " + description + "\n");
+        outWriter.write("case_list_ids:  " + caseIds + "\n");
+        outWriter.flush();
+        outWriter.close();
+    }
+
+    private void categorizeByHistologicalSubType(String histSubType, String caseId) {
+        if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 1)")) {
+            endoGrade1Set.add(caseId);
+        } else if(histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 2)")) {
+            endoGrade2Set.add(caseId);
+        } else if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 3)")) {
+            endoGrade3Set.add(caseId);
+        } else if (histSubType.equals("Uterine serous endometrial adenocarcinoma")) {
+            serousSet.add(caseId);
+        } else if (histSubType.equals("Mixed serous and endometrioid")) {
+            mixedSet.add(caseId);
+        } else if (histSubType.equals("[Discrepancy]")) {
+            //  Do nothing.  ignore.
+        } else {
+            throw new IllegalArgumentException ("Aborting.  Unknown Histological Subtype:  " + histSubType);
+        }
     }
 
     public HashSet<String> getSequencedCaseSet() {
@@ -265,18 +355,21 @@ public class PrepareClinicalFile {
         // check args
         if (args.length < 3) {
             System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
-                    "<output_file>");
+                    "<output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
                 new File(args[1]), new File(args[2]));
 
-        FileWriter writer = new FileWriter(new File(args[3]));
+        prepareClinicalFile.writeCaseLists(args[3]);
+
+        File newClinicalFile = new File(args[3] + "/ucec_clinical_unified.txt");
+        FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
         HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
-        System.out.println ("New Clinical File Written to:  " + args[3]);
+        System.out.println ("New Clinical File Written to:  " + newClinicalFile.getAbsolutePath());
         writer.flush();
         writer.close();
     }
