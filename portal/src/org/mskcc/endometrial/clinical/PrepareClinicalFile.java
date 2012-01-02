@@ -3,6 +3,7 @@ package org.mskcc.endometrial.clinical;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Prepares the Endometrial Clinical File.
@@ -57,22 +58,26 @@ public class PrepareClinicalFile {
     private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
     private HashMap<String, String> msiMap = new HashMap<String, String>();
+    private HashSet<String> sequencedCaseSet = new HashSet<String>();
 
     /**
      * Constructor.
      *
      * @param clinicalFile Clinical File.
      * @param msiFile   MSI File.
+     * @param mafFile   MAF Mutation File.
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile) throws IOException {
+    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile) throws IOException {
         readMsiFile(msiFile);
+        skimMafFile(mafFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
-        newTable.append(newHeaderLine.trim() + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB + "MSI_STATUS" + NEW_LINE);
+        newTable.append(newHeaderLine.trim() + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
+                + "MSI_STATUS" + TAB + "SEQUENCED" + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
@@ -99,10 +104,21 @@ public class PrepareClinicalFile {
             } else {
                 newTable.append(TAB + NA_OUTPUT);
             }
+
+            if (sequencedCaseSet.contains(caseId)) {
+                newTable.append (TAB + "Y");
+            } else {
+                newTable.append (TAB + "N");
+            }
+
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    public HashSet<String> getSequencedCaseSet() {
+        return sequencedCaseSet;
     }
 
     /**
@@ -163,6 +179,42 @@ public class PrepareClinicalFile {
         bufferedReader.close();
     }
 
+    private void skimMafFile(File mafFile) throws IOException {
+        FileReader reader = new FileReader(mafFile);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String headerLine = bufferedReader.readLine();  //  The header line.
+        int caseIdIndex = getCaseIdIndex(headerLine);
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            String parts[] = line.split("\t");
+
+            String barCode = parts[caseIdIndex];
+            String barCodeParts[] = barCode.split("-");
+            String caseId = null;
+            try {
+                caseId = barCodeParts[0] + "-" + barCodeParts[1] + "-" + barCodeParts[2];
+            } catch( ArrayIndexOutOfBoundsException e) {
+                caseId = barCode;
+            }
+            if (!sequencedCaseSet.contains(caseId)) {
+                sequencedCaseSet.add(caseId);
+            }
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+    }
+
+    private int getCaseIdIndex(String headerLine) {
+        String parts[] = headerLine.split("\t");
+        for (int i=0; i<parts.length; i++) {
+            String headerName = parts[i];
+            if (headerName.equals("Tumor_Sample_Barcode")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private void computeOsMonths(String caseId, String vitalStatus, String daysToFu, String daysToAlive,
             String daysToDead) {
         String osMonthsStr = NA_OUTPUT;
@@ -212,15 +264,19 @@ public class PrepareClinicalFile {
     public static void main(String[] args) throws Exception {
         // check args
         if (args.length < 3) {
-            System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <output_file>");
+            System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
+                    "<output_file>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
-                new File(args[1]));
+                new File(args[1]), new File(args[2]));
 
-        FileWriter writer = new FileWriter(new File(args[2]));
+        FileWriter writer = new FileWriter(new File(args[3]));
         writer.write(prepareClinicalFile.getNewClinicalTable());
-        System.out.println ("New Clinical File Written to:  " + args[2]);
+
+        HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
+        System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
+        System.out.println ("New Clinical File Written to:  " + args[3]);
         writer.flush();
         writer.close();
     }
