@@ -14,14 +14,14 @@
 ./importSangerCensus.pl ../sample_data/genes/sanger_gene_census.txt
 
 # Load up the Endometrioid (UCEC) Meta Data File
-./importCancerStudy.pl ~/endo/ucec.txt
+./importCancerStudy.pl ~/SugarSync/endo/data/ucec.txt
 
 # Imports All Case Lists and Clinical Data
-./importCaseList.pl ~/endo/case_lists
-./importClinicalData.pl ~/endo/UCEC.clinical.txt
+./importCaseList.pl ~/SugarSync/endo/data/out/case_lists
+./importClinicalData.pl ~/SugarSync/endo/data/out/ucec_clinical_unified.txt
 
 # Imports Mutation Data
-./importProfileData.pl --data ~/endo/UCEC.maf.annotated --meta ~/endo/meta_mutations_MAF.txt --dbmsAction clobber
+./importProfileData.pl --data ~/SugarSync/endo/data/UCEC.maf.annotated --meta ~/SugarSync/endo/data/meta_mutations_MAF.txt --dbmsAction clobber
 
 # Imports Copy Number Data
 #./importProfileData.pl --data $CGDS_STAGING_HOME/ucec/data_CNA.txt --meta $CGDS_STAGING_HOME/ucec/meta_CNA.txt --dbmsAction clobber
@@ -30,4 +30,4 @@
 #./importGeneSets.pl ../sample_data/gene_sets/c2.cp.v3.0.entrez.gmt
 
 # Import MutSig
-./importGeneSets.pl ~/endo/UCEC.sig_gene_sets.txt 
+./importGeneSets.pl ~/SugarSync/endo/data/UCEC.sig_gene_sets.txt 
