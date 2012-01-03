@@ -65,6 +65,7 @@ public class PrepareClinicalFile {
     private HashSet<String> endoGrade3Set = new HashSet<String>();
     private HashSet<String> serousSet = new HashSet<String>();
     private HashSet<String> mixedSet = new HashSet<String>();
+    private HashSet<String> hyperMutatedSet = new HashSet<String>();
 
     /**
      * Constructor.
@@ -74,16 +75,18 @@ public class PrepareClinicalFile {
      * @param mafFile   MAF Mutation File.
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile) throws IOException {
+    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File hyperMutatedFile)
+            throws IOException {
         readMsiFile(msiFile);
         skimMafFile(mafFile);
+        readHyperMutatedFile(hyperMutatedFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
         newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB + "SEQUENCED" + NEW_LINE);
+                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB + "HYPERMUTATED" + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
@@ -128,6 +131,12 @@ public class PrepareClinicalFile {
             }
 
             categorizeByHistologicalSubType(histSubType, caseId);
+
+            if (hyperMutatedSet.contains(caseId)) {
+                newTable.append (TAB + "Y");
+            } else {
+                newTable.append (TAB + "N");
+            }
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
@@ -277,6 +286,24 @@ public class PrepareClinicalFile {
         bufferedReader.close();
     }
 
+    private void readHyperMutatedFile (File hyperMutatedFile) throws IOException {
+        FileReader reader = new FileReader(hyperMutatedFile);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line = bufferedReader.readLine();  //  The header line.
+        while (line != null) {
+            String barCode = line.trim();
+
+            //  bar code ids look like this:  TCGA-A6-2671-01A-01D-1861-23
+            String idParts[] = barCode.split("-");
+            if (barCode.trim().length()>0) {
+                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
+                hyperMutatedSet.add(caseId);
+            }
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+    }
+
     private void skimMafFile(File mafFile) throws IOException {
         FileReader reader = new FileReader(mafFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
@@ -363,15 +390,15 @@ public class PrepareClinicalFile {
         // check args
         if (args.length < 3) {
             System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
-                    "<output_dir>");
+                    "<hypermutated_list> <output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
-                new File(args[1]), new File(args[2]));
+                new File(args[1]), new File(args[2]), new File(args[3]));
 
-        prepareClinicalFile.writeCaseLists(args[3]);
+        prepareClinicalFile.writeCaseLists(args[4]);
 
-        File newClinicalFile = new File(args[3] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[4] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
