@@ -82,7 +82,7 @@ public class PrepareClinicalFile {
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
-        newTable.append(newHeaderLine.trim() + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
+        newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
                 + "MSI_STATUS" + TAB + "SEQUENCED" + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -91,6 +91,7 @@ public class PrepareClinicalFile {
             String histSubType = parts[4];
             String daysToNewTumorEventAfterInitialTreatment = parts[8];
             String vitalStatus = parts[10];
+            String recurredStatus = parts[9];
             String daysToFu = parts[12];
             String daysToAlive = parts[13];
             String daysToDead = parts[14];
@@ -102,6 +103,14 @@ public class PrepareClinicalFile {
             computeOsMonths(caseId, vitalStatus, daysToFu, daysToAlive, daysToDead);
 
             newTable.append(line.trim().trim());
+
+            if (recurredStatus.equalsIgnoreCase("YES")) {
+                newTable.append(TAB + "Recurred");
+            } else if (recurredStatus.equals("No")) {
+                newTable.append(TAB + "DiseaseFree");
+            } else {
+                newTable.append(TAB + "");
+            }
             newTable.append(TAB + dfsMonthsMap.get(caseId));
             newTable.append(TAB + osMonthsMap.get(caseId));
 
@@ -218,7 +227,6 @@ public class PrepareClinicalFile {
     private String transformHeader(String headerLine) {
         headerLine = headerLine.replaceAll("bcr_patient_barcode", "CASE_ID");
         headerLine = headerLine.replaceAll("NewVitalStatus", "OS_STATUS");
-        headerLine = headerLine.replaceAll("Recurred/Progressed", "DFS_STATUS");
         return headerLine;
     }
 
