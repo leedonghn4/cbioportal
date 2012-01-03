@@ -90,8 +90,7 @@ public class ScanGeneSets {
         // Start of Constants
         geneticProfileIdSet.add("ucec_tcga_mutations");
         CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId("ucec_tcga");
-        CaseList caseList = getCaseList(cancerStudy, "ucec_endo");
-        //CaseList caseList = getCaseList(cancerStudy, "ucec_endo12");
+        CaseList caseList = getCaseList(cancerStudy, "ucec_endo_grade2_sequenced");
         // End of Constants
 
         ArrayList <ClinicalData> clinicalDataList =
