@@ -24,7 +24,10 @@
 ./importProfileData.pl --data ~/SugarSync/endo/data/UCEC.maf.annotated --meta ~/SugarSync/endo/data/meta_mutations_MAF.txt --dbmsAction clobber
 
 # Imports Copy Number Data
-#./importProfileData.pl --data $CGDS_STAGING_HOME/ucec/data_CNA.txt --meta $CGDS_STAGING_HOME/ucec/meta_CNA.txt --dbmsAction clobber
+./importProfileData.pl --data ~/SugarSync/endo/data/data_CNA.txt --meta ~/SugarSync/endo/data/meta_CNA.txt --dbmsAction clobber
+
+# Imports mRNA Z-Scores Data
+./importProfileData.pl --data ~/SugarSync/endo/data/data_mRNA_median_Zscores.txt --meta ~/SugarSync/endo/data/meta_mRNA_median_Zscores.txt --dbmsAction clobber
 
 # Import Gene Sets
 #./importGeneSets.pl ../sample_data/gene_sets/c2.cp.v3.0.entrez.gmt
