@@ -97,7 +97,7 @@ public class PrepareClinicalFile {
             String daysToDead = parts[14];
 
             // Compute DFS_MONTHS
-            computeDfsMonths(caseId, daysToNewTumorEventAfterInitialTreatment);
+            computeDfsMonths(caseId, recurredStatus, daysToNewTumorEventAfterInitialTreatment, daysToFu);
 
             // Compute OS_MONTHS
             computeOsMonths(caseId, vitalStatus, daysToFu, daysToAlive, daysToDead);
@@ -106,7 +106,7 @@ public class PrepareClinicalFile {
 
             if (recurredStatus.equalsIgnoreCase("YES")) {
                 newTable.append(TAB + "Recurred");
-            } else if (recurredStatus.equals("No")) {
+            } else if (recurredStatus.equals("NO")) {
                 newTable.append(TAB + "DiseaseFree");
             } else {
                 newTable.append(TAB + "");
@@ -320,12 +320,21 @@ public class PrepareClinicalFile {
             double osMonths = convertDaysToMonths(daysToDead);
             osMonthsStr = formatter.format(osMonths);
         } else if (vitalStatus.equals(LIVING)) {
-            if (daysToAlive.trim().length() > 0 && !daysToAlive.equals(NA_INPUT)) {
+            boolean daysToAliveHasData = fieldHasData(daysToAlive);
+            boolean daysToFUHasData = fieldHasData(daysToFu);
+            if (daysToAliveHasData && daysToFUHasData) {
+                double osMonths1 = convertDaysToMonths(daysToAlive);
+                double osMonths2= convertDaysToMonths(daysToFu);
+                double osMonths = Math.max(osMonths1, osMonths2);
+                osMonthsStr = formatter.format(osMonths);
+            } else if (daysToAliveHasData) {
                 double osMonths = convertDaysToMonths(daysToAlive);
                 osMonthsStr = formatter.format(osMonths);
-            } else if (daysToFu.trim().length() > 0 && !daysToFu.equals(NA_INPUT)) {
+            } else if (daysToFUHasData) {
                 double osMonths = convertDaysToMonths(daysToFu);
                 osMonthsStr = formatter.format(osMonths);
+            } else {
+                osMonthsStr = NA_OUTPUT;
             }
         } else {
             throw new IllegalArgumentException("Aborting.  Cannot process VITAL STATUS:  " + vitalStatus);
@@ -333,13 +342,37 @@ public class PrepareClinicalFile {
         osMonthsMap.put(caseId, osMonthsStr);
     }
 
-    private void computeDfsMonths(String caseId, String daysToNewTumorEventAfterInitialTreatment) {
+    private void computeDfsMonths(String caseId, String recurredStatus,
+            String daysToNewTumorEventAfterInitialTreatment, String daysToFollowUp) {
         String dfsMonthsStr = NA_OUTPUT;
-        if (daysToNewTumorEventAfterInitialTreatment.trim().length() > 0) {
-            double dfsMonths = convertDaysToMonths(daysToNewTumorEventAfterInitialTreatment);
-            dfsMonthsStr = formatter.format(dfsMonths);
+
+        if (recurredStatus.equalsIgnoreCase("YES")) {
+            if (fieldHasData(daysToNewTumorEventAfterInitialTreatment)) {
+                double dfsMonths = convertDaysToMonths(daysToNewTumorEventAfterInitialTreatment);
+                dfsMonthsStr = formatter.format(dfsMonths);
+            } else {
+                dfsMonthsStr = NA_OUTPUT;
+            }
+        } else if (recurredStatus.equalsIgnoreCase("NO")) {
+            if (fieldHasData(daysToFollowUp)) {
+                double dfsMonths = convertDaysToMonths(daysToFollowUp);
+                dfsMonthsStr = formatter.format(dfsMonths);
+            } else {
+                dfsMonthsStr = NA_OUTPUT;
+            }
+        } else {
+            dfsMonthsStr = NA_OUTPUT;
         }
         dfsMonthsMap.put(caseId, dfsMonthsStr);
+    }
+
+    private boolean fieldHasData(String fieldValue) {
+        if (fieldValue.trim().length() > 0) {
+            if (!fieldValue.equalsIgnoreCase(NA_INPUT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getDfsMonths(String caseId) {

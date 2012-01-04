@@ -31,6 +31,12 @@ public class TestPrepareClinicalFile extends TestCase {
         dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-AP-A1E3");
         assertEquals("NA", dfsMonths);
 
+        osMonths = prepareClinicalFile.getOsMonths("TCGA-B5-A0K7");
+        assertEquals("17.05", osMonths);
+
+        dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-B5-A0K7");
+        assertEquals("10.55", dfsMonths);
+
         String msiStatus = prepareClinicalFile.getMsiStatus("TCGA-AP-A051");
         assertEquals("MSI-H", msiStatus);
 
