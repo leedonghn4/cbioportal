@@ -164,35 +164,35 @@ public class PrepareClinicalFile {
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_endo_grade1_all",
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_all",
                 "Subtype:  Endometrial:  Grade 1 - All",false, outputDir);
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_endo_grade1_sequenced",
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_sequenced",
                 "Subtype:  Endometrial:  Grade 1 - Sequenced", true, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_endo_grade2_all",
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_all",
                 "Subtype:  Endometrial:  Grade 2 - All", false, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_endo_grade2_sequenced",
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_sequenced",
                 "Subtype:  Endometrial:  Grade 2 - Sequenced", true, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_endo_grade3_all",
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_all",
                 "Subtype:  Endometrial:  Grade 3 - All", false, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_endo_grade3_sequenced",
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_sequenced",
                 "Subtype:  Endometrial:  Grade 3 - Sequenced", true, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, "ucec_serous_all",
+        outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_all",
                 "Subtype:  Endometrial:  Serous - All", false, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, "ucec_serous_sequenced",
+        outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_sequenced",
                 "Subtype:  Endometrial:  Serous - Sequenced", true, outputDir);
 
-        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_mixed_all",
+        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_all",
                 "Subtype:  Mixed Serous and Endometrial - All", false, outputDir);
-        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_mixed_sequenced",
+        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_sequenced",
                 "Subtype:  Mixed Serous and Endometrial - Sequenced", true, outputDir);
         
         HashSet<String> allEndoSet = new HashSet<String>();
         allEndoSet.addAll(endoGrade1Set);
         allEndoSet.addAll(endoGrade2Set);
         allEndoSet.addAll(endoGrade3Set);
-        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_endo_all",
+        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_all",
                 "Subtype:  Endometrial:  Grades 1-3 - All",false, outputDir);
-        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_endo_sequenced",
+        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_sequenced",
                 "Subtype:  Endometrial:  Grades 1-3 - Sequenced", true, outputDir);
 
         HashSet<String> cluster1Set = new HashSet<String>();
@@ -210,13 +210,13 @@ public class PrepareClinicalFile {
                 cluster3Set.add(caseId);
             }
         }
-        outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_cna_cluster_1_sequenced",
+        outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_tcga_cna_cluster_1_sequenced",
                 "CNA Cluster 1 - Sequenced",
                 "CNA Cluster 1 - Endometrioids with very few or no SNCA (Sequenced Cases Only)", true, outputDir);
-        outputCaseSet(cluster2Set, sequencedCaseSet, "ucec_cna_cluster_2_sequenced",
+        outputCaseSet(cluster2Set, sequencedCaseSet, "ucec_tcga_cna_cluster_2_sequenced",
                 "CNA Cluster 2 - Sequenced",
                 "CNA Cluster 2 - Endometrioids with some SNCA (Sequenced Cases Only)", true, outputDir);
-        outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_cna_cluster_3_sequenced",
+        outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_tcga_cna_cluster_3_sequenced",
                 "CNA Cluster 3 - Sequenced",
                 "CNA Cluster 3 - Serous Like (Sequenced Cases Only)", true, outputDir);
     }
