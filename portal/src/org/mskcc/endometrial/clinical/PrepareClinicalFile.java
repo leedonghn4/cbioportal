@@ -2,9 +2,7 @@ package org.mskcc.endometrial.clinical;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Prepares the Endometrial Clinical File.
@@ -65,6 +63,7 @@ public class PrepareClinicalFile {
     private HashSet<String> endoGrade3Set = new HashSet<String>();
     private HashSet<String> serousSet = new HashSet<String>();
     private HashSet<String> mixedSet = new HashSet<String>();
+    private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
 
     /**
      * Constructor.
@@ -74,16 +73,17 @@ public class PrepareClinicalFile {
      * @param mafFile   MAF Mutation File.
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile) throws IOException {
+    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaClusterFile) throws IOException {
         readMsiFile(msiFile);
         skimMafFile(mafFile);
+        readCnaClusterAssignments(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
         newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB + "SEQUENCED" + NEW_LINE);
+                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB + "CNA_CLUSTER" + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
@@ -127,11 +127,40 @@ public class PrepareClinicalFile {
                 newTable.append (TAB + "N");
             }
 
+            String cnaCluster = cnaClusterAssignmentMap.get(caseId);
+            if (cnaCluster == null) {
+                newTable.append (TAB + NA_OUTPUT);
+            } else {
+                newTable.append (TAB + cnaCluster);
+            }
+
             categorizeByHistologicalSubType(histSubType, caseId);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    private void readCnaClusterAssignments(File cnaClusterFile) throws IOException {
+        FileReader reader = new FileReader(cnaClusterFile);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line = bufferedReader.readLine();  //  The header line.
+        line = bufferedReader.readLine();
+        while (line != null) {
+            String parts[] = line.split("\t");
+            String barCode = parts[0];
+            String cnaCluster = parts[1];
+
+            //  bar code ids look like this:  TCGA-A5-A0G1-01
+            String idParts[] = barCode.split("-");
+            if (barCode.trim().length()>0) {
+                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
+                cnaClusterAssignmentMap.put(caseId, cnaCluster);
+            }
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
@@ -165,6 +194,28 @@ public class PrepareClinicalFile {
                 "Subtype:  Endometrial:  Grades 1-3 - All",false, outputDir);
         outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_endo_sequenced",
                 "Subtype:  Endometrial:  Grades 1-3 - Sequenced", true, outputDir);
+
+        HashSet<String> cluster1Set = new HashSet<String>();
+        HashSet<String> cluster2Set = new HashSet<String>();
+        HashSet<String> cluster3Set = new HashSet<String>();
+        Iterator<String> caseIterator = cnaClusterAssignmentMap.keySet().iterator();
+        while (caseIterator.hasNext()) {
+            String caseId = caseIterator.next();
+            String clusterId = cnaClusterAssignmentMap.get(caseId);
+            if (clusterId.equals("1")) {
+                cluster1Set.add(caseId);
+            } else if (clusterId.equals("2")) {
+                cluster2Set.add(caseId);
+            } else if (clusterId.equals("3")) {
+                cluster3Set.add(caseId);
+            }
+        }
+        outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_cna_cluster_1_sequenced",
+                "CNA Cluster 1:  Endometrioids with very few or no SNCA - Sequenced", true, outputDir);
+        outputCaseSet(cluster2Set, sequencedCaseSet, "ucec_cna_cluster_2_sequenced",
+                "CNA Cluster 2:  Endometrioids with some SNCA - Sequenced", true, outputDir);
+        outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_cna_cluster_3_sequenced",
+                "CNA Cluster 3:  Serous like - Sequenced", true, outputDir);
     }
 
     private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
@@ -396,15 +447,15 @@ public class PrepareClinicalFile {
         // check args
         if (args.length < 3) {
             System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
-                    "<output_dir>");
+                    " <cna_clusters_file> <output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
-                new File(args[1]), new File(args[2]));
+                new File(args[1]), new File(args[2]), new File(args[3]));
 
-        prepareClinicalFile.writeCaseLists(args[3]);
+        prepareClinicalFile.writeCaseLists(args[4]);
 
-        File newClinicalFile = new File(args[3] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[4] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 

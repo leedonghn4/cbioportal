@@ -17,7 +17,8 @@ public class TestPrepareClinicalFile extends TestCase {
         File clinFile = new File ("test_data/endo_clinical.txt");
         File msiFile = new File ("test_data/msi_test.txt");
         File mafFile = new File ("test_data/data_mutations_extended.txt");
-        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile);
+        File cnaClusterFile = new File ("test_data/cna_clusters_test.txt");
+        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile, cnaClusterFile);
         String dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-A5-A0GJ");
         assertEquals ("0.39", dfsMonths);
         String osMonths = prepareClinicalFile.getOsMonths("TCGA-A5-A0GJ");
