@@ -211,15 +211,18 @@ public class PrepareClinicalFile {
             }
         }
         outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_cna_cluster_1_sequenced",
-                "CNA Cluster 1:  Endometrioids with very few or no SNCA - Sequenced", true, outputDir);
+                "CNA Cluster 1 - Sequenced",
+                "CNA Cluster 1 - Endometrioids with very few or no SNCA (Sequenced Cases Only)", true, outputDir);
         outputCaseSet(cluster2Set, sequencedCaseSet, "ucec_cna_cluster_2_sequenced",
-                "CNA Cluster 2:  Endometrioids with some SNCA - Sequenced", true, outputDir);
+                "CNA Cluster 2 - Sequenced",
+                "CNA Cluster 2 - Endometrioids with some SNCA (Sequenced Cases Only)", true, outputDir);
         outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_cna_cluster_3_sequenced",
-                "CNA Cluster 3:  Serous like - Sequenced", true, outputDir);
+                "CNA Cluster 3 - Sequenced",
+                "CNA Cluster 3 - Serous Like (Sequenced Cases Only)", true, outputDir);
     }
 
     private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
-            String stableId, String name, boolean onlyIncludeSequencedCases,
+            String stableId, String name, String description, boolean onlyIncludeSequencedCases,
             String outputDir) throws IOException {
         StringBuffer caseIds = new StringBuffer();
         int sampleCount = 0;
@@ -234,9 +237,9 @@ public class PrepareClinicalFile {
                 sampleCount++;
             }
         }
-        
+
         name = name + " [" + sampleCount + " samples]";
-        String description = name + " [Auto generated on " + new Date() + "].";
+        description = description + " [Auto generated on " + new Date() + "].";
         File outputFile = new File(outputDir + "/case_lists/" + stableId + ".txt");
         System.out.println ("Writing case set:  " + outputFile.getAbsolutePath());
         FileWriter outWriter = new FileWriter(outputFile);
@@ -247,6 +250,13 @@ public class PrepareClinicalFile {
         outWriter.write("case_list_ids:  " + caseIds + "\n");
         outWriter.flush();
         outWriter.close();
+    }
+
+    private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
+            String stableId, String name, boolean onlyIncludeSequencedCases,
+            String outputDir) throws IOException {
+        outputCaseSet(caseSet, sequencedCaseSet, stableId, name, name, onlyIncludeSequencedCases,
+                outputDir);
     }
 
     private void categorizeByHistologicalSubType(String histSubType, String caseId) {
