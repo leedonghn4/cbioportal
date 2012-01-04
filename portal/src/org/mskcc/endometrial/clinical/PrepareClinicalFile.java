@@ -106,7 +106,7 @@ public class PrepareClinicalFile {
 
             if (recurredStatus.equalsIgnoreCase("YES")) {
                 newTable.append(TAB + "Recurred");
-            } else if (recurredStatus.equals("NO")) {
+            } else if (recurredStatus.equalsIgnoreCase("NO")) {
                 newTable.append(TAB + "DiseaseFree");
             } else {
                 newTable.append(TAB + "");
