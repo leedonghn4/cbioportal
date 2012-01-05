@@ -59,6 +59,9 @@ public class ResetDatabase {
 
         DaoGeneSet daoGeneSet = new DaoGeneSet();
         daoGeneSet.deleteAllRecords();
+
+        DaoClinicalFreeForm daoClinicalFreeForm = new DaoClinicalFreeForm();
+        daoClinicalFreeForm.deleteAllRecords();
     }
 
     public static void resetDatabase() throws DaoException {
