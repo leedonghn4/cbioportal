@@ -80,7 +80,20 @@
       <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="137" column="0" selection-start="5029" selection-end="5029" vertical-scroll-proportion="0.85825545">
+            <state line="130" column="24" selection-start="4818" selection-end="4818" vertical-scroll-proportion="0.34289128">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <marker date="1325799538000" expanded="true" signature="112:1040" placeholder="/**...*/" />
+                <marker date="1325799538000" expanded="true" signature="21503:21992" placeholder="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TestPrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="77" selection-start="664" selection-end="664" vertical-scroll-proportion="0.49940264">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -91,16 +104,7 @@
       <file leaf-file-name="prepareClinicalData.sh" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="202" selection-start="202" selection-end="202" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ImportClinicalData.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportClinicalData.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.36760125">
+            <state line="1" column="240" selection-start="469" selection-end="469" vertical-scroll-proportion="0.02676399">
               <folding />
             </state>
           </provider>
@@ -109,7 +113,7 @@
       <file leaf-file-name="SurvivalAnalysis.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/SurvivalAnalysis.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.46261683">
+            <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.7096774">
               <folding />
             </state>
           </provider>
@@ -118,7 +122,7 @@
       <file leaf-file-name="clinical_tab.jsp" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/build/WEB-INF/jsp/clinical_tab.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.21462639">
+            <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.3329223">
               <folding />
             </state>
           </provider>
@@ -127,7 +131,7 @@
       <file leaf-file-name="ClinicalData.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.119937696">
+            <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.18399045">
               <folding />
             </state>
           </provider>
@@ -136,7 +140,7 @@
       <file leaf-file-name="ConvertClinicalToDataFrame.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.50311524">
+            <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.77180403">
               <folding />
             </state>
           </provider>
@@ -145,7 +149,7 @@
       <file leaf-file-name="ScanGeneSets.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/tool/ScanGeneSets.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.09190031">
+            <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.14097969">
               <folding />
             </state>
           </provider>
@@ -607,7 +611,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="20" y="22" width="2540" height="1457" extended-state="1" />
+    <frame x="20" y="22" width="2540" height="1457" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
@@ -630,7 +634,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
       <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298351" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3298351" order="2" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="5" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="0" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
@@ -724,15 +728,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="3" selection-start="1220" selection-end="1220" vertical-scroll-proportion="0.8148148">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportClinicalData.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.36760125">
@@ -756,35 +751,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/SurvivalAnalysis.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.46261683">
+        <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.7096774">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/build/WEB-INF/jsp/clinical_tab.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.21462639">
+        <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.3329223">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalData.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.119937696">
+        <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.18399045">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.50311524">
+        <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.77180403">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/tool/ScanGeneSets.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.09190031">
+        <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.14097969">
           <folding />
         </state>
       </provider>
@@ -796,18 +791,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="137" column="0" selection-start="5029" selection-end="5029" vertical-scroll-proportion="0.85825545">
+        <state line="19" column="77" selection-start="664" selection-end="664" vertical-scroll-proportion="0.49940264">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="130" column="24" selection-start="4818" selection-end="4818" vertical-scroll-proportion="0.34289128">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1325799538000" expanded="true" signature="112:1040" placeholder="/**...*/" />
+            <marker date="1325799538000" expanded="true" signature="21503:21992" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="202" selection-start="202" selection-end="202" vertical-scroll-proportion="0.0">
+        <state line="1" column="240" selection-start="469" selection-end="469" vertical-scroll-proportion="0.02676399">
           <folding />
         </state>
       </provider>

@@ -17,7 +17,10 @@ public class TestPrepareClinicalFile extends TestCase {
         File clinFile = new File ("test_data/endo_clinical.txt");
         File msiFile = new File ("test_data/msi_test.txt");
         File mafFile = new File ("test_data/data_mutations_extended.txt");
-        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile);
+        File hyperMutatedFile = new File("test_data/hypermutated_cases.txt");
+        File cnaClusterFile = new File ("test_data/cna_clusters_test.txt");
+        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile, hyperMutatedFile,
+                cnaClusterFile);
         String dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-A5-A0GJ");
         assertEquals ("0.39", dfsMonths);
         String osMonths = prepareClinicalFile.getOsMonths("TCGA-A5-A0GJ");
@@ -30,6 +33,12 @@ public class TestPrepareClinicalFile extends TestCase {
 
         dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-AP-A1E3");
         assertEquals("NA", dfsMonths);
+
+        osMonths = prepareClinicalFile.getOsMonths("TCGA-B5-A0K7");
+        assertEquals("17.05", osMonths);
+
+        dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-B5-A0K7");
+        assertEquals("10.55", dfsMonths);
 
         String msiStatus = prepareClinicalFile.getMsiStatus("TCGA-AP-A051");
         assertEquals("MSI-H", msiStatus);
