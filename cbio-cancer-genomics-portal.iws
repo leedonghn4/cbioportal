@@ -124,7 +124,7 @@
       <file leaf-file-name="cgds.sql" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="39" selection-start="1069" selection-end="1069" vertical-scroll-proportion="0.5825545">
+            <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.89719623">
               <folding />
             </state>
           </provider>
@@ -721,7 +721,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="20" y="22" width="2540" height="1457" extended-state="0" />
+    <frame x="20" y="22" width="2540" height="1457" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
@@ -927,7 +927,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="39" selection-start="1069" selection-end="1069" vertical-scroll-proportion="0.5825545">
+        <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.89719623">
           <folding />
         </state>
       </provider>
