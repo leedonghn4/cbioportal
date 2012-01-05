@@ -77,22 +77,22 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="build.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/build.xml">
+      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="47" selection-start="404" selection-end="404" vertical-scroll-proportion="0.017488075">
-              <folding />
+            <state line="137" column="0" selection-start="5029" selection-end="5029" vertical-scroll-proportion="0.85825545">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+      <file leaf-file-name="prepareClinicalData.sh" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="44" selection-start="2408" selection-end="2408" vertical-scroll-proportion="0.6214953">
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state line="0" column="202" selection-start="202" selection-end="202" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -100,54 +100,70 @@
       <file leaf-file-name="ImportClinicalData.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportClinicalData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.77102804">
+            <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.36760125">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="prepareClinicalData.pl" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.pl">
+      <file leaf-file-name="SurvivalAnalysis.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/SurvivalAnalysis.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="121" selection-start="170" selection-end="170" vertical-scroll-proportion="0.05140187">
+            <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.46261683">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TestPrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
+      <file leaf-file-name="clinical_tab.jsp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/build/WEB-INF/jsp/clinical_tab.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="73" selection-start="1220" selection-end="1220" vertical-scroll-proportion="0.53115267">
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="msi_test.txt" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/test_data/msi_test.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="61" selection-start="1349" selection-end="1349" vertical-scroll-proportion="0.32554516">
+            <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.21462639">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CalculateMutationFrequencies.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/CalculateMutationFrequencies.java">
+      <file leaf-file-name="ClinicalData.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="86" column="69" selection-start="3742" selection-end="3803" vertical-scroll-proportion="0.31464174">
+            <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.119937696">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ImportCaseList.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportCaseList.java">
+      <file leaf-file-name="ConvertClinicalToDataFrame.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="103" column="0" selection-start="3268" selection-end="4039" vertical-scroll-proportion="0.8800623">
+            <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.50311524">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ScanGeneSets.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/tool/ScanGeneSets.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.09190031">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="os_plot.txt" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/os_plot.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="survival_no_plots.txt" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -234,6 +250,40 @@
           <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="cbio-cancer-genomics-portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc/portal/r_bridge" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
       </PATH>
       <PATH>
         <PATH_ELEMENT>
@@ -258,6 +308,68 @@
         </PATH_ELEMENT>
         <PATH_ELEMENT>
           <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc/endometrial" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="cbio-cancer-genomics-portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/src/org/mskcc" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="cbio-cancer-genomics-portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/scripts" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="cbio-cancer-genomics-portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/scripts" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/scripts/endo" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
       </PATH>
@@ -495,7 +607,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="20" y="22" width="2540" height="1457" extended-state="0" />
+    <frame x="20" y="22" width="2540" height="1457" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
@@ -584,62 +696,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/remote/GetClinicalData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="86" selection-start="654" selection-end="682" vertical-scroll-proportion="0.44683394">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/SurvivalAnalysis.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="42" selection-start="1648" selection-end="1648" vertical-scroll-proportion="0.38590202">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="11" selection-start="552" selection-end="552" vertical-scroll-proportion="-1.2473118">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/build/WEB-INF/jsp/clinical_tab.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.3329223">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/scripts/scanGeneSets.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="92" selection-start="138" selection-end="138" vertical-scroll-proportion="0.07885305">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoCaseList.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="97" column="11" selection-start="3089" selection-end="3108" vertical-scroll-proportion="0.51135004">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoGeneticProfile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="193" column="11" selection-start="7350" selection-end="7375" vertical-scroll-proportion="0.51135004">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/servlet/QueryBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="374" column="0" selection-start="17786" selection-end="17909" vertical-scroll-proportion="0.9474313">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/CalculateMutationFrequencies.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="86" column="69" selection-start="3742" selection-end="3803" vertical-scroll-proportion="0.31464174">
@@ -663,17 +719,73 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.pl">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="121" selection-start="170" selection-end="170" vertical-scroll-proportion="0.05140187">
+        <state line="3" column="121" selection-start="170" selection-end="170" vertical-scroll-proportion="0.07885305">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="73" selection-start="1220" selection-end="1220" vertical-scroll-proportion="0.53115267">
+        <state line="31" column="3" selection-start="1220" selection-end="1220" vertical-scroll-proportion="0.8148148">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportClinicalData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.36760125">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/os_plot.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/SurvivalAnalysis.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="19" selection-start="1011" selection-end="1027" vertical-scroll-proportion="0.46261683">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/build/WEB-INF/jsp/clinical_tab.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="89" selection-start="1018" selection-end="1034" vertical-scroll-proportion="0.21462639">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.119937696">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.50311524">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/tool/ScanGeneSets.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="142" selection-start="3464" selection-end="3464" vertical-scroll-proportion="0.09190031">
+          <folding />
         </state>
       </provider>
     </entry>
@@ -684,19 +796,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ImportClinicalData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="109" column="38" selection-start="3929" selection-end="3939" vertical-scroll-proportion="0.77102804">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="44" selection-start="2408" selection-end="2408" vertical-scroll-proportion="0.6214953">
+        <state line="137" column="0" selection-start="5029" selection-end="5029" vertical-scroll-proportion="0.85825545">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="202" selection-start="202" selection-end="202" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
