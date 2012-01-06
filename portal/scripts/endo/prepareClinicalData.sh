@@ -1,1 +1,1 @@
-./prepareClinicalData.pl ~/SugarSync/endo/data/ClinicalTable_12_30_2011.txt ~/SugarSync/endo/data/MSI_12_30_2011.txt ~/SugarSync/endo/data/UCEC.maf.annotated ~/SugarSync/endo/data/hypermutated_cases.txt ~/SugarSync/endo/data/cna_clusters/ucec_cna_clusters.txt ~/SugarSync/endo/data/out
+./prepareClinicalData.pl ~/SugarSync/endo/data/ClinicalTable_12_30_2011.txt ~/SugarSync/endo/data/MSI_12_30_2011.txt ~/SugarSync/endo/data/UCEC.maf.annotated ~/SugarSync/endo/data/data_CNA.txt ~/SugarSync/endo/data/cna_clusters/ucec_cna_clusters.txt ~/SugarSync/endo/data/out
