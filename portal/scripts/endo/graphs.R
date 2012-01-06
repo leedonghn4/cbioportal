@@ -38,9 +38,10 @@ qplot(1:nrow(sub_df), log(TOTAL_SNV_COUNT), data=sub_df, geom="point", colour=MS
 # Create Plot of CNA Mutations
 # First, determine correlation
 c = cor(log(sub_df$TOTAL_SNV_COUNT), sub_df$CNA_ALTERED_1, method="spearman")
+title = paste("Scatter Plot of CNA v. Mutation\nSpearman Correlation:  ", signif(c, 4))
 qplot(CNA_ALTERED_1, log(TOTAL_SNV_COUNT), data=sub_df, geom="point",
 	xlab="# of Genes Altered by CNA", ylab="log(Total # of SNVs)",
-	main="Scatter Plot of CNA v. Mutation")+geom_smooth(method="lm")
+	main=title) + geom_smooth(method="lm")
 	
 # Create Plot of CNA v. Mutations, Color Coded by CNA Clusters
 qplot(CNA_ALTERED_1, log(TOTAL_SNV_COUNT), data=sub_df, geom="point", colour=CNA_CLUSTER,
