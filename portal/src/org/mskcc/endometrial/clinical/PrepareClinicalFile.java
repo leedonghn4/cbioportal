@@ -1,5 +1,7 @@
 package org.mskcc.endometrial.clinical;
 
+import org.mskcc.endometrial.cna.CnaSummarizer;
+
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -63,7 +65,6 @@ public class PrepareClinicalFile {
     private HashSet<String> endoGrade3Set = new HashSet<String>();
     private HashSet<String> serousSet = new HashSet<String>();
     private HashSet<String> mixedSet = new HashSet<String>();
-    private HashSet<String> hyperMutatedSet = new HashSet<String>();
     private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
 
     /**
@@ -74,11 +75,12 @@ public class PrepareClinicalFile {
      * @param mafFile   MAF Mutation File.
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File hyperMutatedFile, 
+    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaFile,
             File cnaClusterFile) throws IOException {
         readMsiFile(msiFile);
+
+        CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         skimMafFile(mafFile);
-        readHyperMutatedFile(hyperMutatedFile);
         readCnaClusterAssignments(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
@@ -86,7 +88,9 @@ public class PrepareClinicalFile {
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
         newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB + "HYPERMUTATED" + TAB + "CNA_CLUSTER" + NEW_LINE);
+                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB +
+                "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
+                +"CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
@@ -107,41 +111,23 @@ public class PrepareClinicalFile {
 
             newTable.append(line.trim().trim());
 
-            if (recurredStatus.equalsIgnoreCase("YES")) {
-                newTable.append(TAB + "Recurred");
-            } else if (recurredStatus.equalsIgnoreCase("NO")) {
-                newTable.append(TAB + "DiseaseFree");
-            } else {
-                newTable.append(TAB + "");
-            }
-            newTable.append(TAB + dfsMonthsMap.get(caseId));
-            newTable.append(TAB + osMonthsMap.get(caseId));
+            appendSurvivalColumns(recurredStatus, caseId);
+            appendMsiStatus(caseId);
+            appendSequencedColumn(caseId);
 
-            String msiStatus = msiMap.get(caseId);
-            if (msiStatus != null) {
-                newTable.append(TAB + msiStatus);
-            } else {
-                newTable.append(TAB + NA_OUTPUT);
-            }
-
-            if (sequencedCaseSet.contains(caseId)) {
+            if (cnaSummarizer.hasCnaData(caseId)) {
                 newTable.append (TAB + "Y");
             } else {
                 newTable.append (TAB + "N");
             }
-
-            if (hyperMutatedSet.contains(caseId)) {
+            if (sequencedCaseSet.contains(caseId) && cnaSummarizer.hasCnaData(caseId)) {
                 newTable.append (TAB + "Y");
             } else {
                 newTable.append (TAB + "N");
             }
-
-            String cnaCluster = cnaClusterAssignmentMap.get(caseId);
-            if (cnaCluster == null) {
-                newTable.append (TAB + NA_OUTPUT);
-            } else {
-                newTable.append (TAB + cnaCluster);
-            }
+            
+            appendCnaColumns(cnaSummarizer, caseId);
+            appendCnaClusterColumn(caseId);
 
             categorizeByHistologicalSubType(histSubType, caseId);
 
@@ -149,6 +135,49 @@ public class PrepareClinicalFile {
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    private void appendCnaColumns(CnaSummarizer cnaSummarizer, String caseId) {
+        newTable.append (TAB + cnaSummarizer.getCna1Count(caseId));
+        newTable.append (TAB + cnaSummarizer.getCna2Count(caseId));
+    }
+
+    private void appendCnaClusterColumn(String caseId) {
+        String cnaCluster = cnaClusterAssignmentMap.get(caseId);
+        if (cnaCluster == null) {
+            newTable.append (TAB + NA_OUTPUT);
+        } else {
+            newTable.append (TAB + cnaCluster);
+        }
+    }
+
+    private void appendSequencedColumn(String caseId) {
+        if (sequencedCaseSet.contains(caseId)) {
+            newTable.append (TAB + "Y");
+        } else {
+            newTable.append (TAB + "N");
+        }
+    }
+
+    private void appendMsiStatus(String caseId) {
+        String msiStatus = msiMap.get(caseId);
+        if (msiStatus != null) {
+            newTable.append(TAB + msiStatus);
+        } else {
+            newTable.append(TAB + NA_OUTPUT);
+        }
+    }
+
+    private void appendSurvivalColumns(String recurredStatus, String caseId) {
+        if (recurredStatus.equalsIgnoreCase("YES")) {
+            newTable.append(TAB + "Recurred");
+        } else if (recurredStatus.equalsIgnoreCase("NO")) {
+            newTable.append(TAB + "DiseaseFree");
+        } else {
+            newTable.append(TAB + "");
+        }
+        newTable.append(TAB + dfsMonthsMap.get(caseId));
+        newTable.append(TAB + osMonthsMap.get(caseId));
     }
 
     private void readCnaClusterAssignments(File cnaClusterFile) throws IOException {
@@ -348,24 +377,6 @@ public class PrepareClinicalFile {
         bufferedReader.close();
     }
 
-    private void readHyperMutatedFile (File hyperMutatedFile) throws IOException {
-        FileReader reader = new FileReader(hyperMutatedFile);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String line = bufferedReader.readLine();  //  The header line.
-        while (line != null) {
-            String barCode = line.trim();
-
-            //  bar code ids look like this:  TCGA-A6-2671-01A-01D-1861-23
-            String idParts[] = barCode.split("-");
-            if (barCode.trim().length()>0) {
-                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
-                hyperMutatedSet.add(caseId);
-            }
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-    }
-
     private void skimMafFile(File mafFile) throws IOException {
         FileReader reader = new FileReader(mafFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
@@ -485,7 +496,7 @@ public class PrepareClinicalFile {
         // check args
         if (args.length < 3) {
             System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
-                    "<hypermutated_list> <cna_clusters_file> <output_dir>");
+                    "<cna_file> <cna_clusters_file> <output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
