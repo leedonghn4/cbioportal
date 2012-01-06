@@ -16,7 +16,7 @@ public class TestPrepareClinicalFile extends TestCase {
     public void testPrepareClinicalFile() throws IOException {
         File clinFile = new File ("test_data/endo_clinical.txt");
         File msiFile = new File ("test_data/msi_test.txt");
-        File mafFile = new File ("test_data/data_mutations_extended.txt");
+        File mafFile = new File ("test_data/endo_maf_test.txt");
         File hyperMutatedFile = new File("test_data/hypermutated_cases.txt");
         File cnaClusterFile = new File ("test_data/cna_clusters_test.txt");
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile, hyperMutatedFile,
@@ -44,7 +44,7 @@ public class TestPrepareClinicalFile extends TestCase {
         assertEquals("MSI-H", msiStatus);
 
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
-        assertEquals (1, sequencedCaseSet.size());
-        assertTrue(sequencedCaseSet.contains("TCGA-AA-3664"));
+        assertEquals (80, sequencedCaseSet.size());
+        assertTrue(sequencedCaseSet.contains("TCGA-A5-A0G1"));
     }
 }
