@@ -14,6 +14,11 @@ df = transform(df, TOTAL_SNV_COUNT=SILENT_MUTATION_COUNT+NON_SILENT_MUTATION_COU
 # Create new InDel Ratio Column
 df = transform(df, INDEL_RATIO = INDEL_MUTATION_COUNT/TOTAL_SNV_COUNT)
 
+# Create new MUTATION_RATE_CATEGORY Column
+df = transform(df, MUTATION_RATE_CATEGORY="0_LOW")
+df[df$TOTAL_SNV_COUNT>120,]$MUTATION_RATE_CATEGORY="1_HIGH"
+df[df$TOTAL_SNV_COUNT>1000,]$MUTATION_RATE_CATEGORY="2_HIGHEST"
+
 # Restrict to Cases that have CNA and Sequencing Data
 sub_df = subset(df, df$SEQUENCED_AND_GISTIC=="Y")
 
@@ -25,7 +30,7 @@ qplot(1:nrow(sub_df), CNA_ALTERED_1, data=sub_df, geom="point", colour=CNA_CLUST
 	xlab="All Cases with Sequence and CNA Data", ylab="# of Genes Altered by CNA",
 	main="Association between Extent of Copy Number Alteration and Cluster Assignments")
 
-# Sort by TOTAL_MUTATION_COUNT
+# Sort by TOTAL_SNV_COUNT
 sub_df = sub_df[order (sub_df$TOTAL_SNV_COUNT, decreasing=T),]
 
 # Create Plot of SNV Rates, Color-Coded by CNA Clusters
@@ -42,7 +47,7 @@ qplot(1:nrow(sub_df), log(TOTAL_SNV_COUNT), data=sub_df, geom="point", colour=MS
 qplot(1:nrow(sub_df), log(TOTAL_SNV_COUNT), data=sub_df, geom="point", colour=MSI_STATUS,
 	size=INDEL_RATIO,
 	xlab="All Cases with Sequence and CNA Data", ylab="log(Total # of SNVs)",
-	main="Mutation Rates, Color-Coded by MSI-Status")+geom_vline(xintercept = 22, linetype=2)+geom_vline(xintercept=78, linetype=2)
+	main="Mutation Rates, Color-Coded by MSI-Status")+geom_hline(yintercept = 6.9, linetype=2)+geom_hline(yintercept=4.78, linetype=2)+scale_size(to = c(3, 10)) 
 
 # Create Plot of CNA Mutations
 # First, determine correlation
@@ -62,3 +67,15 @@ qplot(CNA_ALTERED_1, log(TOTAL_SNV_COUNT), data=sub_df, geom="point", colour=CNA
 	size=INDEL_RATIO,
 	xlab="# of Genes Altered by CNA", ylab="log(Total # of SNVs)",
 	main="Scatter Plot of CNA v. Mutation, Color-Coded by CNA Clusters")
+	
+# Compare MUTATION_RATE_CATEGORY
+kt = kruskal.test(INDEL_RATIO ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), INDEL_RATIO))
+p= p + geom_boxplot(outlier.size =0) 
+p= p+ geom_jitter(position=position_jitter(w=0.1), size=3, colour="red")
+p=p+xlab("Mutation Rate Category") 
+p=p+ylab("InDel Ratio") 
+the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
+p=p+opts(title=the_title)
+p
+pw = pairwise.wilcox.test(sub_df$INDEL_RATIO, sub_df$MUTATION_RATE_CATEGORY, p.adj = "bonf")
