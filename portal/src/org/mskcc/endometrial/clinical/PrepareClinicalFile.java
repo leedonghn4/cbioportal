@@ -66,6 +66,9 @@ public class PrepareClinicalFile {
     private HashSet<String> endoGrade3Set = new HashSet<String>();
     private HashSet<String> serousSet = new HashSet<String>();
     private HashSet<String> mixedSet = new HashSet<String>();
+    private HashSet<String> highestMutSet = new HashSet<String>();
+    private HashSet<String> highMutSet = new HashSet<String>();
+    private HashSet<String> lowMutSet = new HashSet<String>();
     private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
 
     /**
@@ -94,7 +97,8 @@ public class PrepareClinicalFile {
                 + "MSI_STATUS" + TAB + "SEQUENCED" + TAB
                 + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
-                + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB + "INDEL_MUTATION_COUNT"
+                + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
+                + "INDEL_MUTATION_COUNT" + TAB + "TOTAL_SNV_COUNT" + "MUTATION_RATE_CATEGORY"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -132,9 +136,22 @@ public class PrepareClinicalFile {
     }
 
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
+        int totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
+                + mutationSummarizer.getNonSilentMutationMap(caseId);
         newTable.append (TAB + mutationSummarizer.getSilentMutationCount(caseId));
         newTable.append (TAB + mutationSummarizer.getNonSilentMutationMap(caseId));
+        newTable.append (TAB + totalSnvCount);
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
+        if (totalSnvCount >2465) {
+            newTable.append(TAB + "1_HIGHEST");
+            highestMutSet.add(caseId);
+        } else if (totalSnvCount>228) {
+            newTable.append(TAB + "2_HIGH");
+            highMutSet.add(caseId);
+        } else {
+            newTable.append(TAB + "3_LOW");
+            lowMutSet.add(caseId);
+        }
     }
 
     private void appendCnaDataAvailableColumns(CnaSummarizer cnaSummarizer, String caseId) {
@@ -271,6 +288,14 @@ public class PrepareClinicalFile {
         outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_tcga_cna_cluster_3_sequenced",
                 "CNA Cluster 3 - Sequenced",
                 "CNA Cluster 3 - Serous Like (Sequenced Cases Only)", true, outputDir);
+
+        //  Output Mutation Categories
+        outputCaseSet(highestMutSet, sequencedCaseSet, "ucec_tcga_highest_mut",
+                "Mutation Rate:  Highest", true, outputDir);
+        outputCaseSet(highMutSet, sequencedCaseSet, "ucec_tcga_high_mut",
+                "Mutation Rate:  High", true, outputDir);
+        outputCaseSet(lowMutSet, sequencedCaseSet, "ucec_tcga_low_mut",
+                "Mutation Rate:  Low", true, outputDir);
     }
 
     private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
