@@ -99,6 +99,7 @@ public class PrepareClinicalFile {
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
                 + "INDEL_MUTATION_COUNT" + TAB + "TOTAL_SNV_COUNT" + TAB + "MUTATION_RATE_CATEGORY"
+                + TAB + "MLH1_MUTATED"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -128,6 +129,12 @@ public class PrepareClinicalFile {
             appendCnaClusterColumn(caseId);
             appendMutationCounts(mutationSummarizer, caseId);
             categorizeByHistologicalSubType(histSubType, caseId);
+
+            if (mutationSummarizer.isMlh1Mutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
 
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();

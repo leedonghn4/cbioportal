@@ -32,6 +32,7 @@ public class MutationSummarizer {
     private HashMap<String, Integer> inDelMap = new HashMap<String, Integer>();
     private HashMap<String, Integer> silentMutationMap = new HashMap<String, Integer>();
     private HashSet<String> indelKeywordSet = new HashSet<String>();
+    private HashSet<String> mlh1MutatedSet = new HashSet<String>();
 
     public MutationSummarizer(File mafFile) throws IOException {
         indelKeywordSet.add("Frame_Shift_Del");
@@ -47,6 +48,7 @@ public class MutationSummarizer {
         while (line != null) {
             String parts[] = line.split("\t");
 
+            String geneSymbol = parts[0];
             String barCode = parts[caseIdIndex];
             String barCodeParts[] = barCode.split("-");
             String caseId = null;
@@ -62,14 +64,27 @@ public class MutationSummarizer {
             String variantType = parts[8];
             if (variantType.equalsIgnoreCase("Silent")) {
                 incrementCounterMap(caseId, silentMutationMap);
-            } else if (indelKeywordSet.contains(variantType)) {
-                incrementCounterMap(caseId, inDelMap);
             } else {
-                incrementCounterMap(caseId, nonSilentMutationMap);
+                if (geneSymbol.equalsIgnoreCase("MLH1")) {
+                    mlh1MutatedSet.add(caseId);
+                }
+                if (indelKeywordSet.contains(variantType)) {
+                    incrementCounterMap(caseId, inDelMap);
+                } else {
+                    incrementCounterMap(caseId, nonSilentMutationMap);
+                }
             }
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    public boolean isMlh1Mutated(String caseId) {
+        if (mlh1MutatedSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int getNonSilentMutationMap (String caseId) {
