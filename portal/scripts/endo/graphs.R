@@ -39,10 +39,21 @@ sub_df = subset(df, SEQUENCED=="Y")
 sub_df = sub_df[order (sub_df$TOTAL_SNV_COUNT, decreasing=T),]
 sub_df = subset(sub_df, TOTAL_SNV_COUNT>1)
 
-# Create Plot of SNV Rates, Color-Coded by MSI-Status, and Node Size Proportional to INDEL_RATIO
+# Create Plot of SNV Rates
 qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", 
 	xlab="All Sequenced Cases (Ordered by Mutation Count)", ylab="log10(Total # of SNVs)",
 	main="Total Mutation Counts")+geom_vline(xintercept = 18, linetype=2)+geom_vline(xintercept=95, linetype=2)+scale_size(to = c(2, 10))+scale_y_log10() 
+
+# Create Plot of SNV Rates, Color-Coded by MUTATION_RATE_CATEGORY
+qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MUTATION_RATE_CATEGORY,
+			xlab="All Sequenced Cases (Ordered by Mutation Count)", ylab="log10(Total # of SNVs)",
+			main="Total Mutation Counts, Color-Coded by MSI-Status")+geom_vline(xintercept = 18, linetype=2)+geom_vline(xintercept=95, linetype=2)+scale_y_log10() 
+
+
+# Create Plot of SNV Rates, Color-Coded by MSI-Status
+	qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MSI_STATUS,
+		xlab="All Sequenced Cases (Ordered by Mutation Count)", ylab="log10(Total # of SNVs)",
+		main="Total Mutation Counts, Color-Coded by MSI-Status")+geom_vline(xintercept = 18, linetype=2)+geom_vline(xintercept=95, linetype=2)+scale_y_log10() 
 
 # Create Plot of SNV Rates, Color-Coded by MSI-Status, and Node Size Proportional to INDEL_RATIO
 qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MSI_STATUS,
