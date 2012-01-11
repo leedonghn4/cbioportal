@@ -17,6 +17,6 @@ public class TestMutationSummarizer extends TestCase {
         MutationSummarizer mutationSummarizer = new MutationSummarizer(mafFile);
 
         assertEquals (5, mutationSummarizer.getSilentMutationCount("TCGA-A5-A0G1"));
-        assertEquals (18, mutationSummarizer.getNonSilentMutationMap("TCGA-A5-A0G1"));
+        assertEquals (18, mutationSummarizer.getNonSilentMutationCount("TCGA-A5-A0G1"));
     }
 }

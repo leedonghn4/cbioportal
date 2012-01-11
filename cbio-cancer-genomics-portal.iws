@@ -77,10 +77,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="100" column="75" selection-start="3976" selection-end="3976" vertical-scroll-proportion="0.5420561">
+            <state line="147" column="0" selection-start="5866" selection-end="5866" vertical-scroll-proportion="0.25623053">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -88,7 +88,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dfs_plot.txt" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="MutationSummarizer.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="89" column="40" selection-start="3006" selection-end="3031" vertical-scroll-proportion="0.33333334">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dfs_plot.txt" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/dfs_plot.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.32554516">
@@ -118,7 +127,7 @@
       <file leaf-file-name="DaoClinicalFreeForm.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoClinicalFreeForm.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="75" column="0" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.95249224">
+            <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.95249224">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -130,15 +139,6 @@
         <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
           <provider selected="true" editor-type-id="text-editor">
             <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.89719623">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ResetDatabase.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ResetDatabase.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="63" column="47" selection-start="2625" selection-end="2625" vertical-scroll-proportion="0.8130841">
               <folding />
             </state>
           </provider>
@@ -678,13 +678,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="13" selection-start="111" selection-end="111" vertical-scroll-proportion="0.18399045">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/ConvertClinicalToDataFrame.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="83" column="66" selection-start="3353" selection-end="3364" vertical-scroll-proportion="0.50311524">
@@ -754,7 +747,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoClinicalFreeForm.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="75" column="0" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.95249224">
+        <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.95249224">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -775,15 +768,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="100" column="75" selection-start="3976" selection-end="3976" vertical-scroll-proportion="0.5420561">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="36" column="27" selection-start="970" selection-end="970" vertical-scroll-proportion="0.6168224">
@@ -795,6 +779,22 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.32554516">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="89" column="40" selection-start="3006" selection-end="3031" vertical-scroll-proportion="0.33333334">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="147" column="0" selection-start="5866" selection-end="5866" vertical-scroll-proportion="0.25623053">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
