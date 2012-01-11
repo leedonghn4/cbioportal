@@ -19,8 +19,9 @@ public class TestPrepareClinicalFile extends TestCase {
         File mafFile = new File ("test_data/endo_maf_test.txt");
         File hyperMutatedFile = new File("test_data/hypermutated_cases.txt");
         File cnaClusterFile = new File ("test_data/cna_clusters_test.txt");
+        File mlh1MethFile = new File ("test_data/mlh1_meth_test.txt");
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(clinFile, msiFile, mafFile, hyperMutatedFile,
-                cnaClusterFile);
+                cnaClusterFile, mlh1MethFile);
         String dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-A5-A0GJ");
         assertEquals ("0.39", dfsMonths);
         String osMonths = prepareClinicalFile.getOsMonths("TCGA-A5-A0GJ");
@@ -46,5 +47,8 @@ public class TestPrepareClinicalFile extends TestCase {
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         assertEquals (80, sequencedCaseSet.size());
         assertTrue(sequencedCaseSet.contains("TCGA-A5-A0G1"));
+
+        assertEquals ("1", prepareClinicalFile.getMlh1HypermethylatedStatus("TCGA-A5-A0VO"));
+        assertEquals ("0", prepareClinicalFile.getMlh1HypermethylatedStatus("TCGA-AX-A0J0"));
     }
 }

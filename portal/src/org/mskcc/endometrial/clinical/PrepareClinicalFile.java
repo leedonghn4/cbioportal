@@ -70,6 +70,7 @@ public class PrepareClinicalFile {
     private HashSet<String> highMutSet = new HashSet<String>();
     private HashSet<String> lowMutSet = new HashSet<String>();
     private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
+    private HashMap<String, String> mlh1HyperMethylatedMap = new HashMap<String, String>();
 
     /**
      * Constructor.
@@ -80,12 +81,13 @@ public class PrepareClinicalFile {
      * @throws IOException IO Error.
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaFile,
-            File cnaClusterFile) throws IOException {
+            File cnaClusterFile, File mlh1MethFile) throws IOException {
         readMsiFile(msiFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(mafFile);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
+        readMlh1MethylatedMap(mlh1MethFile);
 
         readCnaClusterAssignments(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
@@ -99,7 +101,7 @@ public class PrepareClinicalFile {
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
                 + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY"
-                + TAB + "MLH1_MUTATED"
+                + TAB + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -136,7 +138,37 @@ public class PrepareClinicalFile {
                 newTable.append(TAB + "0");
             }
 
+            if (mlh1HyperMethylatedMap.containsKey(caseId)) {
+                newTable.append(TAB + mlh1HyperMethylatedMap.get(caseId));
+            } else {
+                newTable.append(TAB + NA_OUTPUT);
+            }
+
             newTable.append(NEW_LINE);
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+    }
+
+    public String getMlh1HypermethylatedStatus (String caseId) {
+        return mlh1HyperMethylatedMap.get(caseId);
+    }
+
+    private void readMlh1MethylatedMap (File mlh1File) throws IOException {
+        FileReader reader = new FileReader(mlh1File);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            String parts[] = line.split("\t");
+            String barCode = parts[0];
+            String value = parts[1];
+
+            //  bar code ids look like this:  TCGA-A5-A0VO-01A-21D-A10A-05
+            String idParts[] = barCode.split("-");
+            if (barCode.trim().length()>0) {
+                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
+                mlh1HyperMethylatedMap.put(caseId, value);
+            }
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
@@ -507,17 +539,18 @@ public class PrepareClinicalFile {
 
     public static void main(String[] args) throws Exception {
         // check args
-        if (args.length < 3) {
+        if (args.length < 4) {
             System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
-                    "<cna_file> <cna_clusters_file> <output_dir>");
+                    "<cna_file> <cna_clusters_file> <mlh1_meth_file> <output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
-                new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]));
+                new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
+                new File(args[5]));
 
-        prepareClinicalFile.writeCaseLists(args[5]);
+        prepareClinicalFile.writeCaseLists(args[6]);
 
-        File newClinicalFile = new File(args[5] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[6] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
