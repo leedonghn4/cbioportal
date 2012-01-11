@@ -1,6 +1,7 @@
 package org.mskcc.cgds.dao;
 
 import org.mskcc.cgds.model.ClinicalParameterMap;
+import org.mskcc.portal.model.CaseFilter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * Data access object for Clinical Free Form Data.
@@ -90,6 +92,29 @@ public class DaoClinicalFreeForm {
                 paramSet.add(paramValue);
             }
             return paramSet;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(con, pstmt, rs);
+        }
+    }
+
+    public HashSet<String> getAllCases (int cancerStudyId) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        HashSet<String> caseSet = new HashSet<String>();
+        try {
+            con = JdbcUtil.getDbConnection();
+            pstmt = con.prepareStatement ("SELECT DISTINCT(CASE_ID) FROM `clinical_free_form`" +
+                    "WHERE CANCER_STUDY_ID=?");
+            pstmt.setInt(1, cancerStudyId);
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String paramValue = rs.getString(1);
+                caseSet.add(paramValue);
+            }
+            return caseSet;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
