@@ -80,7 +80,7 @@
       <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="147" column="0" selection-start="5866" selection-end="5866" vertical-scroll-proportion="0.25623053">
+            <state line="152" column="35" selection-start="6240" selection-end="6240" vertical-scroll-proportion="0.34190032">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -372,7 +372,7 @@
       <recent name="org.mskcc.endometrial.test" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.TestDaoClinicalFreeForm">
+  <component name="RunManager" selected="JUnit.TestPrepareClinicalFile">
     <configuration default="true" type="TestNG" factoryName="TestNG" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -791,7 +791,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="147" column="0" selection-start="5866" selection-end="5866" vertical-scroll-proportion="0.25623053">
+        <state line="152" column="35" selection-start="6240" selection-end="6240" vertical-scroll-proportion="0.34190032">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
