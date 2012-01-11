@@ -75,6 +75,25 @@ p = p + scale_colour_brewer(type="qual", palette=6)
 p = p + geom_rug(aes(y = NULL)) 
 p
 
+# Create Plot of SNV Rates, Color-Coded by MLH1 Mutation
+p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=factor(MLH1_MUTATED))
+p = p + opts(title="Total Mutation Counts")
+p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
+p = p + ylab("log(Total # of SNVs)")
+p = p + scale_size(to = c(2, 10))
+p = p + scale_y_log10() 
+p = p + geom_rug(aes(y = NULL)) 
+p
+
+# Create Plot of SNV Rates, Node-Size is Proportional to CNA_ALTERED_1
+p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", size=CNA_ALTERED_1)
+p = p + opts(title="Total Mutation Counts")
+p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
+p = p + ylab("log(Total # of SNVs)")
+p = p + scale_size(to = c(2, 10))
+p = p + scale_y_log10() 
+p
+
 # Compare INDEL_RATIO in MUTATION_RATE_CATEGORY
 kt = kruskal.test(INDEL_RATIO ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
 p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), INDEL_RATIO))
