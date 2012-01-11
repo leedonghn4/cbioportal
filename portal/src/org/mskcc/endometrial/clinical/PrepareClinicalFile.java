@@ -150,7 +150,7 @@ public class PrepareClinicalFile {
         newTable.append (TAB + totalSnvCount);
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
         if (sequencedCaseSet.contains(caseId)) {
-            if (totalSnvCount >2465) {
+            if (totalSnvCount >5000) {
                 newTable.append(TAB + "1_HIGHEST");
                 highestMutSet.add(caseId);
             } else if (totalSnvCount>200) {
