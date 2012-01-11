@@ -87,7 +87,7 @@ public class MutationSummarizer {
         }
     }
 
-    public int getNonSilentMutationMap (String caseId) {
+    public int getNonSilentMutationCount(String caseId) {
         if (sequencedCaseSet.contains(caseId)) {
             if (nonSilentMutationMap.containsKey(caseId)) {
                 return nonSilentMutationMap.get(caseId);
