@@ -98,7 +98,7 @@ public class PrepareClinicalFile {
                 + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "INDEL_MUTATION_COUNT" + TAB + "TOTAL_SNV_COUNT" + TAB + "MUTATION_RATE_CATEGORY"
+                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY"
                 + TAB + "MLH1_MUTATED"
                 + NEW_LINE);
         line = bufferedReader.readLine();
@@ -143,10 +143,10 @@ public class PrepareClinicalFile {
     }
 
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
-        int totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
-                + mutationSummarizer.getNonSilentMutationMap(caseId);
+        long totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
+                + mutationSummarizer.getNonSilentMutationCount(caseId);
         newTable.append (TAB + mutationSummarizer.getSilentMutationCount(caseId));
-        newTable.append (TAB + mutationSummarizer.getNonSilentMutationMap(caseId));
+        newTable.append (TAB + mutationSummarizer.getNonSilentMutationCount(caseId));
         newTable.append (TAB + totalSnvCount);
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
         if (sequencedCaseSet.contains(caseId)) {
