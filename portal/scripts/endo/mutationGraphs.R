@@ -6,7 +6,6 @@ library(ggplot2)
 # A Series of Graphs Exploring Hypermutation in Endometrical Cancer
 #####################################################################
 
-
 # Start PDF
 pdf("report.pdf", width=9, height=7) 
 
@@ -15,6 +14,9 @@ df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
 
 # Make CNA Clusters into Factors, instead of Ints
 df = transform (df, CNA_CLUSTER=as.factor(CNA_CLUSTER))
+
+# Make MLH1 Hypermethylation into Factors, instead of Ints
+df = transform (df, MLH1_HYPERMETHYLATED=as.factor(MLH1_HYPERMETHYLATED))
 
 # Create new InDel Ratio Column
 df = transform(df, INDEL_RATIO = INDEL_MUTATION_COUNT/TOTAL_SNV_COUNT)
@@ -56,9 +58,21 @@ p
 p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MSI_STATUS, size=INDEL_RATIO)
 p = p + opts(title="Total Mutation Counts")
 p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
-p = p + scale_y_continuous("log10(Total # of SNVs)")
+p = p + ylab("log(Total # of SNVs)")
 p = p + scale_size(to = c(2, 10))
 p = p + scale_y_log10() 
+p = p + scale_colour_brewer(type="qual", palette=6)
+p
+
+# Create Plot of SNV Rates, Color-Coded by MLH1 Hypermethylation
+p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MLH1_HYPERMETHYLATED)
+p = p + opts(title="Total Mutation Counts")
+p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
+p = p + ylab("log(Total # of SNVs)")
+p = p + scale_size(to = c(2, 10))
+p = p + scale_y_log10() 
+p = p + scale_colour_brewer(type="qual", palette=6) 
+p = p + geom_rug(aes(y = NULL)) 
 p
 
 # Compare INDEL_RATIO in MUTATION_RATE_CATEGORY
