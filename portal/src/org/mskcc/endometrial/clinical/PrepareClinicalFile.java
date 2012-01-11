@@ -153,7 +153,7 @@ public class PrepareClinicalFile {
             if (totalSnvCount >2465) {
                 newTable.append(TAB + "1_HIGHEST");
                 highestMutSet.add(caseId);
-            } else if (totalSnvCount>228) {
+            } else if (totalSnvCount>200) {
                 newTable.append(TAB + "2_HIGH");
                 highMutSet.add(caseId);
             } else {
