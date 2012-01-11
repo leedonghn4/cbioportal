@@ -100,8 +100,9 @@ public class PrepareClinicalFile {
                 + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY"
-                + TAB + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
+                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY" + TAB
+                + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
+                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -144,6 +145,24 @@ public class PrepareClinicalFile {
                 newTable.append(TAB + NA_OUTPUT);
             }
 
+            if (mutationSummarizer.isTp53Mutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
+            if (mutationSummarizer.isPtenMutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
+            if (mutationSummarizer.isPik3caMutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
@@ -182,7 +201,7 @@ public class PrepareClinicalFile {
         newTable.append (TAB + totalSnvCount);
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
         if (sequencedCaseSet.contains(caseId)) {
-            if (totalSnvCount >5000) {
+            if (totalSnvCount >950) {
                 newTable.append(TAB + "1_HIGHEST");
                 highestMutSet.add(caseId);
             } else if (totalSnvCount>200) {

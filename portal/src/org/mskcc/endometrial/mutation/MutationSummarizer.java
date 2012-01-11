@@ -33,6 +33,9 @@ public class MutationSummarizer {
     private HashMap<String, Integer> silentMutationMap = new HashMap<String, Integer>();
     private HashSet<String> indelKeywordSet = new HashSet<String>();
     private HashSet<String> mlh1MutatedSet = new HashSet<String>();
+    private HashSet<String> tp53MutatedSet = new HashSet<String>();
+    private HashSet<String> ptenMutatedSet = new HashSet<String>();
+    private HashSet<String> pik3caMutatedSet = new HashSet<String>();
 
     public MutationSummarizer(File mafFile) throws IOException {
         indelKeywordSet.add("Frame_Shift_Del");
@@ -67,6 +70,12 @@ public class MutationSummarizer {
             } else {
                 if (geneSymbol.equalsIgnoreCase("MLH1")) {
                     mlh1MutatedSet.add(caseId);
+                } else if (geneSymbol.equals("TP53")) {
+                    tp53MutatedSet.add(caseId);
+                } else if (geneSymbol.equals("PTEN")) {
+                    ptenMutatedSet.add(caseId);
+                } else if (geneSymbol.equals("PIK3CA")) {
+                    pik3caMutatedSet.add(caseId);
                 }
                 if (indelKeywordSet.contains(variantType)) {
                     incrementCounterMap(caseId, inDelMap);
@@ -87,6 +96,30 @@ public class MutationSummarizer {
         }
     }
 
+    public boolean isTp53Mutated(String caseId) {
+        if (tp53MutatedSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isPtenMutated(String caseId) {
+        if (ptenMutatedSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isPik3caMutated(String caseId) {
+        if (pik3caMutatedSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     public int getNonSilentMutationCount(String caseId) {
         if (sequencedCaseSet.contains(caseId)) {
             if (nonSilentMutationMap.containsKey(caseId)) {
