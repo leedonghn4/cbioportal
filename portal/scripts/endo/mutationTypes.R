@@ -4,21 +4,20 @@ library(gridExtra)
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
 
-# Create new Percent Columns
-df = transform(df, TOTAL_SNPS=TG_COUNT + TC_COUNT + TA_COUNT + CT_COUNT + CG_COUNT + CA_COUNT)
-df = transform(df, TG_PERCENT = TG_COUNT/TOTAL_SNPS)
-df = transform(df, TC_PERCENT = TC_COUNT/TOTAL_SNPS)
-df = transform(df, TA_PERCENT = TA_COUNT/TOTAL_SNPS)
-df = transform(df, CT_PERCENT = CT_COUNT/TOTAL_SNPS)
-df = transform(df, CG_PERCENT = CG_COUNT/TOTAL_SNPS)
-df = transform(df, CA_PERCENT = CA_COUNT/TOTAL_SNPS)
-df = transform(df, TOTAL_PERCENT=TG_PERCENT + TC_PERCENT + TA_PERCENT + CT_PERCENT + CG_PERCENT + CA_PERCENT)
-
 # Restrict to Sequenced Cases
-sub_df = subset(df, SEQUENCED=="Y")
+df = subset(df, SEQUENCED=="Y")
 
 # Remove the one outlier that has 0 mutations
-sub_df = subset(sub_df, TOTAL_SNV_COUNT>1)
+df = subset(sub_df, TOTAL_SNV_COUNT>1)
+
+# Create new Percent Columns
+df = transform(df, TG_PERCENT = TG_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, TC_PERCENT = TC_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, TA_PERCENT = TA_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, CT_PERCENT = CT_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, CG_PERCENT = CG_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, CA_PERCENT = CA_COUNT/TOTAL_SNV_COUNT)
+df = transform(df, TOTAL_PERCENT=TG_PERCENT + TC_PERCENT + TA_PERCENT + CT_PERCENT + CG_PERCENT + CA_PERCENT)
 
 # Sort by TOTAL_SNV_COUNT
 sub_df = sub_df[order (sub_df$TOTAL_SNV_COUNT, decreasing=T),]
@@ -51,6 +50,16 @@ p = p + geom_boxplot(outlier.size =0)
 p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
 p = p + xlab("Mutation Rate Category") 
 p = p + ylab("C>A/G>T Transversion Ratio") 
+the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
+p = p + opts(title=the_title)
+p
+
+kt = kruskal.test(CT_PERCENT ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), CT_PERCENT))
+p = p + geom_boxplot(outlier.size =0) 
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
+p = p + xlab("Mutation Rate Category") 
+p = p + ylab("C>T/G>A Ratio") 
 the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
 p = p + opts(title=the_title)
 p
