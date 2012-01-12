@@ -36,6 +36,7 @@ public class MutationSummarizer {
     private HashSet<String> tp53MutatedSet = new HashSet<String>();
     private HashSet<String> ptenMutatedSet = new HashSet<String>();
     private HashSet<String> pik3caMutatedSet = new HashSet<String>();
+    private HashSet<String> krasMutatedSet = new HashSet<String>();
 
     public MutationSummarizer(File mafFile) throws IOException {
         indelKeywordSet.add("Frame_Shift_Del");
@@ -76,6 +77,8 @@ public class MutationSummarizer {
                     ptenMutatedSet.add(caseId);
                 } else if (geneSymbol.equals("PIK3CA")) {
                     pik3caMutatedSet.add(caseId);
+                } else if (geneSymbol.equals("KRAS")) {
+                    krasMutatedSet.add(caseId);
                 }
                 if (indelKeywordSet.contains(variantType)) {
                     incrementCounterMap(caseId, inDelMap);
@@ -114,6 +117,14 @@ public class MutationSummarizer {
 
     public boolean isPik3caMutated(String caseId) {
         if (pik3caMutatedSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isKrasMutated(String caseId) {
+        if (krasMutatedSet.contains(caseId)) {
             return true;
         } else {
             return false;

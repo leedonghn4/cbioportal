@@ -102,7 +102,8 @@ public class PrepareClinicalFile {
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
                 + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY" + TAB
                 + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
-                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED"
+                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
+                + "KRAS_MUTATED"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -158,6 +159,12 @@ public class PrepareClinicalFile {
             }
 
             if (mutationSummarizer.isPik3caMutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
+            if (mutationSummarizer.isKrasMutated(caseId)) {
                 newTable.append(TAB + "1");
             } else {
                 newTable.append(TAB + "0");
