@@ -173,7 +173,7 @@ dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_CATEGORY)
 # colors=c("red", "blue", "green")
 # plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
 # legend ("topright", bty="n", labels, fill=colors)
-# p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
 # legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
 
 test7 = list (METRIC="Survival (DFS)", MUT_HIGHEST=0, MUT_HIGH=0, P_VALUE=signif(p_val, digits=4), TEST="Logrank Test")
@@ -237,9 +237,14 @@ pt = prop.table(t, 2)
 f = fisher.test(t)
 test16 = list (METRIC="Rate of MLH1 Mutation", MUT_HIGHEST=pt[2,1], MUT_HIGH=pt[2,2], P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
 
+t = table(local_df$KRAS_MUTATED, local_df$MUTATION_RATE_CATEGORY, exclude="3_LOW")
+pt = prop.table(t, 2)
+f = fisher.test(t)
+test17 = list (METRIC="Rate of KRAS Mutation", MUT_HIGHEST=pt[2,1], MUT_HIGH=pt[2,2], P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
+
 options(scipen=11)
 results = rbind (data.frame(test0), data.frame(test1), data.frame(test2), data.frame(test3), data.frame(test4), data.frame(test5), data.frame(test6), data.frame(test7),
 	data.frame(test8), data.frame(test9), data.frame(test10), data.frame(test11), data.frame(test12), data.frame(test13), data.frame(test14), data.frame(test15),
-	data.frame(test16))
+	data.frame(test16), data.frame(test17))
 print(results)
 
