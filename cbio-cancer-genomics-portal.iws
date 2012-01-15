@@ -77,13 +77,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="159" column="50" selection-start="6402" selection-end="6402" vertical-scroll-proportion="0.9166035">
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state line="159" column="50" selection-start="6416" selection-end="6416" vertical-scroll-proportion="0.016755521">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -100,10 +98,8 @@
       <file leaf-file-name="TestPrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.83320695">
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.73724294">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -117,10 +113,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MutationSummarizer.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="MutationSummarizer.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="121" column="0" selection-start="4062" selection-end="4062" vertical-scroll-proportion="0.9499621">
+            <state line="121" column="0" selection-start="5055" selection-end="5055" vertical-scroll-proportion="1.1629856">
               <folding />
             </state>
           </provider>
@@ -129,7 +125,7 @@
       <file leaf-file-name="dfs_plot.txt" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/dfs_plot.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.31690675">
+            <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.3183549">
               <folding />
             </state>
           </provider>
@@ -138,7 +134,7 @@
       <file leaf-file-name="survival_no_plots.txt" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="27" selection-start="970" selection-end="970" vertical-scroll-proportion="0.60045487">
+            <state line="36" column="27" selection-start="970" selection-end="970" vertical-scroll-proportion="0.60319877">
               <folding />
             </state>
           </provider>
@@ -147,10 +143,8 @@
       <file leaf-file-name="DaoClinicalFreeForm.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoClinicalFreeForm.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.9272176">
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.016755521">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -158,7 +152,7 @@
       <file leaf-file-name="cgds.sql" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.89992416">
+            <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.91774565">
               <folding />
             </state>
           </provider>
@@ -167,7 +161,7 @@
       <file leaf-file-name="ResultSet.class" pinned="false" current="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/portal/build/WEB-INF/lib/mysql-connector-java-3.1.10-bin.jar!/com/mysql/jdbc/ResultSet.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="518" column="0" selection-start="27916" selection-end="27916" vertical-scroll-proportion="0.898773">
+            <state line="518" column="0" selection-start="27916" selection-end="27916" vertical-scroll-proportion="0.9283513">
               <folding />
             </state>
           </provider>
@@ -353,6 +347,13 @@
     </key>
   </component>
   <component name="RunManager" selected="JUnit.TestPrepareClinicalFile">
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -382,18 +383,6 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-    </configuration>
     <configuration default="true" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" />
       <option name="VM_PARAMETERS" />
@@ -409,13 +398,6 @@
       <method>
         <option name="Make" value="true" />
       </method>
-    </configuration>
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="" />
@@ -438,6 +420,18 @@
       <method>
         <option name="Make" value="true" />
       </method>
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
     </configuration>
     <configuration default="false" name="TestDaoGeneSet" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="Portal" />
@@ -569,29 +563,29 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="2560" height="1492" extended-state="6" />
+    <frame x="0" y="22" width="2560" height="1486" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298351" order="1" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="3" />
-      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943755" order="-1" />
+      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943755" order="8" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="7" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="0" />
-      <window_info id="Maven projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24800955" order="0" />
-      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="Maven projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24771008" order="0" />
+      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
-      <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943755" order="2" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="5" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="0" />
@@ -702,39 +696,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/portal/build/WEB-INF/lib/mysql-connector-java-3.1.10-bin.jar!/com/mysql/jdbc/ResultSet.class">
+    <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="518" column="0" selection-start="27916" selection-end="27916" vertical-scroll-proportion="0.898773">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoClinicalFreeForm.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.9272176">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.89992416">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="27" selection-start="970" selection-end="970" vertical-scroll-proportion="0.60045487">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/dfs_plot.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.31690675">
+        <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.73724294">
           <folding />
         </state>
       </provider>
@@ -746,35 +717,52 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/dfs_plot.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.83320695">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="19" column="11" selection-start="839" selection-end="839" vertical-scroll-proportion="0.3183549">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/r_bridge/survival_no_plots.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="121" column="0" selection-start="4062" selection-end="4062" vertical-scroll-proportion="0.9499621">
+        <state line="36" column="27" selection-start="970" selection-end="970" vertical-scroll-proportion="0.60319877">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/dao/DaoClinicalFreeForm.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="76" column="9" selection-start="2675" selection-end="2675" vertical-scroll-proportion="0.016755521">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/db/cgds.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="365" column="39" selection-start="10889" selection-end="10889" vertical-scroll-proportion="0.91774565">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/portal/build/WEB-INF/lib/mysql-connector-java-3.1.10-bin.jar!/com/mysql/jdbc/ResultSet.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="518" column="0" selection-start="27916" selection-end="27916" vertical-scroll-proportion="0.9283513">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="159" column="50" selection-start="6402" selection-end="6402" vertical-scroll-proportion="0.9166035">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state line="159" column="50" selection-start="6416" selection-end="6416" vertical-scroll-proportion="0.016755521">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="121" column="0" selection-start="5055" selection-end="5055" vertical-scroll-proportion="1.1629856">
+          <folding />
         </state>
       </provider>
     </entry>
