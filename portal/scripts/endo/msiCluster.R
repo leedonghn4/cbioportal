@@ -59,15 +59,15 @@ cols = c("#FFFFFF", "lightblue")
 # margins = (bottom, right)
 rownames(m1) = rep("", nrow(m1))
 rownames(m2) = rep("", nrow(m2))
-heatmap.plus(m1, RowSideColors=m2, margins=c(20,5), col=cols)
+heatmap.plus(m1, RowSideColors=m2, margins=c(25,5), col=cols, Colv = NA)
 
 # Add Two Color Legends
 os_labels=c("MSS", "MSI-L", "MSI-H")
 color_codes = c("#B3CDE3", "#8C96C6", "#88419D")
 legend ("topleft", bty="y", os_labels, fill=color_codes, 
-        title="MSI-Status", inset=c(0.2,0.85))
+        title="MSI-Status", inset=c(0.2,0.75))
 
 os_labels=c("Low", "High", "Higest")
 color_codes = c("#B2E2E2", "#66C2A4", "#238B45")
 legend ("topleft", bty="y", os_labels, fill=color_codes, 
-        title="Mutation Category", inset=c(0.38,0.85))
+        title="Mutation Category", inset=c(0.38,0.75))
