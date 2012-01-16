@@ -36,7 +36,7 @@ df[df$MUTATION_RATE_CATEGORY=="1_HIGHEST",]$COL2="#238B45"
 
 # Get only MSI-L and MSI-H
 #df = subset(df, MSI_STATUS=="MSI-H" | MSI_STATUS=="MSI-L")
-df = subset(df, MSI_STATUS=="MSI-L")
+#df = subset(df, MSI_STATUS=="MSI-H")
 
 # Extract the part of the matrix that we want to cluster
 sub_df1 = subset(df, select=BAT40:D2S123)
