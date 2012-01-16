@@ -1,4 +1,5 @@
 #!/usr/bin/Rscript --no-save
+library(heatmap.plus)
 
 # Read in Unified Clinical File
 clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
@@ -11,10 +12,10 @@ df = merge (clin_df, msi_df)
 
 # Extract a smaller subset of columns
 df = subset(df, select=c(CASE_ID, BAT40, BAT26, BAT25, D17S250, TGFBII, D5S346, 
-           D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CATEGORY))
+           D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CATEGORY, SEQUENCED))
 
 # Only Include Sequenced Cases;  Exclude cases where MSI is unknown
-df = subset(df, merged$SEQUENCED=="Y" & (MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done"))
+df = subset(df, SEQUENCED=="Y" & (MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done"))
 
 # Create new Color Columns, default to white
 # Note the use of stringsAsFactors.
@@ -34,7 +35,8 @@ df[df$MUTATION_RATE_CATEGORY=="2_HIGH",]$COL2="#66C2A4"
 df[df$MUTATION_RATE_CATEGORY=="1_HIGHEST",]$COL2="#238B45"
 
 # Get only MSI-L and MSI-H
-df = subset(df, MSI_STATUS=="MSI-L" | MSI_STATUS=="HSI-H")
+#df = subset(df, MSI_STATUS=="MSI-H" | MSI_STATUS=="MSI-L")
+df = subset(df, MSI_STATUS=="MSI-L")
 
 # Extract the part of the matrix that we want to cluster
 sub_df1 = subset(df, select=BAT40:D2S123)
