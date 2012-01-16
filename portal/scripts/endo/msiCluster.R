@@ -1,6 +1,4 @@
 #!/usr/bin/Rscript --no-save
-library(gplots)
-library(gridExtra)
 
 # Read in Unified Clinical File
 clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
@@ -9,35 +7,65 @@ clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
 msi_df = read.delim("~/SugarSync/endo/data/out/msi_out.txt")
 
 # Merge together
-merged = merge (clin_df, msi_df)
+df = merge (clin_df, msi_df)
 
-# Extract a smaller df
-merged = subset(merged, MSI_STATUS=="MSI-L" | MSI_STATUS=="MSI-H")
+# Extract a smaller subset of columns
+df = subset(df, select=c(CASE_ID, BAT40, BAT26, BAT25, D17S250, TGFBII, D5S346, 
+           D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CATEGORY))
 
-sub_df1 = subset(merged, merged$SEQUENCED=="Y",
-	select=c(CASE_ID, BAT40, BAT26, BAT25, D17S250, TGFBII, D5S346, D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CATEGORY))
+# Only Include Sequenced Cases;  Exclude cases where MSI is unknown
+df = subset(df, merged$SEQUENCED=="Y" & (MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done"))
 
-sub_df2 = subset(sub_df1, MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done", 
-	select=c(BAT40, BAT26, BAT25, D17S250, TGFBII, D5S346, D2S123, PentaD, PentaE))
-sub_df3 = subset(sub_df1, MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done",
-	select=c("CASE_ID", "MSI_STATUS", "MUTATION_RATE_CATEGORY"))
+# Create new Color Columns, default to white
+# Note the use of stringsAsFactors.
+# If this is not set, strings are automatically converted to factors
+df = transform(df, COL1="#FFFFFF", stringsAsFactors=FALSE)
+df = transform(df, COL2="#FFFFFF", stringsAsFactors=FALSE)
 
-sub_df3 = transform(sub_df3, MSS=0)
-sub_df3[sub_df3$MSI_STATUS=="MSS",]$MSS=1
-sub_df3 = transform(sub_df3, MSI_L=0)
-sub_df3[sub_df3$MSI_STATUS=="MSI-L",]$MSI_L=1
-sub_df3 = transform(sub_df3, MSI_H=0)
-sub_df3[sub_df3$MSI_STATUS=="MSI-H",]$MSI_H=1
-sub_df3 = transform(sub_df3, MUT_HIGHEST=0)
-sub_df3[sub_df3$MUTATION_RATE_CATEGORY=="1_HIGHEST",]$MUT_HIGHEST=1
-sub_df3 = transform(sub_df3, MUT_HIGH=0)
-sub_df3[sub_df3$MUTATION_RATE_CATEGORY=="2_HIGH",]$MUT_HIGH=1
-sub_df3 = transform(sub_df3, MUT_LOW=0)
-sub_df3[sub_df3$MUTATION_RATE_CATEGORY=="3_LOW",]$MUT_LOW=1
+# Suggested Color Mappings at:  http://colorbrewer2.org/
+# Create Color Mappings:  MSI_STATUS
+df[df$MSI_STATUS=="MSS",]$COL1="#B3CDE3"
+df[df$MSI_STATUS=="MSI-L",]$COL1="#8C96C6"
+df[df$MSI_STATUS=="MSI-H",]$COL1="#88419D"
 
-sub_df4 = subset(sub_df3, select=c("MSS", "MSI_L", "MSI_H", "MUT_HIGHEST", "MUT_HIGH", "MUT_LOW"))
+# Create Color Mappings:  MUTATION_RATE_CATEGORY
+df[df$MUTATION_RATE_CATEGORY=="3_LOW",]$COL2="#B2E2E2"
+df[df$MUTATION_RATE_CATEGORY=="2_HIGH",]$COL2="#66C2A4"
+df[df$MUTATION_RATE_CATEGORY=="1_HIGHEST",]$COL2="#238B45"
 
-m = as.matrix (sub_df2)
-rownames(m) = sub_df3$CASE_ID
-m = t(m)
-heatmap_plus(m, addvar = sub_df4)
+# Get only MSI-L and MSI-H
+df = subset(df, MSI_STATUS=="MSI-L" | MSI_STATUS=="HSI-H")
+
+# Extract the part of the matrix that we want to cluster
+sub_df1 = subset(df, select=BAT40:D2S123)
+
+# Extract the color annotation part of the matrix
+sub_df2 = subset(df, select=COL1:COL2)
+
+# Change the column names for the annotations
+colnames(sub_df2) = c("MSI", "Mutation Category")
+
+# Convert the Data Frames to Matrices
+m1 = as.matrix(sub_df1)
+m2 = as.matrix(sub_df2)
+
+# Create the color scheme:  blues
+#cols = brewer.pal(2, "Blues")
+cols = c("#FFFFFF", "lightblue")
+
+# Create the Heatmap
+# margins = (bottom, right)
+rownames(m1) = rep("", nrow(m1))
+rownames(m2) = rep("", nrow(m2))
+heatmap.plus(m1, RowSideColors=m2, margins=c(20,5), col=cols)
+
+# Add Two Color Legends
+os_labels=c("MSS", "MSI-L", "MSI-H")
+color_codes = c("#B3CDE3", "#8C96C6", "#88419D")
+legend ("topleft", bty="y", os_labels, fill=color_codes, 
+        title="MSI-Status", inset=c(0.2,0.85))
+
+os_labels=c("Low", "High", "Higest")
+color_codes = c("#B2E2E2", "#66C2A4", "#238B45")
+legend ("topleft", bty="y", os_labels, fill=color_codes, 
+        title="Mutation Category", inset=c(0.38,0.85))
