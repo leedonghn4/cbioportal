@@ -71,6 +71,7 @@ public class PrepareClinicalFile {
     private HashSet<String> lowMutSet = new HashSet<String>();
     private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
     private HashMap<String, String> mlh1HyperMethylatedMap = new HashMap<String, String>();
+    private HashMap<String, Long> coverageMap = new HashMap<String, Long>();
 
     /**
      * Constructor.
@@ -81,13 +82,14 @@ public class PrepareClinicalFile {
      * @throws IOException IO Error.
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaFile,
-            File cnaClusterFile, File mlh1MethFile) throws IOException {
+            File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
         readMsiFile(msiFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(mafFile);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
         readMlh1MethylatedMap(mlh1MethFile);
+        readCoverageFile(coverageFile);
 
         readCnaClusterAssignments(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
@@ -109,7 +111,8 @@ public class PrepareClinicalFile {
                 + "TA_COUNT" + TAB
                 + "CT_COUNT" + TAB
                 + "CG_COUNT" + TAB
-                + "CA_COUNT"
+                + "CA_COUNT" + TAB
+                + "COVERED_BASED"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
@@ -183,10 +186,41 @@ public class PrepareClinicalFile {
             newTable.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
             newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
 
+            newTable.append(TAB + getNumBasesCovered(caseId));
+
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    public void readCoverageFile(File coverageFile) throws IOException{
+        FileReader reader = new FileReader(coverageFile);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line = bufferedReader.readLine();  // Skip Header
+        line = bufferedReader.readLine();
+        while (line != null) {
+            String parts[] = line.split("\t");
+            String barCode = parts[0];
+            long coveredBases = Long.parseLong(parts[1]);
+
+            //  bar code ids look like this:  TCGA-A5-A0G1-01A-11D-A122-09
+            String idParts[] = barCode.split("-");
+            if (barCode.trim().length() > 0) {
+                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
+                coverageMap.put(caseId, coveredBases);
+            }
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+    }
+
+    public long getNumBasesCovered(String caseId) {
+        if (coverageMap.containsKey(caseId)) {
+            return coverageMap.get(caseId);
+        } else {
+            return 0;
+        }
     }
 
     public String getMlh1HypermethylatedStatus (String caseId) {
@@ -585,11 +619,11 @@ public class PrepareClinicalFile {
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
                 new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
-                new File(args[5]));
+                new File(args[5]), new File(args[6]));
 
-        prepareClinicalFile.writeCaseLists(args[6]);
+        prepareClinicalFile.writeCaseLists(args[7]);
 
-        File newClinicalFile = new File(args[6] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[7] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
