@@ -247,4 +247,5 @@ results = rbind (data.frame(test0), data.frame(test1), data.frame(test2), data.f
 	data.frame(test8), data.frame(test9), data.frame(test10), data.frame(test11), data.frame(test12), data.frame(test13), data.frame(test14), data.frame(test15),
 	data.frame(test16), data.frame(test17))
 print(results)
+write.table(results, file="table.txt", row.names=FALSE, sep="\t", quote = FALSE)
 
