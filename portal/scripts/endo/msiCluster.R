@@ -1,6 +1,8 @@
 #!/usr/bin/Rscript --no-save
 library(heatmap.plus)
 
+# Start PDF
+pdf("report.pdf", width=9, height=7)
 # Read in Unified Clinical File
 clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
 
@@ -71,3 +73,5 @@ os_labels=c("Low", "High", "Higest")
 color_codes = c("#B2E2E2", "#66C2A4", "#238B45")
 legend ("topleft", bty="y", os_labels, fill=color_codes, 
         title="Mutation Category", inset=c(0.38,0.75))
+
+dev.off()
