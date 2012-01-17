@@ -112,7 +112,7 @@ public class PrepareClinicalFile {
                 + "CT_COUNT" + TAB
                 + "CG_COUNT" + TAB
                 + "CA_COUNT" + TAB
-                + "COVERED_BASED"
+                + "COVERED_BASES"
                 + NEW_LINE);
         line = bufferedReader.readLine();
         while (line != null) {
