@@ -53,13 +53,13 @@ m2 = as.matrix(sub_df2)
 
 # Create the color scheme:  blues
 #cols = brewer.pal(2, "Blues")
-cols = c("#FFFFFF", "lightblue")
+cols = c("#FFFFFF", "#AAAAAA")
 
 # Create the Heatmap
 # margins = (bottom, right)
 rownames(m1) = rep("", nrow(m1))
 rownames(m2) = rep("", nrow(m2))
-heatmap.plus(m1, RowSideColors=m2, margins=c(25,5), col=cols, Colv = NA)
+heatmap.plus(m1, RowSideColors=m2, margins=c(25,5), col=cols, Colv = NA, scale="none")
 
 # Add Two Color Legends
 os_labels=c("MSS", "MSI-L", "MSI-H")
