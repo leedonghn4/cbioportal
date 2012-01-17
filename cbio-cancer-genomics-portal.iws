@@ -77,10 +77,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="159" column="50" selection-start="6416" selection-end="6416" vertical-scroll-proportion="0.016755521">
+            <state line="187" column="62" selection-start="7639" selection-end="7639" vertical-scroll-proportion="0.65422696">
               <folding />
             </state>
           </provider>
@@ -98,7 +98,7 @@
       <file leaf-file-name="TestPrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.73724294">
+            <state line="55" column="29" selection-start="2471" selection-end="2471" vertical-scroll-proportion="0.82102054">
               <folding />
             </state>
           </provider>
@@ -113,10 +113,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MutationSummarizer.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="MutationSummarizer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="121" column="0" selection-start="5055" selection-end="5055" vertical-scroll-proportion="1.1629856">
+            <state line="130" column="83" selection-start="5308" selection-end="5308" vertical-scroll-proportion="0.16755521">
               <folding />
             </state>
           </provider>
@@ -347,13 +347,6 @@
     </key>
   </component>
   <component name="RunManager" selected="JUnit.TestPrepareClinicalFile">
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -383,22 +376,6 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="true" type="Application" factoryName="Application" enabled="false" merge="false">
-      <option name="MAIN_CLASS_NAME" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="" />
-      <envs />
-      <method>
-        <option name="Make" value="true" />
-      </method>
-    </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -421,6 +398,22 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
+    <configuration default="true" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="Applet" factoryName="Applet">
       <module name="" />
       <option name="MAIN_CLASS_NAME" />
@@ -432,6 +425,13 @@
       <option name="VM_PARAMETERS" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
     </configuration>
     <configuration default="false" name="TestDaoGeneSet" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="Portal" />
@@ -586,7 +586,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
       <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943755" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3294204" order="2" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="5" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="0" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
@@ -696,20 +696,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="50" column="75" selection-start="2128" selection-end="2156" vertical-scroll-proportion="0.73724294">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/test_data/mlh1_meth_test.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="12" vertical-scroll-proportion="0.0">
@@ -752,16 +738,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="159" column="50" selection-start="6416" selection-end="6416" vertical-scroll-proportion="0.016755521">
+        <state line="130" column="83" selection-start="5308" selection-end="5308" vertical-scroll-proportion="0.16755521">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/mutation/MutationSummarizer.java">
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/test/clinical/TestPrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="121" column="0" selection-start="5055" selection-end="5055" vertical-scroll-proportion="1.1629856">
+        <state line="55" column="29" selection-start="2471" selection-end="2471" vertical-scroll-proportion="0.82102054">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/scripts/endo/prepareClinicalData.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="187" column="62" selection-start="7639" selection-end="7639" vertical-scroll-proportion="0.65422696">
           <folding />
         </state>
       </provider>
