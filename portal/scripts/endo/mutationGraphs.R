@@ -7,7 +7,7 @@ library(ggplot2)
 #####################################################################
 
 # Start PDF
-pdf("report.pdf", width=9, height=7) 
+#pdf("report.pdf", width=9, height=7) 
 
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
@@ -128,6 +128,29 @@ p = p + ylab("log10(Total # SNVs)")
 the_title = paste("Mutation Rates across all Subtypes\nKruskall-Wallace:  ", signif(kt$p.value, 4))
 p= p + opts(title=the_title)
 p
+
+# Compare AGE in MUTATION_RATE_CATEGORY
+kt = kruskal.test(age_at_initial_pathologic_diagnosis ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), age_at_initial_pathologic_diagnosis))
+p = p + geom_boxplot(outlier.size =0) 
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
+p = p + xlab("Mutation Rate Category") 
+p = p + ylab("Age at Diagnosis") 
+the_title = paste("Age Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
+p = p + opts(title=the_title)
+p
+
+# Compare AGE in CNA_CLUSTER
+kt = kruskal.test(age_at_initial_pathologic_diagnosis ~ factor(CNA_CLUSTER), data = sub_df)
+p = ggplot(sub_df,aes(factor(CNA_CLUSTER), age_at_initial_pathologic_diagnosis))
+p = p + geom_boxplot(outlier.size =0) 
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
+p = p + xlab("Mutation Rate Category") 
+p = p + ylab("Age at Diagnosis") 
+the_title = paste("Age Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
+p = p + opts(title=the_title)
+p
+
 
 ########################################################################
 # Restrict to Cases that have CNA and Sequencing Data
