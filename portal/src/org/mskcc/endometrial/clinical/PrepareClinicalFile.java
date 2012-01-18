@@ -2,6 +2,7 @@ package org.mskcc.endometrial.clinical;
 
 import org.mskcc.endometrial.cna.CnaSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
+import org.mskcc.endometrial.mutation.BedCreator;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -72,6 +73,7 @@ public class PrepareClinicalFile {
     private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
     private HashMap<String, String> mlh1HyperMethylatedMap = new HashMap<String, String>();
     private HashMap<String, Long> coverageMap = new HashMap<String, Long>();
+    private File mafFile;
 
     /**
      * Constructor.
@@ -83,6 +85,7 @@ public class PrepareClinicalFile {
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaFile,
             File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
+        this.mafFile = mafFile;
         readMsiFile(msiFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
@@ -345,6 +348,11 @@ public class PrepareClinicalFile {
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+
+    }
+
+    public void writeBedFile(String outputDir) throws IOException {
+        BedCreator bedCreator = new BedCreator(mafFile, null);
 
     }
 
@@ -630,6 +638,8 @@ public class PrepareClinicalFile {
         HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
         System.out.println ("New Clinical File Written to:  " + newClinicalFile.getAbsolutePath());
+
+        prepareClinicalFile.writeBedFile(args[7]);
         writer.flush();
         writer.close();
     }
