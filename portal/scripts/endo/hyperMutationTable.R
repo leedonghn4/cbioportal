@@ -169,12 +169,12 @@ dfs_surv = Surv (local_df$DFS_MONTHS, local_df$DFS_STATUS_BOOLEAN)
 dfs_surv_fit = survfit(dfs_surv ~ local_df$MUTATION_RATE_CATEGORY)
 dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_CATEGORY)
 
-# labels=c("1_HIGHEST_MUT", "2_HIGH_MUT")
-# colors=c("red", "blue", "green")
-# plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
-# legend ("topright", bty="n", labels, fill=colors)
+labels=c("1_HIGHEST_MUT", "2_HIGH_MUT")
+colors=c("red", "blue", "green")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
 p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
-# legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
 
 test7 = list (METRIC="Survival (DFS)", MUT_HIGHEST=0, MUT_HIGH=0, P_VALUE=signif(p_val, digits=4), TEST="Logrank Test")
 
