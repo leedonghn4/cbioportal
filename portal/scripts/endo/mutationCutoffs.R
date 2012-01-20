@@ -33,43 +33,82 @@ df[df$histological_typeCorrected=="Uterine serous endometrial adenocarcinoma",]$
 # Restrict to Sequenced Cases
 sub_df = subset(df, SEQUENCED=="Y")
 
-# Remove the one outlier that has 0 mutations
+# Restrict to Endomterial Subtypes
+#sub_df = subset(sub_df, SUBTYPE=="Endo-Grade-1" | SUBTYPE=="Endo-Grade-2" | SUBTYPE=="Endo-Grade-3")
+
+# Remove the two outliers:
+# Case with 0 mutations
+# Case with > 20,000 mutations
 sub_df = subset(sub_df, TOTAL_SNV_COUNT>1)
+sub_df = subset(sub_df, TOTAL_SNV_COUNT<20000)
 
 # Create new Rate Columns
 sub_df = transform(sub_df, COVERED_BASES = COVERED_BASES/1e+06)
 sub_df = transform(sub_df, SILENT_RATE=SILENT_MUTATION_COUNT/COVERED_BASES)
 sub_df = transform(sub_df, NON_SILENT_RATE=NON_SILENT_MUTATION_COUNT/COVERED_BASES)
+sub_df = transform(sub_df, TOTAL_SNV_RATE=TOTAL_SNV_COUNT/COVERED_BASES)
 sub_df = transform(sub_df, INDEL_RATE=INDEL_MUTATION_COUNT/COVERED_BASES)
 
 # Sort by NON_SILENT_RATE
 sub_df = sub_df[order (sub_df$NON_SILENT_RATE, decreasing=T),]
 
-# Create Plot of NON_SILENT_RATE + SILENT_RATE
-p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df)
-p = p + geom_point(aes(y=NON_SILENT_RATE), colour="blue", size=3) 
+# Create Plot of NON_SILENT_RATE + SILENT_RATE + INDEL_RATE
+p = qplot(1:nrow(sub_df), TOTAL_SNV_RATE, data=sub_df)
+p = p + geom_point(aes(y=TOTAL_SNV_RATE), colour="blue", size=3) 
 p = p + geom_point(aes(y=SILENT_RATE), colour="red", size=3) 
+p = p + geom_point(aes(y=INDEL_RATE), colour="green", size=3)
+p = p + opts(title="Mutation Rates")
+p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
+p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
+p = p + scale_y_log10(scientific=FALSE)
+p
+
+# Perform K-Means Clustering, with N clusters
+#local_df = subset(sub_df, select=c("SILENT_RATE", "NON_SILENT_RATE", "INDEL_RATE"))
+local_df = subset(sub_df, select=c("NON_SILENT_RATE"))
+fit <- kmeans(local_df, 4)
+# get cluster means 
+aggregate(local_df,by=list(fit$cluster),FUN=mean)
+# append cluster assignment
+sub_df <- data.frame(sub_df, fit$cluster)
+sub_df <- transform(sub_df, fit.cluster = as.factor(fit.cluster))
+
+# Create Plot of NON_SILENT_RATE, Color-Code by KMeans Clustering
+p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, colour=fit.cluster, shape=MSI_STATUS)
+p = p + geom_point(aes(y=NON_SILENT_RATE), size=3) 
 p = p + opts(title="Mutation Rates")
 p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
 p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
 p = p + scale_y_log10()
 p
 
-# Create Plot of NON_SILENT_RATE + SILENT_RATE
-p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, size=INDEL_RATIO)
-p = p + geom_point(aes(y=NON_SILENT_RATE))
-p = p + scale_size(to = c(3, 15))
-p = p + opts(title="Mutation Rates")
-p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
-p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
-p = p + scale_y_log10()
-p
+# Create Plot of NON_SILENT_RATE + SILENT_RATE, size=INDEL_RATIO
+# p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, size=INDEL_RATIO)
+# p = p + geom_point(aes(y=NON_SILENT_RATE))
+# p = p + scale_size(to = c(3, 15))
+# p = p + opts(title="Mutation Rates")
+# p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
+# p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
+# p = p + scale_y_log10()
+# p
 
-# Create Plot of NON_SILENT_RATE + SILENT_RATE
+# Create Plot of NON_SILENT_RATE + SILENT_RATE, color=MSI
+t0 <- floor(log10(range(sub_df$NON_SILENT_RATE))) 
+t1 <- seq(from=t0[1], to=t0[2]) 
 p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, colour=MSI_STATUS)
-p = p + geom_point(aes(y=NON_SILENT_RATE), size=4)
+p = p + geom_point(aes(y=NON_SILENT_RATE), size=1)
 p = p + opts(title="Mutation Rates")
 p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
 p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
-p = p + scale_y_log10()
+p = p + scale_y_log10(breaks=10^t1, labels=format(10^t1, big.mark=',', scientific=FALSE, trim=TRUE, drop0trailing=T))
+p
+
+t0 <- floor(log10(range(sub_df$NON_SILENT_RATE))) 
+t1 <- seq(from=t0[1], to=t0[2]) 
+p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, colour=SUBTYPE)
+p = p + geom_point(aes(y=NON_SILENT_RATE), size=1)
+p = p + opts(title="Mutation Rates")
+p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
+p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
+p = p + scale_y_log10(breaks=10^t1, labels=format(10^t1, big.mark=',', scientific=FALSE, trim=TRUE, drop0trailing=T))
 p
