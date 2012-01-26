@@ -7,7 +7,7 @@ library(ggplot2)
 #####################################################################
 
 # Start PDF
-pdf("report.pdf", width=9, height=7) 
+#pdf("report.pdf", width=9, height=7) 
 
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
@@ -44,6 +44,8 @@ sub_df = sub_df[order (sub_df$NON_SILENT_RATE, decreasing=T),]
 plot(density(log10(sub_df$NON_SILENT_RATE)))
 abline(v=2.0,col="red",lty=3)
 abline(v=.65, col="red", lty=3)
+
+plot(density(log10(sub_df$SILENT_RATE)))
 
 # Perform Density Estimate Clustering on NON_SILENT_RATE
 cl <- pdfCluster(log10(sub_df$NON_SILENT_RATE), n.stage=55, hmult=0.5)
@@ -82,3 +84,25 @@ p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
 p = p + scale_y_log10(breaks=10^t1, labels=format(10^t1, big.mark=',', scientific=FALSE, trim=TRUE, drop0trailing=T))
 p
 
+# Get Summary Stats
+low = subset(sub_df, cl.clusters==1)
+high = subset(sub_df, cl.clusters==2)
+highest = subset(sub_df, cl.clusters==3)
+
+l = mean(low$NON_SILENT_RATE)
+h = mean(high$NON_SILENT_RATE)
+u = mean(highest$NON_SILENT_RATE)
+row0 = list(METRIC="NON_SILENT_RATE", LOW=l, HIGH=h, HIGHEST=u)
+
+l = mean(low$SILENT_RATE)
+h = mean(high$SILENT_RATE)
+u = mean(highest$SILENT_RATE)
+row1 = list(METRIC="SILENT_RATE", LOW=l, HIGH=h, HIGHEST=u)
+
+l = mean(low$TOTAL_SNV_COUNT)
+h = mean(high$TOTAL_SNV_COUNT)
+u = mean(highest$TOTAL_SNV_COUNT)
+row2 = list(METRIC="TOTAL_SNV_COUNT", LOW=l, HIGH=h, HIGHEST=u)
+
+summary = rbind (data.frame(row0), data.frame(row1), data.frame(row2))
+print(summary)
