@@ -7,7 +7,7 @@ library(ggplot2)
 #####################################################################
 
 # Start PDF
-#pdf("report.pdf", width=9, height=7) 
+pdf("report.pdf", width=9, height=7) 
 
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
@@ -104,5 +104,10 @@ h = mean(high$TOTAL_SNV_COUNT)
 u = mean(highest$TOTAL_SNV_COUNT)
 row2 = list(METRIC="TOTAL_SNV_COUNT", LOW=l, HIGH=h, HIGHEST=u)
 
-summary = rbind (data.frame(row0), data.frame(row1), data.frame(row2))
+l = nrow(low)
+h = nrow(high)
+u = nrow(highest)
+row3 = list(METRIC="NUM_SAMPLES", LOW=l, HIGH=h, HIGHEST=u)
+
+summary = rbind (data.frame(row0), data.frame(row1), data.frame(row2), data.frame(row3))
 print(summary)
