@@ -13,6 +13,8 @@ pdf("clinical.pdf", width=9, height=7)
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
 
+df = transform(df, MUTATION_RATE_CLUSTER=as.factor(MUTATION_RATE_CLUSTER))
+
 # Create new SUBTYPE Column
 df = transform(df, SUBTYPE="NA")
 df$SUBTYPE = factor(df$SUBTYPE, levels = c("Endo-G1", "Endo-G2", "Endo-G3", "Mixed", "Serous"))
@@ -68,7 +70,7 @@ p2 = p2 + xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank(
 grid.arrange(p1, p2, nrow=2)
 
 # Break out MSI by mutation categories
-df_sub = subset (df, SUBTYPE != "NA" & SEQUENCED=="Y")
+df_sub = subset (df, SUBTYPE != "NA" & SEQUENCED=="Y" & MUTATION_RATE_CLUSTER != "NA")
 p = ggplot(df_sub, aes(x = factor(1), fill = factor(MSI_STATUS))) + geom_bar(width = 1)
 p= p + opts(title = "MSI Status:  By Mutation Category") 
 p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)

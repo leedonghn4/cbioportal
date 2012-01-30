@@ -141,13 +141,20 @@ mergeAndSaveUpdatedClinicalFile <- function(sub_df) {
 	df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
 
 	temp_df = subset(sub_df, select=c("CASE_ID", "cl.clusters"))
-	merged = merge(df, temp_df)
+
+	# Recalibrate cluster values
+	temp_df = transform(temp_df, cl.clusters=as.character(cl.clusters))
+	temp_df[temp_df$cl.clusters=="1",]$cl.clusters="1_LOW"
+	temp_df[temp_df$cl.clusters=="2",]$cl.clusters="2_HIGH"
+	temp_df[temp_df$cl.clusters=="3",]$cl.clusters="3_HIGHEST"
+
+	merged = merge(df, temp_df, all.x=T)
 	
 	# Rename Column
 	names(merged)[length(names(merged))] = "MUTATION_RATE_CLUSTER"
 	
 	# Then save out to new text file
-	write.table(merged, file="~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt", quote=F, sep="\t")
+	write.table(merged, file="~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt", quote=F, sep="\t", row.names=F)
 }
 
 pdf("mutation_rates.pdf", width=9, height=7) 
