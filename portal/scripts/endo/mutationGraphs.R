@@ -7,7 +7,7 @@ library(ggplot2)
 #####################################################################
 
 # Start PDF
-#pdf("report.pdf", width=9, height=7) 
+pdf("report.pdf", width=9, height=7) 
 
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
