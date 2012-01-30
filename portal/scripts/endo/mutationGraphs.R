@@ -10,7 +10,10 @@ library(ggplot2)
 pdf("report.pdf", width=9, height=7) 
 
 # Read in Unified Clinical File
-df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
+df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
+
+# Make MUTATION_RATE_CLUSTER into a Factor
+df = transform(df, MUTATION_RATE_CLUSTER=as.factor(MUTATION_RATE_CLUSTER))
 
 # Make CNA Clusters into Factors, instead of Ints
 df = transform (df, CNA_CLUSTER=as.factor(CNA_CLUSTER))
@@ -40,7 +43,7 @@ sub_df = sub_df[order (sub_df$TOTAL_SNV_COUNT, decreasing=T),]
 sub_df = subset(sub_df, TOTAL_SNV_COUNT>1)
 
 # Create Plot of SNV Rates, Color Coded by Mutation Categories, Log Scale
-p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MUTATION_RATE_CATEGORY)
+p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MUTATION_RATE_CLUSTER)
 p = p + opts(title="Total Mutation Counts")
 p = p + scale_y_continuous("log10(Total # of SNVs)")
 p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
@@ -48,7 +51,7 @@ p = p + scale_y_log10()
 p
 
 # Create Plot of SNV Rates, Color Coded by Mutation Categories, Plain Scale
-p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MUTATION_RATE_CATEGORY)
+p = qplot(1:nrow(sub_df), TOTAL_SNV_COUNT, data=sub_df, geom="point", colour=MUTATION_RATE_CLUSTER)
 p = p + opts(title="Total Mutation Counts")
 p = p + scale_y_continuous("Total # of SNVs")
 p = p + scale_x_continuous("All Sequenced Cases (Ordered by Mutation Count)")
@@ -94,9 +97,9 @@ p = p + scale_size(to = c(2, 10))
 p = p + scale_y_log10() 
 p
 
-# Compare INDEL_RATIO in MUTATION_RATE_CATEGORY
-kt = kruskal.test(INDEL_RATIO ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), INDEL_RATIO))
+# Compare INDEL_RATIO in MUTATION_RATE_CLUSTER
+kt = kruskal.test(INDEL_RATIO ~ factor(MUTATION_RATE_CLUSTER), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), INDEL_RATIO))
 p = p + geom_boxplot(outlier.size =0) 
 p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
 p = p + xlab("Mutation Rate Category") 
@@ -104,14 +107,14 @@ p = p + ylab("InDel Ratio")
 the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
 p = p + opts(title=the_title)
 p
-pw = pairwise.wilcox.test(sub_df$INDEL_RATIO, sub_df$MUTATION_RATE_CATEGORY, p.adj = "bonf")
+pw = pairwise.wilcox.test(sub_df$INDEL_RATIO, sub_df$MUTATION_RATE_CLUSTER, p.adj = "bonf")
 
 # Compare MUTATION_RATE in CNA_CLUSTERs
 cna_sub = subset(sub_df, CNA_CLUSTER != "NA")
 kt = kruskal.test(TOTAL_SNV_COUNT ~ factor(CNA_CLUSTER), data = cna_sub)
 p = ggplot(cna_sub,aes(factor(CNA_CLUSTER), TOTAL_SNV_COUNT))+scale_y_log10()
 p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3, aes(colour=MUTATION_RATE_CATEGORY))
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3, aes(colour=MUTATION_RATE_CLUSTER))
 p = p + xlab("Copy Number Cluster") 
 p = p + ylab("log10(Total # SNVs)") 
 the_title = paste("Mutation Rates across all CNA Clusters\nKruskall-Wallace:  ", signif(kt$p.value, 4))
@@ -122,16 +125,16 @@ p
 kt = kruskal.test(TOTAL_SNV_COUNT ~ factor(SUBTYPE), data = sub_df)
 p = ggplot(sub_df,aes(factor(SUBTYPE), TOTAL_SNV_COUNT))+scale_y_log10()
 p = p + geom_boxplot(outlier.size =0)
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3, aes(colour=MUTATION_RATE_CATEGORY))
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3, aes(colour=MUTATION_RATE_CLUSTER))
 p = p + xlab("Subtype") 
 p = p + ylab("log10(Total # SNVs)") 
 the_title = paste("Mutation Rates across all Subtypes\nKruskall-Wallace:  ", signif(kt$p.value, 4))
 p= p + opts(title=the_title)
 p
 
-# Compare AGE in MUTATION_RATE_CATEGORY
-kt = kruskal.test(age_at_initial_pathologic_diagnosis ~ factor(MUTATION_RATE_CATEGORY), data = sub_df)
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), age_at_initial_pathologic_diagnosis))
+# Compare AGE in MUTATION_RATE_CLUSTER
+kt = kruskal.test(age_at_initial_pathologic_diagnosis ~ factor(MUTATION_RATE_CLUSTER), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), age_at_initial_pathologic_diagnosis))
 p = p + geom_boxplot(outlier.size =0) 
 p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
 p = p + xlab("Mutation Rate Category") 
