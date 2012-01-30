@@ -1,13 +1,17 @@
 #!/usr/bin/Rscript --no-save
-# Load ggplots2
-library(ggplot2)
-library(gridExtra)
+
+print("Generating Clinical Plots...  Loading Packages...")
+
+sink(file="/dev/null")
+suppressMessages(library (ggplot2))
+suppressMessages(library(gridExtra))
+sink()
 
 # Start PDF
-pdf("report.pdf", width=9, height=7)
+pdf("clinical.pdf", width=9, height=7)
 
 # Read in Unified Clinical File
-df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
+df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
 
 # Create new SUBTYPE Column
 df = transform(df, SUBTYPE="NA")
@@ -67,8 +71,10 @@ grid.arrange(p1, p2, nrow=2)
 df_sub = subset (df, SUBTYPE != "NA" & SEQUENCED=="Y")
 p = ggplot(df_sub, aes(x = factor(1), fill = factor(MSI_STATUS))) + geom_bar(width = 1)
 p= p + opts(title = "MSI Status:  By Mutation Category") 
-p=p+facet_grid(facets=. ~ MUTATION_RATE_CATEGORY)
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
 p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
 p
 
-dev.off()
+garbage = dev.off()
+
+print ("PDF report written to:  clinical.pdf")

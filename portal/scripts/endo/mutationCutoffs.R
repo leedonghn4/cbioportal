@@ -144,13 +144,13 @@ mergeAndSaveUpdatedClinicalFile <- function(sub_df) {
 	merged = merge(df, temp_df)
 	
 	# Rename Column
-	names(merged)[length(names(merged))] = "MUTATION_CLUSTER"
+	names(merged)[length(names(merged))] = "MUTATION_RATE_CLUSTER"
 	
 	# Then save out to new text file
 	write.table(merged, file="~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt", quote=F, sep="\t")
 }
 
-pdf("report.pdf", width=9, height=7) 
+pdf("mutation_rates.pdf", width=9, height=7) 
 sub_df = init()
 sub_df = kernel_density()
 calculateSummaryStats(sub_df)
@@ -161,5 +161,5 @@ mergeAndSaveUpdatedClinicalFile(sub_df)
 
 garbage = dev.off()
 
-print ("PDF report written to:  report.pdf")
+print ("PDF report written to:  mutation_rates.pdf")
 print ("Updated clinical file written to:  ucec_clinical_with_clusters_unified.txt")
