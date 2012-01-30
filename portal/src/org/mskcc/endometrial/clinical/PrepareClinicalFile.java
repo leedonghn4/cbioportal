@@ -105,7 +105,7 @@ public class PrepareClinicalFile {
                 + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB + "MUTATION_RATE_CATEGORY" + TAB
+                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB
                 + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
                 + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
                 + "KRAS_MUTATED" + TAB
@@ -257,20 +257,6 @@ public class PrepareClinicalFile {
         newTable.append (TAB + mutationSummarizer.getNonSilentMutationCount(caseId));
         newTable.append (TAB + totalSnvCount);
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
-        if (sequencedCaseSet.contains(caseId)) {
-            if (totalSnvCount >950) {
-                newTable.append(TAB + "1_HIGHEST");
-                highestMutSet.add(caseId);
-            } else if (totalSnvCount>200) {
-                newTable.append(TAB + "2_HIGH");
-                highMutSet.add(caseId);
-            } else {
-                newTable.append(TAB + "3_LOW");
-                lowMutSet.add(caseId);
-            }
-        } else {
-            newTable.append(TAB + NA_OUTPUT);
-        }
     }
 
     private void appendCnaDataAvailableColumns(CnaSummarizer cnaSummarizer, String caseId) {
