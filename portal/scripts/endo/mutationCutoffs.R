@@ -1,6 +1,13 @@
 #!/usr/bin/Rscript --no-save
-library("pdfCluster")
-library(ggplot2)
+
+print("Determining Mutation Cutoffs...  Loading Packages...")
+
+sink(file="/dev/null")
+suppressMessages(library("pdfCluster"))
+suppressMessages(library ("gdata"))
+suppressMessages(library ("gplots"))
+suppressMessages(library(ggplot2))
+sink()
 
 ######################################################################################
 # A Series of Analyses to Identify Mutation Rate Clusters in TCGA Endometrial Cancer
@@ -125,7 +132,8 @@ calculateSummaryStats <-function(sub_df) {
 	row3 = list(METRIC="NUM_SAMPLES", LOW=l, HIGH=h, HIGHEST=u)
 
 	summary = rbind (data.frame(row0), data.frame(row1), data.frame(row2), data.frame(row3))
-	print(summary)
+	textplot(summary, hadj=1, show.rownames=F, cex=1.3, halign="left", valign="top")
+	title ("Mutation Rate Clusters Summary Stats")
 }
 
 mergeAndSaveUpdatedClinicalFile <- function(sub_df) {
@@ -135,11 +143,11 @@ mergeAndSaveUpdatedClinicalFile <- function(sub_df) {
 	temp_df = subset(sub_df, select=c("CASE_ID", "cl.clusters"))
 	merged = merge(df, temp_df)
 	
-	//  How to rename a column
+	# Rename Column
+	names(merged)[length(names(merged))] = "MUTATION_CLUSTER"
 	
-	
-	//  Then save out to new text file
-
+	# Then save out to new text file
+	write.table(merged, file="~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt", quote=F, sep="\t")
 }
 
 pdf("report.pdf", width=9, height=7) 
@@ -149,5 +157,9 @@ calculateSummaryStats(sub_df)
 plotSilentAndNonSilentRates(sub_df)
 plotNonSilentRateInDelSize(sub_df)
 plotNonSilentRateMsiColour(sub_df)
+mergeAndSaveUpdatedClinicalFile(sub_df)
 
-dev.off()
+garbage = dev.off()
+
+print ("PDF report written to:  report.pdf")
+print ("Updated clinical file written to:  ucec_clinical_with_clusters_unified.txt")
