@@ -176,7 +176,9 @@ dfs_surv = Surv (local_df$DFS_MONTHS, local_df$DFS_STATUS_BOOLEAN)
 dfs_surv_fit = survfit(dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
 dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
 
-labels=c("3_HIGHEST", "2_HIGH", "1_LOW")
+print(dfs_surv_fit)
+
+labels=c("1_LOW", "2_HIGH", "3_HIGHEST")
 colors=c("red", "blue", "green")
 plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
 legend ("topright", bty="n", labels, fill=colors)
