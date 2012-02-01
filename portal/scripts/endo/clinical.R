@@ -69,14 +69,6 @@ p2 = p2 + xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank(
 
 grid.arrange(p1, p2, nrow=2)
 
-# Break out MSI by mutation categories
-df_sub = subset (df, SUBTYPE != "NA" & SEQUENCED=="Y" & MUTATION_RATE_CLUSTER != "NA")
-p = ggplot(df_sub, aes(x = factor(1), fill = factor(MSI_STATUS))) + geom_bar(width = 1)
-p= p + opts(title = "MSI Status:  By Mutation Category") 
-p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
-p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
-p
-
 garbage = dev.off()
 
 print ("PDF report written to:  clinical.pdf")
