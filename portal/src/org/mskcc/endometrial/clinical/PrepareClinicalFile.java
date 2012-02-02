@@ -1,6 +1,7 @@
 package org.mskcc.endometrial.clinical;
 
 import org.mskcc.endometrial.cna.CnaSummarizer;
+import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
 import org.mskcc.endometrial.mutation.BedCreator;
 
@@ -80,16 +81,21 @@ public class PrepareClinicalFile {
      *
      * @param clinicalFile Clinical File.
      * @param msiFile   MSI File.
-     * @param mafFile   MAF Mutation File.
+     * @param somaticMafFile   Somatic MAF Mutation File.
+     * @param germlineMafFile  Germline MAF Mutation File.
+     *                         
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile, File mafFile, File cnaFile,
+    public PrepareClinicalFile(File clinicalFile, File msiFile, File somaticMafFile, 
+            File germlineMafFile, File cnaFile,
             File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
-        this.mafFile = mafFile;
+        this.mafFile = somaticMafFile;
         readMsiFile(msiFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
-        MutationSummarizer mutationSummarizer = new MutationSummarizer(mafFile);
+        MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
+        GermlineMutationSummarizer germlinemutationSummarizer = new
+                GermlineMutationSummarizer(germlineMafFile);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
         readMlh1MethylatedMap(mlh1MethFile);
         readCoverageFile(coverageFile);
@@ -109,6 +115,8 @@ public class PrepareClinicalFile {
                 + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
                 + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
                 + "KRAS_MUTATED" + TAB
+                + "MHL1_GERMLINE_I219V" + TAB
+                + "MLH1_GERMLINE_DEL_TTC" + TAB
                 + "TG_COUNT" + TAB
                 + "TC_COUNT" + TAB
                 + "TA_COUNT" + TAB
@@ -177,6 +185,18 @@ public class PrepareClinicalFile {
             }
 
             if (mutationSummarizer.isKrasMutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+            
+            if (germlinemutationSummarizer.isMlh1I219VMutated(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
+            if (germlinemutationSummarizer.isMlh1DelTCC(caseId)) {
                 newTable.append(TAB + "1");
             } else {
                 newTable.append(TAB + "0");
@@ -607,17 +627,18 @@ public class PrepareClinicalFile {
     public static void main(String[] args) throws Exception {
         // check args
         if (args.length < 4) {
-            System.out.println("command line usage:  prepareClinical.pl <clinical_file> <msi_file> <maf_file> " +
+            System.out.println("command line usage:  prepareClinical.pl <clinical_file> " +
+                    "<msi_file> <somatic_maf_file> <germline_maf_file> " +
                     "<cna_file> <cna_clusters_file> <mlh1_meth_file> <output_dir>");
             System.exit(1);
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
                 new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
-                new File(args[5]), new File(args[6]));
+                new File(args[5]), new File(args[6]), new File(args[7]));
 
-        prepareClinicalFile.writeCaseLists(args[7]);
+        prepareClinicalFile.writeCaseLists(args[8]);
 
-        File newClinicalFile = new File(args[7] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[8] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
