@@ -13,6 +13,7 @@ import java.util.HashSet;
 public class GermlineMutationSummarizer {
     private HashSet<String> mlh1I219VMutatedSet = new HashSet<String>();
     private HashSet<String> mlh1DelTTCSet = new HashSet<String>();
+    private HashSet<String> msh2Q915RSet = new HashSet<String>();
 
     public GermlineMutationSummarizer(File germlineMafFile) throws IOException {
         FileReader reader = new FileReader(germlineMafFile);
@@ -46,6 +47,10 @@ public class GermlineMutationSummarizer {
                         mlh1I219VMutatedSet.add(caseId);
                     }
                 }
+            } else if(geneSymbol.equals("MSH2")) {
+                if (aaChange.endsWith("p.Q915R")) {
+                    msh2Q915RSet.add(caseId);
+                }
             }
             line = bufferedReader.readLine();
         }
@@ -72,6 +77,14 @@ public class GermlineMutationSummarizer {
     
     public boolean isMlh1DelTCC(String caseId) {
         if (mlh1DelTTCSet.contains(caseId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean isMsh2Q915RSet(String caseId) {
+        if (msh2Q915RSet.contains(caseId)) {
             return true;
         } else {
             return false;

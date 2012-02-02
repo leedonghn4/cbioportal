@@ -117,6 +117,7 @@ public class PrepareClinicalFile {
                 + "KRAS_MUTATED" + TAB
                 + "MHL1_GERMLINE_I219V" + TAB
                 + "MLH1_GERMLINE_DEL_TTC" + TAB
+                + "MSH2_GERMLINE_Q915R" + TAB
                 + "TG_COUNT" + TAB
                 + "TC_COUNT" + TAB
                 + "TA_COUNT" + TAB
@@ -197,6 +198,12 @@ public class PrepareClinicalFile {
             }
 
             if (germlinemutationSummarizer.isMlh1DelTCC(caseId)) {
+                newTable.append(TAB + "1");
+            } else {
+                newTable.append(TAB + "0");
+            }
+
+            if (germlinemutationSummarizer.isMsh2Q915RSet(caseId)) {
                 newTable.append(TAB + "1");
             } else {
                 newTable.append(TAB + "0");
