@@ -4,8 +4,17 @@ library(ggplot2)
 
 pdf("report.pdf", width=9, height=7)
 
+compareMutationTypes <-function(test, sub_df, mutationCategory) {
+	cat(test)
+	wilcox.test(mutationCategory ~ sub_df$MUTATION_RATE_CLUSTER)
+	t = t.test(mutationCategory ~ sub_df$MUTATION_RATE_CLUSTER)
+	print(t)
+	diff = t$estimate[[1]] - t$estimate[[2]]
+	print(paste("Difference:  ", diff))
+}
+
 # Read in Unified Clinical File
-df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
+df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
 
 # Restrict to Sequenced Cases
 df = subset(df, SEQUENCED=="Y")
@@ -25,117 +34,80 @@ df = transform(df, TOTAL_PERCENT=TG_PERCENT + TC_PERCENT + TA_PERCENT + CT_PERCE
 # Sort by TOTAL_SNV_COUNT
 sub_df = df[order (df$TOTAL_SNV_COUNT, decreasing=F),]
 
-p1 = qplot(1:nrow(sub_df), TG_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
-p2 = qplot(1:nrow(sub_df), TC_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
-p3 = qplot(1:nrow(sub_df), TA_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
-p4 = qplot(1:nrow(sub_df), CT_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
-p5 = qplot(1:nrow(sub_df), CG_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
-p6 = qplot(1:nrow(sub_df), CA_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CATEGORY, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p1 = qplot(1:nrow(sub_df), TG_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p2 = qplot(1:nrow(sub_df), TC_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p3 = qplot(1:nrow(sub_df), TA_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p4 = qplot(1:nrow(sub_df), CT_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p5 = qplot(1:nrow(sub_df), CG_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
+p6 = qplot(1:nrow(sub_df), CA_PERCENT, data=sub_df, geom="bar", colour=MUTATION_RATE_CLUSTER, stat="identity") + opts(legend.position = "none") + xlab("All Cases") + ylim(0,1)
 
 grid.arrange(p1, p2, p3, p4, p5, p6, nrow=2)
 
-# Compare HIGHEST v. HIGH Directly
-local_df_1 = subset(sub_df, MUTATION_RATE_CATEGORY=="1_HIGHEST", select=c(TOTAL_SNV_COUNT, CASE_ID, TG_PERCENT, TC_PERCENT, TA_PERCENT, CT_PERCENT, CG_PERCENT, CA_PERCENT))
-melted_df_1 = melt(local_df_1, id=c("CASE_ID", "TOTAL_SNV_COUNT"), variable_name="metric")
-x1 = reorder(melted_df_1$CASE_ID, melted_df_1$TOTAL_SNV_COUNT)
-#p1 = ggplot(melted_df_1, aes(x=x1, y=value, group=metric, fill=metric)) + geom_area() 
-p1 = ggplot(melted_df_1, aes(x=x1, y=value, fill=metric)) + geom_bar() 
-p1 = p1 + opts(title="Highest Mutation Group")
-p1 = p1 + opts(axis.text.x = theme_blank())
-p1 = p1 + xlab("All Cases")
-p1 = p1 + ylab("Proportion of all SNVs")
-
-local_df_2 = subset(sub_df, MUTATION_RATE_CATEGORY=="2_HIGH", select=c(TOTAL_SNV_COUNT, CASE_ID, TG_PERCENT, TC_PERCENT, TA_PERCENT, CT_PERCENT, CG_PERCENT, CA_PERCENT))
-melted_df_2 = melt(local_df_2, id=c("CASE_ID", "TOTAL_SNV_COUNT"), variable_name="metric")
-x2 = reorder(melted_df_2$CASE_ID, melted_df_2$TOTAL_SNV_COUNT)
-#p2 = ggplot(melted_df_2, aes(x=x2, y=value, group=metric, fill=metric)) + geom_area()
-p2 = ggplot(melted_df_2, aes(x=x2, y=value, fill=metric)) + geom_bar() 
-p2 = p2 + opts(title="High Mutation Group")
-p2 = p2 + xlab("All Cases")
-p2 = p2 + ylab("Proportion of all SNVs")
-p2 = p2 + opts(axis.text.x = theme_blank())
-p2 = p2 + opts(legend.position = "none") 
-
-grid.arrange(p2, p1, nrow=1)
-
-# Compare HIGHEST v. HIGH Directly
-local_df_1 = subset(sub_df, MUTATION_RATE_CATEGORY=="1_HIGHEST", select=c(TOTAL_SNV_COUNT, CASE_ID, TG_PERCENT, TC_PERCENT, TA_PERCENT, CT_PERCENT, CG_PERCENT, CA_PERCENT))
-melted_df_1 = melt(local_df_1, id=c("CASE_ID", "TOTAL_SNV_COUNT"), variable_name="metric")
-x1 = reorder(melted_df_1$CASE_ID, melted_df_1$TOTAL_SNV_COUNT)
-p1 = ggplot(melted_df_1, aes(x=x1, y=value, group=metric, fill=metric)) + geom_area() 
-p1 = p1 + opts(title="Highest Mutation Group")
-p1 = p1 + opts(axis.text.x = theme_blank())
-p1 = p1 + xlab("All Cases")
-p1 = p1 + ylab("Proportion of all SNVs")
-
-local_df_2 = subset(sub_df, MUTATION_RATE_CATEGORY=="2_HIGH", select=c(TOTAL_SNV_COUNT, CASE_ID, TG_PERCENT, TC_PERCENT, TA_PERCENT, CT_PERCENT, CG_PERCENT, CA_PERCENT))
-melted_df_2 = melt(local_df_2, id=c("CASE_ID", "TOTAL_SNV_COUNT"), variable_name="metric")
-x2 = reorder(melted_df_2$CASE_ID, melted_df_2$TOTAL_SNV_COUNT)
-p2 = ggplot(melted_df_2, aes(x=x2, y=value, group=metric, fill=metric)) + geom_area()
-p2 = p2 + opts(title="High Mutation Group")
-p2 = p2 + xlab("All Cases")
-p2 = p2 + ylab("Proportion of all SNVs")
-p2 = p2 + opts(axis.text.x = theme_blank())
-p2 = p2 + opts(legend.position = "none") 
-
-grid.arrange(p2, p1, nrow=1)
-
-
 # Box Plots
-sub_df = subset(sub_df, MUTATION_RATE_CATEGORY=="1_HIGHEST"  | MUTATION_RATE_CATEGORY=="2_HIGH")
+sub_df = subset(sub_df, MUTATION_RATE_CLUSTER=="3_HIGHEST" | MUTATION_RATE_CLUSTER=="2_HIGH")
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), TG_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "T->G"
-p = p + opts(title=the_title)
-p
+compareMutationTypes("TG", sub_df, sub_df$TG_PERCENT)
+compareMutationTypes("TC", sub_df, sub_df$TC_PERCENT)
+compareMutationTypes("TA", sub_df, sub_df$TA_PERCENT)
+compareMutationTypes("CT", sub_df, sub_df$CT_PERCENT)
+compareMutationTypes("CG", sub_df, sub_df$CG_PERCENT)
+compareMutationTypes("CA", sub_df, sub_df$CA_PERCENT)
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), TC_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "T->C"
-p = p + opts(title=the_title)
-p
+theme_set(theme_grey(8))
+p1 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), TG_PERCENT))
+p1 = p1 + geom_boxplot(outlier.size =0) 
+p1 = p1 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p1 = p1 + xlab("Mutation Rate Category") 
+p1 = p1 + ylab("Ratio") 
+the_title1 = "T->G"
+p1 = p1 + opts(title=the_title1)
+p1 = p1 +  opts(axis.text.x = theme_text(size = 8))
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), TA_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "T->A"
-p = p + opts(title=the_title)
-p
+p2 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), TC_PERCENT))
+p2 = p2 + geom_boxplot(outlier.size =0) 
+p2 = p2 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p2 = p2 + xlab("Mutation Rate Category") 
+p2 = p2 + ylab("Ratio") 
+the_title2 = "T->C"
+p2 = p2 + opts(title=the_title2)
+p2 = p2 +  opts(axis.text.x = theme_text(size = 8))
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), CT_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "C->T"
-p = p + opts(title=the_title)
-p
+p3 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), TA_PERCENT))
+p3 = p3 + geom_boxplot(outlier.size =0) 
+p3 = p3 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p3 = p3 + xlab("Mutation Rate Category") 
+p3 = p3 + ylab("Ratio") 
+the_title3 = "T->A"
+p3 = p3 + opts(title=the_title3)
+p3 = p3 +  opts(axis.text.x = theme_text(size = 8))
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), CG_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "C->G"
-p = p + opts(title=the_title)
-p
+p4 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), CT_PERCENT))
+p4 = p4 + geom_boxplot(outlier.size =0) 
+p4 = p4 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p4 = p4 + xlab("Mutation Rate Category") 
+p4 = p4 + ylab("Ratio") 
+the_title4 = "C->T"
+p4 = p4 + opts(title=the_title4)
+p4 = p4 +  opts(axis.text.x = theme_text(size = 8))
 
-p = ggplot(sub_df,aes(factor(MUTATION_RATE_CATEGORY), CA_PERCENT))
-p = p + geom_boxplot(outlier.size =0) 
-p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
-p = p + xlab("Mutation Rate Category") 
-p = p + ylab("Ratio") 
-the_title = "C->A"
-p = p + opts(title=the_title)
-p
+p5 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), CG_PERCENT))
+p5 = p5 + geom_boxplot(outlier.size =0) 
+p5 = p5 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p5 = p5 + xlab("Mutation Rate Category") 
+p5 = p5 + ylab("Ratio") 
+the_title5 = "C->G"
+p5 = p5 + opts(title=the_title5)
+p5 = p5 +  opts(axis.text.x = theme_text(size = 8))
+
+p6 = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), CA_PERCENT))
+p6 = p6 + geom_boxplot(outlier.size =0) 
+p6 = p6 + geom_jitter(position=position_jitter(w=0.1), size=2)
+p6 = p6 + xlab("Mutation Rate Category") 
+p6 = p6 + ylab("Ratio") 
+the_title6 = "C->A"
+p6 = p6 + opts(title=the_title6)
+p6 = p6 +  opts(axis.text.x = theme_text(size = 8))
+
+grid.arrange(p1, p2, p3, p4, p5, p6, nrow=2)
 
 dev.off()

@@ -263,10 +263,29 @@ f = fisher.test(t)
 test17 = list (METRIC="Rate of KRAS Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
 	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
 
+t = table(local_df$MHL1_GERMLINE_I219V, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
+pt = prop.table(t, 2)
+f = fisher.test(t)
+test18 = list (METRIC="Rate of MHL1_GERMLINE_I219V Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
+	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
+
+t = table(local_df$MLH1_GERMLINE_DEL_TTC, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
+pt = prop.table(t, 2)
+f = fisher.test(t)
+test19 = list (METRIC="Rate of MLH1_GERMLINE_DEL_TTC Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
+	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
+
+t = table(local_df$MSH2_GERMLINE_Q915R, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
+pt = prop.table(t, 2)
+f = fisher.test(t)
+test20 = list (METRIC="Rate of MSH2_GERMLINE_Q915R Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
+	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
+
+
 options(scipen=11)
 results = rbind (data.frame(test0), data.frame(test1), data.frame(test2), data.frame(test3), data.frame(test4), data.frame(test5), data.frame(test6), data.frame(test7),
 	data.frame(test8), data.frame(test9), data.frame(test10), data.frame(test11), data.frame(test12), data.frame(test13), data.frame(test14), data.frame(test15),
-	data.frame(test16), data.frame(test17))
+	data.frame(test16), data.frame(test17), data.frame(test18), data.frame(test19), data.frame(test20))
 print(results)
 write.table(results, file="table.txt", row.names=FALSE, sep="\t", quote = FALSE)
 
