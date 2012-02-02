@@ -117,6 +117,19 @@ p = p + ylab("InDel Ratio")
 the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
 p = p + opts(title=the_title)
 p
+
+# Compare INDEL_RATE in MUTATION_RATE_CLUSTER
+kt = kruskal.test(INDEL_RATE ~ factor(MUTATION_RATE_CLUSTER), data = sub_df)
+p = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), INDEL_RATE))
+p = p + geom_boxplot(outlier.size =0) 
+p = p + geom_jitter(position=position_jitter(w=0.1), size=3)
+p = p + xlab("Mutation Rate Category") 
+p = p + ylab("Indel Rate") 
+the_title = paste("InDel Rate Across Mutation Categories\nKruskall-Wallace:  ", signif(kt$p.value, 4))
+p = p + opts(title=the_title)
+p
+
+
 pw = pairwise.wilcox.test(sub_df$INDEL_RATIO, sub_df$MUTATION_RATE_CLUSTER, p.adj = "bonf")
 
 # Compare AGE in MUTATION_RATE_CLUSTER
