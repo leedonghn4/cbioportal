@@ -148,6 +148,44 @@ p
 
 plotmeans (sub_df$age_at_initial_pathologic_diagnosis ~ factor(sub_df$MUTATION_RATE_CLUSTER), mean.labels=T, digits=4)
 
+# Compare Mutation Clusters v. Histological Subtypes
+p = ggplot(sub_df, aes(x = factor(1), fill = factor(SUBTYPE))) + geom_bar(width = 1)
+p= p + opts(title = "Histological Subtype v. Mutation Rate Cluster") 
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
+p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
+p
+
+# Compare Mutation Clusters v. Tumor Grade
+p = ggplot(sub_df, aes(x = factor(1), fill = factor(tumor_grade))) + geom_bar(width = 1)
+p= p + opts(title = "Tumor Grade v. Mutation Rate Cluster") 
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
+p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
+p
+
+# Compare Mutation Clusters v. CNA Clusters
+p = ggplot(sub_df, aes(x = factor(1), fill = factor(CNA_CLUSTER))) + geom_bar(width = 1)
+p= p + opts(title = "CNA Cluster v. Mutation Rate Cluster") 
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
+p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
+p
+
+# Compare Mutation Clusters v. OS_STATUS
+p = ggplot(sub_df, aes(x = factor(1), fill = factor(OS_STATUS))) + geom_bar(width = 1)
+p= p + opts(title = "OS_Status v. Mutation Rate Cluster") 
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
+p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
+p
+
+# Compare Mutation Clusters v. DFS_STATUS
+p = ggplot(sub_df, aes(x = factor(1), fill = factor(DFS_STATUS))) + geom_bar(width = 1)
+p= p + opts(title = "DFS_STATUS v. Mutation Rate Cluster") 
+p=p+facet_grid(facets=. ~ MUTATION_RATE_CLUSTER)
+p=p+xlab("") + opts(axis.text.x = theme_blank(), axis.ticks = theme_blank())
+p
+
+
+
+
 ########################################################################
 # Restrict to Cases that have CNA and Sequencing Data
 sub_df = subset(sub_df, sub_df$SEQUENCED_AND_GISTIC=="Y")
