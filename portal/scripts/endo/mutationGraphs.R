@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript --no-save
 # Load ggplots2
 library(ggplot2)
+library ("gplots")
 
 #####################################################################
 # A Series of Graphs Exploring Hypermutation in Endometrical Cancer
@@ -118,6 +119,8 @@ the_title = paste("InDel Ratios Across Mutation Categories\nKruskall-Wallace:  "
 p = p + opts(title=the_title)
 p
 
+plotmeans (sub_df$INDEL_RATIO ~ factor(sub_df$MUTATION_RATE_CLUSTER), mean.labels=T, digits=4)
+
 # Compare INDEL_RATE in MUTATION_RATE_CLUSTER
 kt = kruskal.test(INDEL_RATE ~ factor(MUTATION_RATE_CLUSTER), data = sub_df)
 p = ggplot(sub_df,aes(factor(MUTATION_RATE_CLUSTER), INDEL_RATE))
@@ -142,6 +145,8 @@ p = p + ylab("Age at Diagnosis")
 the_title = paste("Age Across Mutation Clusters\nKruskal–Wallis:  ", signif(kt$p.value, 4))
 p = p + opts(title=the_title)
 p
+
+plotmeans (sub_df$age_at_initial_pathologic_diagnosis ~ factor(sub_df$MUTATION_RATE_CLUSTER), mean.labels=T, digits=4)
 
 ########################################################################
 # Restrict to Cases that have CNA and Sequencing Data
