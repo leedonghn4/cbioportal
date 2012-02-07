@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
+<project relativePaths="false" version="4">
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
   </component>
@@ -16,6 +16,7 @@
   </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
+    <option name="DEPLOY_AFTER_MAKE" value="0" />
     <excludeFromCompile>
       <directory url="file://$PROJECT_DIR$/portal/web" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/portal/build" includeSubdirectories="true" />
@@ -35,7 +36,6 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
     </wildcardResourcePatterns>
-    <annotationProcessing enabled="false" useClasspath="true" />
   </component>
   <component name="CopyrightManager" default="">
     <module2copyright />
@@ -65,6 +65,18 @@
     <entry_points version="2.0" />
   </component>
   <component name="IdProvider" IDEtalkID="6B021C063AF5548BF8FBBF2668120E0C" />
+  <component name="InspectionProjectProfileManager">
+    <option name="PROJECT_PROFILE" value="Project Default" />
+    <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
+    <scopes />
+    <profiles>
+      <profile version="1.0" is_locked="false">
+        <option name="myName" value="Project Default" />
+        <option name="myLocal" value="false" />
+      </profile>
+    </profiles>
+    <list size="0" />
+  </component>
   <component name="JavacSettings">
     <option name="DEBUGGING_INFO" value="true" />
     <option name="GENERATE_NO_WARNINGS" value="false" />
@@ -221,12 +233,13 @@
   <component name="ProjectCodeStyleSettingsManager">
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
+  <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/portal/Portal.iml" filepath="$PROJECT_DIR$/portal/Portal.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/portal/build/WEB-INF/classes" />
   </component>
   <component name="ResourceManagerContainer">
