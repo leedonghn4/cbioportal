@@ -88,14 +88,15 @@ public class PrepareClinicalFile {
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File somaticMafFile, 
             File germlineMafFile, File cnaFile,
-            File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
+            File cnaClusterFile, File mlh1MethFile, File coverageFile,
+            boolean performSanityChecks) throws IOException {
         this.mafFile = somaticMafFile;
         readMsiFile(msiFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
-        GermlineMutationSummarizer germlinemutationSummarizer = new
-                GermlineMutationSummarizer(germlineMafFile);
+        GermlineMutationSummarizer germlineMutationSummarizer = new
+                GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
         readMlh1MethylatedMap(mlh1MethFile);
         readCoverageFile(coverageFile);
@@ -106,26 +107,7 @@ public class PrepareClinicalFile {
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
         String newHeaderLine = transformHeader(line);
-        newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB
-                + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
-                + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
-                + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB
-                + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
-                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
-                + "KRAS_MUTATED" + TAB
-                + "MHL1_GERMLINE_I219V" + TAB
-                + "MLH1_GERMLINE_DEL_TTC" + TAB
-                + "MSH2_GERMLINE_Q915R" + TAB
-                + "TG_COUNT" + TAB
-                + "TC_COUNT" + TAB
-                + "TA_COUNT" + TAB
-                + "CT_COUNT" + TAB
-                + "CG_COUNT" + TAB
-                + "CA_COUNT" + TAB
-                + "COVERED_BASES"
-                + NEW_LINE);
+        appendColumnHeaders(germlineMutationSummarizer, newHeaderLine);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
@@ -155,11 +137,7 @@ public class PrepareClinicalFile {
             appendMutationCounts(mutationSummarizer, caseId);
             categorizeByHistologicalSubType(histSubType, caseId);
 
-            if (mutationSummarizer.isMlh1Mutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
+            appendBoolean(mutationSummarizer.isMlh1Mutated(caseId), newTable);
 
             if (mlh1HyperMethylatedMap.containsKey(caseId)) {
                 newTable.append(TAB + mlh1HyperMethylatedMap.get(caseId));
@@ -167,47 +145,10 @@ public class PrepareClinicalFile {
                 newTable.append(TAB + NA_OUTPUT);
             }
 
-            if (mutationSummarizer.isTp53Mutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-
-            if (mutationSummarizer.isPtenMutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-
-            if (mutationSummarizer.isPik3caMutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-
-            if (mutationSummarizer.isKrasMutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-            
-            if (germlinemutationSummarizer.isMlh1I219VMutated(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-
-            if (germlinemutationSummarizer.isMlh1DelTCC(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
-
-            if (germlinemutationSummarizer.isMsh2Q915RSet(caseId)) {
-                newTable.append(TAB + "1");
-            } else {
-                newTable.append(TAB + "0");
-            }
+            appendBoolean(mutationSummarizer.isTp53Mutated(caseId), newTable);
+            appendBoolean(mutationSummarizer.isPtenMutated(caseId), newTable);
+            appendBoolean(mutationSummarizer.isPik3caMutated(caseId), newTable);
+            appendBoolean(mutationSummarizer.isKrasMutated(caseId), newTable);
 
             newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
             newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
@@ -217,11 +158,32 @@ public class PrepareClinicalFile {
             newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
 
             newTable.append(TAB + getNumBasesCovered(caseId));
-
+            appendGermlineMutationFields(germlineMutationSummarizer, caseId, newTable);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+    }
+
+    private void appendColumnHeaders(GermlineMutationSummarizer germlineMutationSummarizer, String newHeaderLine) {
+        newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
+                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB
+                + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
+                + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
+                + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
+                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB
+                + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
+                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
+                + "KRAS_MUTATED" + TAB
+                + "TG_COUNT" + TAB
+                + "TC_COUNT" + TAB
+                + "TA_COUNT" + TAB
+                + "CT_COUNT" + TAB
+                + "CG_COUNT" + TAB
+                + "CA_COUNT" + TAB
+                + "COVERED_BASES");
+        appendGermlineMutationColumns(germlineMutationSummarizer, newTable);
+        newTable.append(NEW_LINE);
     }
 
     public void readCoverageFile(File coverageFile) throws IOException{
@@ -371,35 +333,35 @@ public class PrepareClinicalFile {
 
     public void writeCaseLists(String outputDir) throws IOException {
         outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_all",
-                "Subtype:  Endometrial:  Grade 1 - All",false, outputDir);
+                "Subtype:  Endometriod:  Grade 1 - All",false, outputDir);
         outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_sequenced",
-                "Subtype:  Endometrial:  Grade 1 - Sequenced", true, outputDir);
+                "Subtype:  Endometriod:  Grade 1 - Sequenced", true, outputDir);
         outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_all",
-                "Subtype:  Endometrial:  Grade 2 - All", false, outputDir);
+                "Subtype:  Endometriod:  Grade 2 - All", false, outputDir);
         outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_sequenced",
-                "Subtype:  Endometrial:  Grade 2 - Sequenced", true, outputDir);
+                "Subtype:  Endometriod:  Grade 2 - Sequenced", true, outputDir);
         outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_all",
-                "Subtype:  Endometrial:  Grade 3 - All", false, outputDir);
+                "Subtype:  Endometriod:  Grade 3 - All", false, outputDir);
         outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_sequenced",
-                "Subtype:  Endometrial:  Grade 3 - Sequenced", true, outputDir);
+                "Subtype:  Endometriod:  Grade 3 - Sequenced", true, outputDir);
         outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_all",
-                "Subtype:  Endometrial:  Serous - All", false, outputDir);
+                "Subtype:  Endometriod:  Serous - All", false, outputDir);
         outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_sequenced",
-                "Subtype:  Endometrial:  Serous - Sequenced", true, outputDir);
+                "Subtype:  Serous - Sequenced", true, outputDir);
 
         outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_all",
-                "Subtype:  Mixed Serous and Endometrial - All", false, outputDir);
+                "Subtype:  Mixed Serous and Endometriod - All", false, outputDir);
         outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_sequenced",
-                "Subtype:  Mixed Serous and Endometrial - Sequenced", true, outputDir);
+                "Subtype:  Mixed Serous and Endometriod - Sequenced", true, outputDir);
         
         HashSet<String> allEndoSet = new HashSet<String>();
         allEndoSet.addAll(endoGrade1Set);
         allEndoSet.addAll(endoGrade2Set);
         allEndoSet.addAll(endoGrade3Set);
         outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_all",
-                "Subtype:  Endometrial:  Grades 1-3 - All",false, outputDir);
+                "Subtype:  Endometriod:  Grades 1-3 - All",false, outputDir);
         outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_sequenced",
-                "Subtype:  Endometrial:  Grades 1-3 - Sequenced", true, outputDir);
+                "Subtype:  Endometriod:  Grades 1-3 - Sequenced", true, outputDir);
 
         HashSet<String> cluster1Set = new HashSet<String>();
         HashSet<String> cluster2Set = new HashSet<String>();
@@ -631,6 +593,32 @@ public class PrepareClinicalFile {
         return numDays * ONE_DAY;
     }
 
+    private void appendGermlineMutationColumns(GermlineMutationSummarizer germlineMutationSummarizer,
+            StringBuffer newTable) {
+        ArrayList<String> headingList = germlineMutationSummarizer.getColumnHeadings();
+        appendColumns(headingList, newTable);
+    }
+
+    private void appendGermlineMutationFields(GermlineMutationSummarizer germlineMutationSummarizer,
+            String caseId, StringBuffer newTable) {
+        ArrayList<String> valueList = germlineMutationSummarizer.getValues(caseId);
+        appendColumns(valueList, newTable);
+    }
+
+    private void appendColumns(ArrayList<String> list, StringBuffer table) {
+        for (String value:  list) {
+            table.append(TAB + value);
+        }
+    }
+
+    private void appendBoolean(boolean isMutated, StringBuffer newTable) {
+        if (isMutated) {
+            newTable.append(TAB + "1");
+        } else {
+            newTable.append(TAB + "0");
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         // check args
         if (args.length < 4) {
@@ -641,7 +629,7 @@ public class PrepareClinicalFile {
         }
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
                 new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
-                new File(args[5]), new File(args[6]), new File(args[7]));
+                new File(args[5]), new File(args[6]), new File(args[7]), true);
 
         prepareClinicalFile.writeCaseLists(args[8]);
 
@@ -652,8 +640,6 @@ public class PrepareClinicalFile {
         HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
         System.out.println ("New Clinical File Written to:  " + newClinicalFile.getAbsolutePath());
-
-        prepareClinicalFile.writeBedFile(args[7]);
         writer.flush();
         writer.close();
     }

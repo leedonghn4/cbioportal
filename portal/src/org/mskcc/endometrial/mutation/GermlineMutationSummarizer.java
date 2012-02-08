@@ -44,7 +44,7 @@ public class GermlineMutationSummarizer {
 
     private HashSet<String> mmrGeneSet = new HashSet<String>();
 
-    public GermlineMutationSummarizer(File germlineMafFile) throws IOException {
+    public GermlineMutationSummarizer(File germlineMafFile, boolean performSanityChecks) throws IOException {
         initMmrGeneSet();
         FileReader reader = new FileReader(germlineMafFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
@@ -58,11 +58,11 @@ public class GermlineMutationSummarizer {
             String barCode = parts[caseIdIndex];
             String variantClassification = parts[8];
             String referenceAllele = parts[10];
-            String aaChange = null;
+            String aaChange = "NA";
             try {
                 aaChange = parts[47];
             } catch (ArrayIndexOutOfBoundsException e) {
-                aaChange = null;
+                aaChange = "NA";
             }
 
             String barCodeParts[] = barCode.split("-");
@@ -79,6 +79,9 @@ public class GermlineMutationSummarizer {
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
+        if (performSanityChecks) {
+            performSanityCheck();
+        }
     }
 
     public ArrayList<String> getColumnHeadings() {
@@ -162,6 +165,43 @@ public class GermlineMutationSummarizer {
         return dataFields;
     }
 
+    //  Every HashSet should contain >0 cases.
+    private void performSanityCheck() {
+        checkSet(mlh1AnySet, "mlh1Any");
+        checkSet(mlh1LikelyDeleteriousSet, "mlh1Likely");
+        checkSet(msh2AnySet, "msh2Any");
+        // Current MAF does not have any MSH2 Likley Deleterious;  so the statement below is commented out.
+        //checkSet(msh2LikelyDeleteriousSet, "msh2Likley");
+        checkSet(msh6AnySet, "msh6Any");
+        checkSet(msh6LikelyDeleteriousSet, "msh6Likely");
+        checkSet(pms1AnySet, "pms1Any");
+        // Current MAF does not have any PMS1 Likley Deleterious;  so the statement below is commented out.
+        // checkSet(pms1LikelyDeleteriousSet, "pms1Likely");
+        checkSet(pms2AnySet, "pms2Any");
+        checkSet(pms2LikelyDeleteriousSet, "psm2Likely");
+        checkSet(mlh1_I219V_Set, "mlh1I219V");
+        checkSet(mlh1_DEL_TCC_Set, "mlh1_DEL_TTC");
+        checkSet(msh2_Q915R_Set, "msh2_Q915R");
+        checkSet(msh2_N127S_Set, "msh2_N127S");
+        checkSet(msh6_R158C_Set, "msh6_R158C");
+        checkSet(msh6_G39E_Set, "msh6_G39E");
+        checkSet(pms2_K541E_Set, "psm2_K541E");
+        checkSet(pms2_P470S_Set, "pms2_P470S");
+        checkSet(pms2_G857A_Set, "pms2_G875A");
+        checkSet(pms2_T485K_Set, "pms2_T485K");
+        checkSet(pms2_T597S_Set, "pms2_T597S");
+        checkSet(pms2_R563L_Set, "pms2_R563L");
+        checkSet(pms2_R20Q_Set, "pms2_R20Q");
+        checkSet(pms2_T511A_Set, "pms2_T551A");
+        checkSet(pms2_M622I_Set, "pms2_M622I");
+    }
+
+    private void checkSet(HashSet<String> currentSet, String name) {
+        if (currentSet.size() == 0) {
+            throw new NullPointerException ("Case Set:  " + name + " is empty.");
+        }
+    }
+
     private void addDataField(ArrayList<String> dataFields, HashSet<String> mutationSet, String caseId) {
         if (mutationSet.contains(caseId)) {
             dataFields.add("1");
@@ -177,7 +217,7 @@ public class GermlineMutationSummarizer {
             if (likelyDeleterious) {
                 mlh1LikelyDeleteriousSet.add(caseId);
             }
-            if (aaChange.equals("I219V")) {
+            if (aaChange.equals("p.I219V")) {
                 mlh1_I219V_Set.add(caseId);
             } else if (refAllele.equals("TTC")) {
                 mlh1_DEL_TCC_Set.add(caseId);    

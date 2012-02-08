@@ -14,7 +14,11 @@ public class TestGermlineMutationSummarizer extends TestCase {
 
     public void testMutationSummarizer() throws IOException {
         File mafFile = new File ("test_data/mlh1_germline.txt");
-        GermlineMutationSummarizer mutationSummarizer =
-                new GermlineMutationSummarizer(mafFile);
+        try {
+            GermlineMutationSummarizer mutationSummarizer =
+                    new GermlineMutationSummarizer(mafFile, true);
+            fail("NullPointerException should have been thrown!");
+        } catch (NullPointerException e) {
+        }
     }
 }

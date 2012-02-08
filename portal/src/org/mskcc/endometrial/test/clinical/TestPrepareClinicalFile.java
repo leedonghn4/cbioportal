@@ -24,7 +24,7 @@ public class TestPrepareClinicalFile extends TestCase {
         File coverageFile = new File ("test_data/coverage_test.txt");
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile
                 (clinFile, msiFile, somaticFile, germlineFile, hyperMutatedFile,
-                cnaClusterFile, mlh1MethFile, coverageFile);
+                cnaClusterFile, mlh1MethFile, coverageFile, false);
         String dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-A5-A0GJ");
         assertEquals ("0.39", dfsMonths);
         String osMonths = prepareClinicalFile.getOsMonths("TCGA-A5-A0GJ");
