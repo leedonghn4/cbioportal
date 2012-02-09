@@ -46,10 +46,44 @@ init <- function() {
 	return(sub_df)
 }
 
+# Perform Mutual Exclusivity between Chromosomal Instability and Mutation Instability
+mut_ex <- function (sub_df) {
+  temp_df = subset(sub_df, CNA_CLUSTER == 1 | CNA_CLUSTER == 2 | CNA_CLUSTER == 3)
+  temp_df = transform(temp_df, CIN=0)
+  temp_df = transform(temp_df, MIN=0)
+  
+  temp_df[temp_df$MUTATION_RATE_CLUSTER=="3_HIGHEST",]$MIN=1
+  temp_df[temp_df$MUTATION_RATE_CLUSTER=="2_HIGH",]$MIN=1
+  temp_df[temp_df$CNA_CLUSTER==3,]$CIN=1
+  
+  t = table (temp_df$CIN, temp_df$MIN)
+  print(t)
+  fisher.test(t)
+}
+
 # Start PDF
-pdf("report.pdf", width=9, height=7) 
+pdf("report.pdf", width=9, height=7)
 
 sub_df = init()
+
+# Write out basic stats
+mut_highest = subset(sub_df,MUTATION_RATE_CLUSTER=="3_HIGHEST")
+mut_high = subset(sub_df, MUTATION_RATE_CLUSTER=="2_HIGH")
+mut_low = subset(sub_df, MUTATION_RATE_CLUSTER=="1_LOW")
+cna_cluster3 = subset(sub_df, CNA_CLUSTER=="3")
+total_n = nrow(sub_df)
+percent_mut_highest = round(nrow(mut_highest) / total_n, 2)
+percent_mut_high = round(nrow(mut_high) / total_n, 2)
+percent_mut_low = round(nrow(mut_low) / total_n, 2)
+percent_cna_cluster_3 = round(nrow(cna_cluster3) / total_n, 2)
+
+print (paste ("Total Number of cases:  ", total_n))
+print (paste ("Percent Mut Highest:  ", percent_mut_highest, " --> ", nrow(mut_highest)))
+print (paste ("Percent Mut High:  ", percent_mut_high, " --> ", nrow(mut_high)))
+print (paste ("Percent Mut Low:  ", percent_mut_low, " --> ", nrow(mut_low)))
+print (paste ("Percent CNA Cluster 3:  ", percent_cna_cluster_3))
+
+mut_ex(sub_df)
 
 # Create Plot of SNV Rates, Log Scale
 t0 <- floor(log10(range(sub_df$NON_SILENT_RATE))) 
@@ -67,6 +101,17 @@ p
 t0 <- floor(log10(range(sub_df$NON_SILENT_RATE))) 
 t1 <- seq(from=t0[1], to=t0[2]) 
 p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, geom="point", colour=MUTATION_RATE_CLUSTER)
+p = p + opts(title="Mutation Clusters")
+p = p + ylab("log10(Non-Silent Rate)")
+p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
+p = p + scale_y_log10(breaks=10^t1, labels=format(10^t1, big.mark=',', scientific=FALSE, trim=TRUE, drop0trailing=T))
+p = p + geom_rug(aes(y = NULL)) 
+p
+
+# Create Plot of SNV Rates, Color Coded by CNA Clusters, Log Scale
+t0 <- floor(log10(range(sub_df$NON_SILENT_RATE))) 
+t1 <- seq(from=t0[1], to=t0[2]) 
+p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, geom="point", colour=factor(CNA_CLUSTER))
 p = p + opts(title="Mutation Clusters")
 p = p + ylab("log10(Non-Silent Rate)")
 p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
@@ -207,3 +252,5 @@ p
 
 # End PDF 
 dev.off() 
+
+
