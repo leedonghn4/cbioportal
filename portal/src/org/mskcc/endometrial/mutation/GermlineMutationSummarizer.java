@@ -107,7 +107,6 @@ public class GermlineMutationSummarizer {
         columnHeadings.add("GERMINE_MLH1_DEL_TCC");
         columnHeadings.add("GERMLINE_MSH2_Q915R");
         columnHeadings.add("GERMLINE_MSH2_N127S");
-        columnHeadings.add("GERMLINE_MSH6_R158C");
         columnHeadings.add("GERMLINE_MSH6_G39E");
         columnHeadings.add("GERMLINE_PMS2_K541E");
         columnHeadings.add("GERMLINE_PMS2_P470S");
