@@ -2,9 +2,9 @@
 library(heatmap.plus)
 
 # Start PDF
-pdf("report.pdf", width=9, height=7)
+pdf("msi_cluster.pdf", width=9, height=7)
 # Read in Unified Clinical File
-clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_unified.txt")
+clin_df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
 
 # Read in MSI File
 msi_df = read.delim("~/SugarSync/endo/data/out/msi_out.txt")
@@ -12,9 +12,13 @@ msi_df = read.delim("~/SugarSync/endo/data/out/msi_out.txt")
 # Merge together
 df = merge (clin_df, msi_df)
 
+# Remove outliers
+# Case with exactly 1 mutation
+df = subset(df, TOTAL_SNV_COUNT>1)
+
 # Extract a smaller subset of columns
 df = subset(df, select=c(CASE_ID, BAT40, BAT26, BAT25, D17S250, TGFBII, D5S346, 
-           D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CATEGORY, SEQUENCED))
+           D2S123, PentaD, PentaE, MSI_STATUS, MUTATION_RATE_CLUSTER, SEQUENCED))
 
 # Only Include Sequenced Cases;  Exclude cases where MSI is unknown
 df = subset(df, SEQUENCED=="Y" & (MSI_STATUS != "Indeterminant" & MSI_STATUS != "Not Done"))
@@ -32,9 +36,9 @@ df[df$MSI_STATUS=="MSI-L",]$COL1="#8C96C6"
 df[df$MSI_STATUS=="MSI-H",]$COL1="#88419D"
 
 # Create Color Mappings:  MUTATION_RATE_CATEGORY
-df[df$MUTATION_RATE_CATEGORY=="3_LOW",]$COL2="#B2E2E2"
-df[df$MUTATION_RATE_CATEGORY=="2_HIGH",]$COL2="#66C2A4"
-df[df$MUTATION_RATE_CATEGORY=="1_HIGHEST",]$COL2="#238B45"
+df[df$MUTATION_RATE_CLUSTER=="1_LOW",]$COL2="#B2E2E2"
+df[df$MUTATION_RATE_CLUSTER=="2_HIGH",]$COL2="#66C2A4"
+df[df$MUTATION_RATE_CLUSTER=="3_HIGHEST",]$COL2="#238B45"
 
 # Get only MSI-L and MSI-H
 #df = subset(df, MSI_STATUS=="MSI-H" | MSI_STATUS=="MSI-L")
@@ -47,7 +51,7 @@ sub_df1 = subset(df, select=BAT40:D2S123)
 sub_df2 = subset(df, select=COL1:COL2)
 
 # Change the column names for the annotations
-colnames(sub_df2) = c("MSI", "Mutation Category")
+colnames(sub_df2) = c("MSI", "Mutation Rate Cluster")
 
 # Convert the Data Frames to Matrices
 m1 = as.matrix(sub_df1)
@@ -72,6 +76,6 @@ legend ("topleft", bty="y", os_labels, fill=color_codes,
 os_labels=c("Low", "High", "Higest")
 color_codes = c("#B2E2E2", "#66C2A4", "#238B45")
 legend ("topleft", bty="y", os_labels, fill=color_codes, 
-        title="Mutation Category", inset=c(0.38,0.75))
+        title="Mutation Rate Cluster", inset=c(0.38,0.75))
 
 dev.off()
