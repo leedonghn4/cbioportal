@@ -6,10 +6,10 @@ library("multtest")
 # Compare Function:  Performs Fisher's Exact Test and Returns Results in a Data Frame
 ######################################################################################
 compare <- function(metric, sub_df) {
+  print(metric)
   t = table (sub_df[[metric]], sub_df$MUTATION_RATE_CLUSTER)
   pt = prop.table(t, 2)
   f = fisher.test(t)
-
   summary = data.frame (METRIC=metric, 
                   MUT_LOW=round(pt[2,1], 2), 
                   MUT_HIGH=round(pt[2,2], 2), 
@@ -25,7 +25,7 @@ metrics = c("GERMLINE_MMR_ANY", "GERMLINE_MMR_LIKELY_DELETERIOUS", "GERMLINE_MLH
 	"GERMLINE_MSH6_ANY", "GERMLINE_MSH6_LIKELY_DELETERIOUS", "GERMLINE_PMS1_ANY", 
 	"GERMLINE_PMS2_ANY", "GERMLINE_PMS2_LIKELY_DELETERIOUS",
 	"GERMLINE_MLH1_I219V", "GERMINE_MLH1_DEL_TCC", "GERMLINE_MSH2_Q915R", "GERMLINE_MSH2_N127S",
-	"GERMLINE_MSH6_R158C", "GERMLINE_MSH6_G39E", "GERMLINE_PMS2_K541E", "GERMLINE_PMS2_P470S",
+	"GERMLINE_MSH6_G39E", "GERMLINE_PMS2_K541E", "GERMLINE_PMS2_P470S",
 	"GERMLINE_PMS2_G857A", "GERMLINE_PMS2_T485K", "GERMLINE_PMS2_R20Q", 
 	"GERMLINE_PMS2_T511A", "GERMLINE_PMS2_M622I", "GERMLINE_PMS2_T597S", "GERMLINE_PMS2_R563L")
 
