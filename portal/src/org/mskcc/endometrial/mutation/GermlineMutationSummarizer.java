@@ -30,7 +30,6 @@ public class GermlineMutationSummarizer {
     private HashSet<String> mlh1_DEL_TCC_Set = new HashSet<String>();
     private HashSet<String> msh2_Q915R_Set = new HashSet<String>();
     private HashSet<String> msh2_N127S_Set = new HashSet<String>();
-    private HashSet<String> msh6_R158C_Set = new HashSet<String>();
     private HashSet<String> msh6_G39E_Set = new HashSet<String>();
     private HashSet<String> pms2_K541E_Set = new HashSet<String>();
     private HashSet<String> pms2_P470S_Set = new HashSet<String>();
@@ -73,7 +72,13 @@ public class GermlineMutationSummarizer {
                 boolean likelyDeleterious = isLikelyDeleterious(variantClassification);
 
                 if (mmrGeneSet.contains(geneSymbol)) {
-                    extractMMRGene(geneSymbol, caseId, likelyDeleterious, aaChange, referenceAllele);
+                    if (geneSymbol.equals("MSH6") && aaChange.equals("p.R158C")) {
+                        //  Skip over mis-annotated MSH6 gene
+                        //  this gene is annotated by Wash U. as a missense mutation
+                        //  but, according to Oncotator, it's actually a silent mutation.
+                    } else {
+                        extractMMRGene(geneSymbol, caseId, likelyDeleterious, aaChange, referenceAllele);
+                    }
                 }
             }
             line = bufferedReader.readLine();
@@ -151,7 +156,6 @@ public class GermlineMutationSummarizer {
         addDataField(dataFields, this.mlh1_DEL_TCC_Set, caseId);
         addDataField(dataFields, this.msh2_Q915R_Set, caseId);
         addDataField(dataFields, this.msh2_N127S_Set, caseId);
-        addDataField(dataFields, this.msh6_R158C_Set, caseId);
         addDataField(dataFields, this.msh6_G39E_Set, caseId);
         addDataField(dataFields, this.pms2_K541E_Set, caseId);
         addDataField(dataFields, this.pms2_P470S_Set, caseId);
@@ -183,7 +187,6 @@ public class GermlineMutationSummarizer {
         checkSet(mlh1_DEL_TCC_Set, "mlh1_DEL_TTC");
         checkSet(msh2_Q915R_Set, "msh2_Q915R");
         checkSet(msh2_N127S_Set, "msh2_N127S");
-        checkSet(msh6_R158C_Set, "msh6_R158C");
         checkSet(msh6_G39E_Set, "msh6_G39E");
         checkSet(pms2_K541E_Set, "psm2_K541E");
         checkSet(pms2_P470S_Set, "pms2_P470S");
@@ -237,9 +240,7 @@ public class GermlineMutationSummarizer {
             if (likelyDeleterious) {
                 msh6LikelyDeleteriousSet.add(caseId);
             }
-            if (aaChange.equals("p.R158C")) { 
-                msh6_R158C_Set.add(caseId);
-            } else if (aaChange.equals("p.G39E")) {
+            if (aaChange.equals("p.G39E")) {
                 msh6_G39E_Set.add(caseId);
             }
         } else if (geneSymbol.equals("PMS1")) {
