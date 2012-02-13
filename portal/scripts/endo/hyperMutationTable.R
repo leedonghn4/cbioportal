@@ -185,6 +185,53 @@ legend ("topright", bty="n", labels, fill=colors)
 p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
 legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
 
+local_df = sub_df
+local_df = transform(local_df, MUTATION_RATE_HIGHEST=0)
+local_df[local_df$MUTATION_RATE_CLUSTER %in% "3_HIGHEST",]$MUTATION_RATE_HIGHEST=1
+dfs_surv = Surv (local_df$DFS_MONTHS, local_df$DFS_STATUS_BOOLEAN)
+dfs_surv_fit = survfit(dfs_surv ~ local_df$MUTATION_RATE_HIGHEST)
+dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_HIGHEST)
+
+print(dfs_surv_fit)
+
+labels=c("Other", "3_HIGHEST")
+colors=c("red", "blue", "green")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
+
+local_df = subset(sub_df, MUTATION_RATE_CLUSTER %in% c("3_HIGHEST", "1_LOW"))
+local_df[local_df$MUTATION_RATE_CLUSTER %in% "3_HIGHEST",]$MUTATION_RATE_HIGHEST=1
+dfs_surv = Surv (local_df$DFS_MONTHS, local_df$DFS_STATUS_BOOLEAN)
+dfs_surv_fit = survfit(dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
+dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
+
+print(dfs_surv_fit)
+
+labels=c("1_LOW", "3_HIGHEST")
+colors=c("red", "blue", "green")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
+
+local_df = subset(sub_df, MUTATION_RATE_CLUSTER %in% c("3_HIGHEST", "2_HIGH"))
+local_df[local_df$MUTATION_RATE_CLUSTER %in% "3_HIGHEST",]$MUTATION_RATE_HIGHEST=1
+dfs_surv = Surv (local_df$DFS_MONTHS, local_df$DFS_STATUS_BOOLEAN)
+dfs_surv_fit = survfit(dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
+dfs_log_rank = survdiff (dfs_surv ~ local_df$MUTATION_RATE_CLUSTER)
+
+print(dfs_surv_fit)
+
+labels=c("2_HIGH", "3_HIGHEST")
+colors=c("red", "blue", "green")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
+
+
 test7 = list (METRIC="Survival (DFS)", MUT_HIGH=0, MUT_HIGHEST=0, 
 	P_VALUE=signif(p_val, digits=4), TEST="Logrank Test")
 
@@ -263,29 +310,10 @@ f = fisher.test(t)
 test17 = list (METRIC="Rate of KRAS Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
 	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
 
-t = table(local_df$MHL1_GERMLINE_I219V, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
-pt = prop.table(t, 2)
-f = fisher.test(t)
-test18 = list (METRIC="Rate of MHL1_GERMLINE_I219V Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
-	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
-
-t = table(local_df$MLH1_GERMLINE_DEL_TTC, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
-pt = prop.table(t, 2)
-f = fisher.test(t)
-test19 = list (METRIC="Rate of MLH1_GERMLINE_DEL_TTC Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
-	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
-
-t = table(local_df$MSH2_GERMLINE_Q915R, local_df$MUTATION_RATE_CLUSTER, exclude="1_LOW")
-pt = prop.table(t, 2)
-f = fisher.test(t)
-test20 = list (METRIC="Rate of MSH2_GERMLINE_Q915R Mutation", MUT_HIGH=pt[2,1], MUT_HIGHEST=pt[2,2],
-	P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
-
-
 options(scipen=11)
 results = rbind (data.frame(test0), data.frame(test1), data.frame(test2), data.frame(test3), data.frame(test4), data.frame(test5), data.frame(test6), data.frame(test7),
 	data.frame(test8), data.frame(test9), data.frame(test10), data.frame(test11), data.frame(test12), data.frame(test13), data.frame(test14), data.frame(test15),
-	data.frame(test16), data.frame(test17), data.frame(test18), data.frame(test19), data.frame(test20))
+	data.frame(test16), data.frame(test17))
 print(results)
 write.table(results, file="table.txt", row.names=FALSE, sep="\t", quote = FALSE)
 
