@@ -188,6 +188,7 @@ mergeAndSaveUpdatedClinicalFile <- function(sub_df) {
 	temp_df[temp_df$cl.clusters=="1",]$cl.clusters="1_LOW"
 	temp_df[temp_df$cl.clusters=="2",]$cl.clusters="2_HIGH"
 	temp_df[temp_df$cl.clusters=="3",]$cl.clusters="3_HIGHEST"
+  temp_df[temp_df$cl.clusters=="4",]$cl.clusters="3_HIGHEST"
 
 	merged = merge(df, temp_df, all.x=T)
 	
@@ -209,7 +210,7 @@ survival <- function (sub_df) {
   dfs_surv_fit = survfit(dfs_surv ~ sub_df$cl.clusters)
   dfs_log_rank = survdiff (dfs_surv ~ sub_df$cl.clusters)
 
-  print(dfs_surv_fit)
+  #print(dfs_surv_fit)
 
   labels=c("Low", "High", "Highest", "Higher")
   colors=c("red", "blue", "green", "orange")
@@ -226,7 +227,7 @@ survival <- function (sub_df) {
   dfs_surv_fit = survfit(dfs_surv ~ sub_df$MUT_HIGHER_HIGHEST)
   dfs_log_rank = survdiff (dfs_surv ~ sub_df$MUT_HIGHER_HIGHEST)
 
-  print(dfs_surv_fit)
+  #print(dfs_surv_fit)
 
   labels=c("Mut_High_Low", "Mut_Higher_Highest")
   colors=c("red", "blue", "green", "orange")
