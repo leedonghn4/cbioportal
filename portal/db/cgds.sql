@@ -358,3 +358,9 @@ CREATE TABLE IF NOT EXISTS `sanger_cancer_census` (
   `OTHER_GERMLINE_MUT` tinyint(1) NOT NULL,
   `OTHER_DISEASE` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Sanger Cancer Gene Census';
+
+CREATE TABLE IF NOT EXISTS `oncotator` (
+  `CACHE_KEY` varchar(255) NOT NULL,
+  `JSON` longtext NOT NULL,
+  KEY `key` (`CACHE_KEY`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
