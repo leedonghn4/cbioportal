@@ -128,32 +128,32 @@ function drawMutationDiagram(sequences) {
   scaleH = maxCount * per;
   scaleW = scaleHoriz(8, w, l);
 
-  paper.path("M" + scaleX + " " + scaleY +
-             "L" + (scaleX + scaleW) + " " + scaleY +
-             "L" + (scaleX + scaleW) + " " + (scaleY - scaleH) +
-             "L" + scaleX + " " + (scaleY - scaleH))
-   .attr({"stroke": scaleColors[0], "stroke-width": 1});
+//  paper.path("M" + scaleX + " " + scaleY +
+//             "L" + (scaleX + scaleW) + " " + scaleY +
+//             "L" + (scaleX + scaleW) + " " + (scaleY - scaleH) +
+//             "L" + scaleX + " " + (scaleY - scaleH))
+//   .attr({"stroke": scaleColors[0], "stroke-width": 1});
 
   // mutation scale major ticks
-  paper.path("M" + (scaleX + scaleW - 4) + " " + (scaleY - (maxCount / 2) * per) +
-             "L" + (scaleX + scaleW) + " " + (scaleY - (maxCount / 2) * per))
-   .attr({"stroke": scaleColors[0], "stroke-width": 1});
-
-  // mutation scale minor ticks
-  paper.path("M" + (scaleX + scaleW - 2) + " " + (scaleY - (3 * maxCount / 4) * per) +
-             "L" + (scaleX + scaleW) + " " + (scaleY - (3 * maxCount / 4) * per))
-   .attr({"stroke": scaleColors[0], "stroke-width": 1});
-
-  paper.path("M" + (scaleX + scaleW - 2) + " " + (scaleY - (maxCount / 4) * per) +
-             "L" + (scaleX + scaleW) + " " + (scaleY - (maxCount / 4) * per))
-   .attr({"stroke": scaleColors[0], "stroke-width": 1});
-
-  // mutation scale labels
-  paper.text(scaleX - 8, scaleY, 0)
-    .attr({"text-anchor": "middle", "fill": scaleColors[1], "font-size": "11px", "font-family": "sans-serif"})
-
-  paper.text(scaleX - 8, scaleY - (maxCount * per), maxCount)
-    .attr({"text-anchor": "middle", "fill": scaleColors[1], "font-size": "11px", "font-family": "sans-serif"})
+//  paper.path("M" + (scaleX + scaleW - 4) + " " + (scaleY - (maxCount / 2) * per) +
+//             "L" + (scaleX + scaleW) + " " + (scaleY - (maxCount / 2) * per))
+//   .attr({"stroke": scaleColors[0], "stroke-width": 1});
+//
+//  // mutation scale minor ticks
+//  paper.path("M" + (scaleX + scaleW - 2) + " " + (scaleY - (3 * maxCount / 4) * per) +
+//             "L" + (scaleX + scaleW) + " " + (scaleY - (3 * maxCount / 4) * per))
+//   .attr({"stroke": scaleColors[0], "stroke-width": 1});
+//
+//  paper.path("M" + (scaleX + scaleW - 2) + " " + (scaleY - (maxCount / 4) * per) +
+//             "L" + (scaleX + scaleW) + " " + (scaleY - (maxCount / 4) * per))
+//   .attr({"stroke": scaleColors[0], "stroke-width": 1});
+//
+//  // mutation scale labels
+//  paper.text(scaleX - 8, scaleY, 0)
+//    .attr({"text-anchor": "middle", "fill": scaleColors[1], "font-size": "11px", "font-family": "sans-serif"})
+//
+//  paper.text(scaleX - 8, scaleY - (maxCount * per), maxCount)
+//    .attr({"text-anchor": "middle", "fill": scaleColors[1], "font-size": "11px", "font-family": "sans-serif"})
 
   // mutation lollipops
   labelShown = false;
@@ -165,13 +165,7 @@ function drawMutationDiagram(sequences) {
       lollipopStrokeColor = darken(lollipopFillColor);
       markupLineColor = mutationDiagram.markups[i].lineColour;
 
-      if (mutationDiagram.markups[i].metadata.count == 1) {
-        countText = "(" + mutationDiagram.markups[i].metadata.count + " mutation)";
-      }
-      else {
-        countText = "(" + mutationDiagram.markups[i].metadata.count + " mutations)";
-      }
-      mutationTitle = "Amino Acid Change:  " + mutationDiagram.markups[i].metadata.label + " " + countText;
+      mutationTitle = "Amino Acid Change:  " + mutationDiagram.markups[i].metadata.label;
 
       lollipop = paper.rect((x1 - GRID_WIDTH/2), y1, GRID_WIDTH, GRID_HEIGHT)
         .attr({"fill": lollipopFillColor, "stroke": lollipopStrokeColor, "stroke-width": 0.5});
