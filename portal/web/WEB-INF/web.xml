@@ -132,6 +132,16 @@
         <servlet-class>org.mskcc.portal.mut_diagram.servlet.MutationDiagramDataServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>onco_viz_data</servlet-name>
+        <servlet-class>org.mskcc.portal.mut_diagram.servlet.OncoVizDataServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>onco_viz_draw</servlet-name>
+        <servlet-class>org.mskcc.portal.mut_diagram.servlet.OncoVizDrawServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>webservice</servlet-name>
         <url-pattern>/webservice.do</url-pattern>
@@ -160,6 +170,16 @@
     <servlet-mapping>
         <servlet-name>mutation_diagram_data_json</servlet-name>
         <url-pattern>/mutation_diagram_data.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>onco_viz_draw</servlet-name>
+        <url-pattern>/onco_viz.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>onco_viz_data</servlet-name>
+        <url-pattern>/onco_viz.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
