@@ -28,6 +28,7 @@ public class ExtendedMutation {
     private String linkXVar;
     private String linkPdb;
     private String linkMsa;
+    private String color;
 
     public ExtendedMutation() {
     }
@@ -203,6 +204,14 @@ public class ExtendedMutation {
 
     public void setSequencer(String sequencer) {
         this.sequencer = sequencer;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @JsonIgnore

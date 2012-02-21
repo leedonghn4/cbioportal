@@ -9,6 +9,7 @@ import java.util.Map;
 public final class Markup {
     private int start;
     private int end;
+    private int yoffset;
     private String href;
     private List<String> colour;
     private String lineColour;
@@ -105,5 +106,13 @@ public final class Markup {
 
     public Map<String, Object> getMetadata() {
         return metadata;
+    }
+
+    public int getYoffset() {
+        return yoffset;
+    }
+
+    public void setYoffset(int yoffset) {
+        this.yoffset = yoffset;
     }
 }
