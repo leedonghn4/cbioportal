@@ -3,6 +3,7 @@ package org.mskcc.cgds.model;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.mskcc.portal.mut_diagram.oncotator.Oncotator;
 
 /**
  * Encapsules Details regarding a Single Mutation.
@@ -22,6 +23,8 @@ public class ExtendedMutation {
     private String chr;
     private long startPosition;
     private long endPosition;
+    private String refAllele;
+    private String observedAllele;
     private String aminoAcidChange;
     private String mutationType;
     private String functionalImpactScore;
@@ -29,6 +32,7 @@ public class ExtendedMutation {
     private String linkPdb;
     private String linkMsa;
     private String color;
+    private Oncotator oncotator;
 
     public ExtendedMutation() {
     }
@@ -212,6 +216,30 @@ public class ExtendedMutation {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getRefAllele() {
+        return refAllele;
+    }
+
+    public void setRefAllele(String refAllele) {
+        this.refAllele = refAllele;
+    }
+
+    public String getObservedAllele() {
+        return observedAllele;
+    }
+
+    public void setObservedAllele(String observedAllele) {
+        this.observedAllele = observedAllele;
+    }
+
+    public Oncotator getOncotator() {
+        return oncotator;
+    }
+
+    public void setOncotator(Oncotator oncotator) {
+        this.oncotator = oncotator;
     }
 
     @JsonIgnore

@@ -11,6 +11,8 @@ import org.mskcc.cgds.dao.DaoException;
 import org.mskcc.cgds.dao.DaoGeneOptimized;
 import org.mskcc.cgds.model.ExtendedMutation;
 import org.mskcc.portal.mut_diagram.*;
+import org.mskcc.portal.mut_diagram.oncotator.OncotatorService;
+import org.mskcc.portal.mut_diagram.oncotator.Oncotator;
 import org.mskcc.portal.mut_diagram.impl.CacheFeatureService;
 import org.mskcc.portal.mut_diagram.impl.CgdsIdMappingService;
 import org.mskcc.portal.mut_diagram.impl.PfamGraphicsCacheLoader;
@@ -63,14 +65,14 @@ public final class OncoVizDataServlet extends HttpServlet {
 
         List<String> uniProtIds = idMappingService.getUniProtIds(hugoGeneSymbol);
         if (uniProtIds.isEmpty()) {
-            writeSequencesToResponse(hugoGeneSymbol, EMPTY, response);
+            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, response);
             return;
         }
 
         String uniProtId = uniProtIds.get(0);
         List<Sequence> sequences = featureService.getFeatures(uniProtId);
         if (sequences.isEmpty()) {
-            writeSequencesToResponse(hugoGeneSymbol, EMPTY, response);
+            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, response);
             return;
         }
 
@@ -81,11 +83,16 @@ public final class OncoVizDataServlet extends HttpServlet {
         }
         sequence.getMetadata().put("hugoGeneSymbol", hugoGeneSymbol);
         sequence.getMetadata().put("uniProtId", uniProtId);
- 
-        List<ExtendedMutation> mutations = readMutations(request.getParameter("mutations"));
+
+        List<ExtendedMutation> mutations = null;
+        try {
+            mutations = readMutations(request.getParameter("mutations"));
+        } catch (DaoException e) {
+            throw new IOException (e);
+        }
 
         List<Markup> markups = createMarkups(mutations);
-        writeSequencesToResponse(hugoGeneSymbol, ImmutableList.of(sequence.withMarkups(markups)), response);
+        writeSequencesToResponse(mutations, hugoGeneSymbol, ImmutableList.of(sequence.withMarkups(markups)), response);
     }
 
     /**
@@ -95,8 +102,9 @@ public final class OncoVizDataServlet extends HttpServlet {
         List<Markup> markups = newArrayList();
         HashMap<Integer, Integer> locationMap = new HashMap<Integer, Integer>();
         for (ExtendedMutation mutation: mutations) {
-            String aaChange = mutation.getAminoAcidChange();
+            String aaChange = mutation.getOncotator().getProteinChange();
             try {
+                aaChange = aaChange.replace("_splice", "");
                 int location = Integer.valueOf(aaChange.replaceAll("[A-Za-z\\.*]+", ""));
                 int yoffset = 1;
                 if (locationMap.containsKey(location)) {
@@ -115,7 +123,7 @@ public final class OncoVizDataServlet extends HttpServlet {
                 markup.setV_align("top");
                 markup.setType("mutation");
                 markup.setMetadata(new HashMap<String, Object>());
-                markup.getMetadata().put("label", mutation.getAminoAcidChange());
+                markup.getMetadata().put("label", mutation.getOncotator().getProteinChange());
                 markups.add(markup);
             }
             catch (NumberFormatException e) {
@@ -125,13 +133,19 @@ public final class OncoVizDataServlet extends HttpServlet {
         return markups;
     }
 
-    private void writeSequencesToResponse(String geneSymbol,
+    private void writeSequencesToResponse(List<ExtendedMutation> mutationList, String geneSymbol,
               final List<Sequence> sequences, final HttpServletResponse response)
             throws IOException {
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
         writer.write("<html>");
+        writer.write("<head>\n" +
+                "<link href=\"css/global_portal.css\" type=\"text/css\" rel=\"stylesheet\" />\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "\n");
         writer.write("<body>");
+        writer.write("<div align=\"left\">");
         writer.write("<h2>OncoViz</h2>");
         writer.write("Almost there...<P>");
         writer.write("<form action='onco_viz.do' method='POST'>");
@@ -144,6 +158,18 @@ public final class OncoVizDataServlet extends HttpServlet {
         writer.write("</textarea>");
         writer.write("<P><input type=\"submit\">");
         writer.write("</form>");
+
+        if (mutationList != null) {
+            writer.write("<table>");
+            writer.write("<tr><th>Case ID</th><th>Protein Change (Oncotator)</th></tr>");
+            for (ExtendedMutation mutation:  mutationList) {
+                writer.write("<tr><td>" + mutation.getCaseId() + "</td>");
+                writer.write("<td>" + mutation.getOncotator().getProteinChange() + "</td>");
+                writer.write("</tr>");
+            }
+            writer.write("</table>");
+        }
+        writer.write("</div>");
         writer.write("</body>");
         writer.write("</html>");
     }
@@ -151,7 +177,8 @@ public final class OncoVizDataServlet extends HttpServlet {
     /**
      * Reads in mutations from the Request Object.
      */
-    List<ExtendedMutation> readMutations(final String value) {
+    List<ExtendedMutation> readMutations(final String value) throws IOException, DaoException {
+        OncotatorService service = OncotatorService.getInstance();
         List<ExtendedMutation> mutations = new ArrayList<ExtendedMutation>();
         if (value != null) {
             String lines[] = value.split("\n");
@@ -160,17 +187,32 @@ public final class OncoVizDataServlet extends HttpServlet {
                     //  Split by any white space
                     String parts[] = line.split("\\s+");
 
+                    //  Example:  TCGA-1234 7 140453136 140453136 A T RED
                     String caseId = parts[0];
-                    String aaChange = parts[1];
+                    String chr = parts[1];
+                    String start = parts[2];
+                    String end = parts[3];
+                    String refAllele = parts[4];
+                    String observedAllele = parts[5];
                     String color = "BLACK";
                     try {
-                        color = parts[2];
+                        color = parts[6];
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                     ExtendedMutation mutation = new ExtendedMutation();
-                    mutation.setAminoAcidChange(aaChange);
+                    mutation.setChr(chr);
+                    mutation.setStartPosition(Long.parseLong(start));
+                    mutation.setEndPosition(Long.parseLong(end));
+                    mutation.setRefAllele(refAllele);
+                    mutation.setObservedAllele(observedAllele);
                     mutation.setCaseId(caseId);
                     mutation.setColor(color);
+
+                    //  Add Oncotator Annotation
+                    Oncotator annotation = service.getOncotatorAnnotation(mutation.getChr(), mutation.getStartPosition(),
+                            mutation.getEndPosition(), mutation.getRefAllele(), mutation.getObservedAllele());
+                    mutation.setOncotator(annotation);
+
                     mutations.add(mutation);
                 }
             }
