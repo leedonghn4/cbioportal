@@ -37,7 +37,7 @@ public class OncotatorService {
         String json = DaoOncotatorCache.getOncotatorRecord(key);
         if (json != null) {
             logger.warn("Got data from DB Cache");
-            Oncotator oncotator = OncotatorParser.parseJSON(json);
+            Oncotator oncotator = OncotatorParser.parseJSON(key, json);
             return oncotator;
         } else {
             //  Otherwise, connect to Oncotator
@@ -46,7 +46,7 @@ public class OncotatorService {
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String content = WebFileConnect.readFile(in);
             if (content != null) {
-                Oncotator oncotator = OncotatorParser.parseJSON(content);
+                Oncotator oncotator = OncotatorParser.parseJSON(key, content);
                 
                 //  Store JSON to DB Cache
                 DaoOncotatorCache.addOncotatorRecord(key, content);

@@ -9,13 +9,14 @@ public class Oncotator {
     private String genomeChange;
     private String proteinChange;
     private String variantClassification;
+    private int exonAffected;
+
+    public Oncotator (String key) {
+        this.key = key;
+    }
 
     public String getKey() {
         return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public String getProteinChange() {
@@ -48,5 +49,13 @@ public class Oncotator {
 
     public void setGenomeChange(String genomeChange) {
         this.genomeChange = genomeChange;
+    }
+
+    public int getExonAffected() {
+        return exonAffected;
+    }
+
+    public void setExonAffected(int exonAffected) {
+        this.exonAffected = exonAffected;
     }
 }

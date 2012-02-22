@@ -63,16 +63,18 @@ public final class OncoVizDataServlet extends HttpServlet {
             throws ServletException, IOException {
         String hugoGeneSymbol = request.getParameter("hugoGeneSymbol");
 
+        HashMap<String, String> proteinColorMap = extractProteinColorMap(request);
+
         List<String> uniProtIds = idMappingService.getUniProtIds(hugoGeneSymbol);
         if (uniProtIds.isEmpty()) {
-            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, response);
+            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, proteinColorMap, response);
             return;
         }
 
         String uniProtId = uniProtIds.get(0);
         List<Sequence> sequences = featureService.getFeatures(uniProtId);
         if (sequences.isEmpty()) {
-            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, response);
+            writeSequencesToResponse(null, hugoGeneSymbol, EMPTY, proteinColorMap, response);
             return;
         }
 
@@ -86,13 +88,31 @@ public final class OncoVizDataServlet extends HttpServlet {
 
         List<ExtendedMutation> mutations = null;
         try {
-            mutations = readMutations(request.getParameter("mutations"));
+            mutations = readMutations(proteinColorMap, request.getParameter("mutations"));
         } catch (DaoException e) {
             throw new IOException (e);
         }
 
         List<Markup> markups = createMarkups(mutations);
-        writeSequencesToResponse(mutations, hugoGeneSymbol, ImmutableList.of(sequence.withMarkups(markups)), response);
+        writeSequencesToResponse(mutations, hugoGeneSymbol, ImmutableList.of(sequence.withMarkups(markups)),
+                proteinColorMap, response);
+    }
+
+    private HashMap<String, String> extractProteinColorMap(HttpServletRequest request) {
+        HashMap<String, String> proteinColorMap = new HashMap<String, String>();
+        String textArea = request.getParameter("protein_color_map");
+        logger.warn("text:  " + textArea);
+        if (textArea != null) {
+            String lines[] = textArea.split("\n");
+            for (String line: lines) {
+                if (line.trim().length()>0) {
+                    String parts[] = line.split("\\s+");
+                    logger.warn("Adding:  " + parts[0].trim() + " : " + parts[1].trim());
+                    proteinColorMap.put(parts[0], parts[1]);
+                }
+            }
+        }
+        return proteinColorMap;
     }
 
     /**
@@ -134,7 +154,7 @@ public final class OncoVizDataServlet extends HttpServlet {
     }
 
     private void writeSequencesToResponse(List<ExtendedMutation> mutationList, String geneSymbol,
-              final List<Sequence> sequences, final HttpServletResponse response)
+              final List<Sequence> sequences, HashMap<String, String> proteinColorMap, final HttpServletResponse response)
             throws IOException {
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
@@ -161,10 +181,13 @@ public final class OncoVizDataServlet extends HttpServlet {
 
         if (mutationList != null) {
             writer.write("<table>");
-            writer.write("<tr><th>Case ID</th><th>Protein Change (Oncotator)</th></tr>");
+            writer.write("<tr><th>Case ID</th><th>Genomic Change</th><th>Exon Affected</th><th>Protein Change</th><th>Key</th></tr>");
             for (ExtendedMutation mutation:  mutationList) {
                 writer.write("<tr><td>" + mutation.getCaseId() + "</td>");
+                writer.write("<td>" + mutation.getOncotator().getGenomeChange() + "</td>");
+                writer.write("<td>" + mutation.getOncotator().getExonAffected() + "</td>");
                 writer.write("<td>" + mutation.getOncotator().getProteinChange() + "</td>");
+                writer.write("<td><a href='http://jsonviewer.stack.hu/#http://www.broadinstitute.org/oncotator/mutation/" + mutation.getOncotator().getKey() + "'>Oncotator JSON</a></td>");
                 writer.write("</tr>");
             }
             writer.write("</table>");
@@ -177,7 +200,8 @@ public final class OncoVizDataServlet extends HttpServlet {
     /**
      * Reads in mutations from the Request Object.
      */
-    List<ExtendedMutation> readMutations(final String value) throws IOException, DaoException {
+    List<ExtendedMutation> readMutations(HashMap<String, String> proteinColorMap,
+            final String value) throws IOException, DaoException {
         OncotatorService service = OncotatorService.getInstance();
         List<ExtendedMutation> mutations = new ArrayList<ExtendedMutation>();
         if (value != null) {
@@ -212,6 +236,11 @@ public final class OncoVizDataServlet extends HttpServlet {
                     Oncotator annotation = service.getOncotatorAnnotation(mutation.getChr(), mutation.getStartPosition(),
                             mutation.getEndPosition(), mutation.getRefAllele(), mutation.getObservedAllele());
                     mutation.setOncotator(annotation);
+
+                    String proteinChange = annotation.getProteinChange();
+                    if (proteinColorMap.containsKey(proteinChange)) {
+                        mutation.setColor(proteinColorMap.get(proteinChange));
+                    }
 
                     mutations.add(mutation);
                 }
