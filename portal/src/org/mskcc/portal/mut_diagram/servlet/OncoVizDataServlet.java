@@ -105,7 +105,7 @@ public final class OncoVizDataServlet extends HttpServlet {
         if (textArea != null) {
             String lines[] = textArea.split("\n");
             for (String line: lines) {
-                if (line.trim().length()>0) {
+                if (line.trim().length()>0 && !line.startsWith("#")) {
                     String parts[] = line.split("\\s+");
                     logger.warn("Adding:  " + parts[0].trim() + " : " + parts[1].trim());
                     proteinColorMap.put(parts[0], parts[1]);
