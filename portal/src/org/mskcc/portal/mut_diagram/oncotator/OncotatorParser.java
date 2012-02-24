@@ -20,6 +20,13 @@ public class OncotatorParser {
         if (genomeChange != null) {
             oncotator.setGenomeChange(genomeChange.getTextValue());
         }
+        
+        JsonNode cosmic = rootNode.path("Cosmic_overlapping_mutations");
+        if (cosmic != null) {
+            oncotator.setCosmicOverlappingMutations(cosmic.getTextValue());
+        } else {
+            oncotator.setCosmicOverlappingMutations("NO COSMIC DATA");
+        }
 
         JsonNode bestTranscriptIndexNode = rootNode.path("best_canonical_transcript");
 

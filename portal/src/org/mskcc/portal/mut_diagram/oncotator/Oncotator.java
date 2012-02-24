@@ -10,6 +10,7 @@ public class Oncotator {
     private String proteinChange;
     private String variantClassification;
     private int exonAffected;
+    private String cosmicOverlappingMutations;
 
     public Oncotator (String key) {
         this.key = key;
@@ -57,5 +58,17 @@ public class Oncotator {
 
     public void setExonAffected(int exonAffected) {
         this.exonAffected = exonAffected;
+    }
+
+    public String getCosmicOverlappingMutations() {
+        if (cosmicOverlappingMutations == null) {
+            return "--";
+        } else {
+            return cosmicOverlappingMutations;
+        }
+    }
+
+    public void setCosmicOverlappingMutations(String cosmicOverlappingMutations) {
+        this.cosmicOverlappingMutations = cosmicOverlappingMutations;
     }
 }
