@@ -9,7 +9,7 @@ window.log = function() {
 };
 
 function drawMutationDiagram(sequences) {
-  GRID_WIDTH = 2;
+  GRID_WIDTH = 1;
   GRID_HEIGHT = 4;
   Y_SPACER = 2;
   MAX_OFFSET = 4;
