@@ -62,3 +62,8 @@ pt = prop.table(t, 2)
 f = fisher.test(t)
 test3 = list (METRIC="Age", YOUNGER=pt[2,1], OLDER=pt[2,2], P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
 
+# Compare Frequency of PIK3CA Mutations in the Different Mutation Rate Clusters
+t = table(df$PIK3CA_MUTATED, df$MUTATION_RATE_CLUSTER)
+pt = prop.table(t, 2)
+f = fisher.test(t)
+test4 = list (METRIC="Mutation Rate", LOW=pt[2,1], HIGH=pt[2,2], HIGHEST=pt[2,3], P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
