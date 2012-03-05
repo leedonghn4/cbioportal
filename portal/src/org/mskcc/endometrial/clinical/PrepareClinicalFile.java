@@ -3,7 +3,6 @@ package org.mskcc.endometrial.clinical;
 import org.mskcc.endometrial.cna.CnaSummarizer;
 import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
-import org.mskcc.endometrial.mutation.BedCreator;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -137,18 +136,11 @@ public class PrepareClinicalFile {
             appendMutationCounts(mutationSummarizer, caseId);
             categorizeByHistologicalSubType(histSubType, caseId);
 
-            appendBoolean(mutationSummarizer.isMlh1Mutated(caseId), newTable);
-
             if (mlh1HyperMethylatedMap.containsKey(caseId)) {
                 newTable.append(TAB + mlh1HyperMethylatedMap.get(caseId));
             } else {
                 newTable.append(TAB + NA_OUTPUT);
             }
-
-            appendBoolean(mutationSummarizer.isTp53Mutated(caseId), newTable);
-            appendBoolean(mutationSummarizer.isPtenMutated(caseId), newTable);
-            appendBoolean(mutationSummarizer.isPik3caMutated(caseId), newTable);
-            appendBoolean(mutationSummarizer.isKrasMutated(caseId), newTable);
 
             newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
             newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
@@ -172,9 +164,7 @@ public class PrepareClinicalFile {
                 + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
                 + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
                 + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB
-                + "MLH1_MUTATED" + TAB + "MLH1_HYPERMETHYLATED" + TAB
-                + "TP53_MUTATED" + TAB + "PTEN_MUTATED" + TAB + "PIK3CA_MUTATED" + TAB
-                + "KRAS_MUTATED" + TAB
+                + "MLH1_HYPERMETHYLATED" + TAB
                 + "TG_COUNT" + TAB
                 + "TC_COUNT" + TAB
                 + "TA_COUNT" + TAB
@@ -323,11 +313,6 @@ public class PrepareClinicalFile {
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
-
-    }
-
-    public void writeBedFile(String outputDir) throws IOException {
-        BedCreator bedCreator = new BedCreator(mafFile, null);
 
     }
 
