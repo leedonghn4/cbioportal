@@ -26,6 +26,10 @@ public class ExtendedMutation {
     private String linkXVar;
     private String linkPdb;
     private String linkMsa;
+    private String referenceAllele;
+    private String tumorAllele;
+    private long start;
+    private long end;
 
     public ExtendedMutation() {
     }
@@ -216,6 +220,38 @@ public class ExtendedMutation {
 
     public String getGeneSymbol() {
         return gene.getHugoGeneSymbolAllCaps();
+    }
+
+    public String getReferenceAllele() {
+        return referenceAllele;
+    }
+
+    public void setReferenceAllele(String referenceAllele) {
+        this.referenceAllele = referenceAllele;
+    }
+
+    public String getTumorAllele() {
+        return tumorAllele;
+    }
+
+    public void setTumorAllele(String tumorAllele) {
+        this.tumorAllele = tumorAllele;
+    }
+
+    public long getStart() {
+        return start;
+    }
+
+    public void setStart(long start) {
+        this.start = start;
+    }
+
+    public long getEnd() {
+        return end;
+    }
+
+    public void setEnd(long end) {
+        this.end = end;
     }
 
     @Override
