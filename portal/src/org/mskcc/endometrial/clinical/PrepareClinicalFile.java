@@ -8,38 +8,15 @@ import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
  * Prepares the Endometrial Clinical File.
- *
- * We assume the original clinical file has the following headers:
- * 0:  bcr_patient_barcode
- * 1:  age_at_initial_pathologic_diagnosis
- * 2:  days_to_birth
- * 3:  2009FIGOstageCorrected
- * 4:  histological_typeCorrected
- * 5:  tumor_grade
- * 6:  year_of_initial_pathologic_diagnosis
- * 7:  primaryTherapyOutcomeSuccess
- * 8:  daysToNewTumorEventAfterInitialTreatment
- * 9:  Recurred/Progressed
- * 10:  NewVitalStatus
- * 11:  NewPersNeoplasmStatus
- * 12:  NewDaystoFU
- * 13:  NewDaystoAlive
- * 14:  NewDaystoDead
  */
 public class PrepareClinicalFile {
-    private static final double ONE_DAY = 0.0328549112;
-    private static final String LIVING = "LIVING";
-    private static final String DECEASED = "DECEASED";
-    private static final String NA_INPUT = "[Not Available]";
     private static final String NA_OUTPUT = "NA";
     private static final String TAB = "\t";
     private static final String NEW_LINE = "\n";
-    private DecimalFormat formatter = new DecimalFormat("###.##");
     private HashMap<String, String> osMonthsMap = new HashMap<String, String>();
     private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
@@ -372,81 +349,20 @@ public class PrepareClinicalFile {
 
     private void computeOsMonths(String caseId, String vitalStatus, String daysToFu, String daysToAlive,
             String daysToDead) {
-        String osMonthsStr = NA_OUTPUT;
-        if (vitalStatus.equals(DECEASED)) {
-            double osMonths = convertDaysToMonths(daysToDead);
-            osMonthsStr = formatter.format(osMonths);
-        } else if (vitalStatus.equals(LIVING)) {
-            boolean daysToAliveHasData = fieldHasData(daysToAlive);
-            boolean daysToFUHasData = fieldHasData(daysToFu);
-            if (daysToAliveHasData && daysToFUHasData) {
-                double osMonths1 = convertDaysToMonths(daysToAlive);
-                double osMonths2= convertDaysToMonths(daysToFu);
-                double osMonths = Math.max(osMonths1, osMonths2);
-                osMonthsStr = formatter.format(osMonths);
-            } else if (daysToAliveHasData) {
-                double osMonths = convertDaysToMonths(daysToAlive);
-                osMonthsStr = formatter.format(osMonths);
-            } else if (daysToFUHasData) {
-                double osMonths = convertDaysToMonths(daysToFu);
-                osMonthsStr = formatter.format(osMonths);
-            } else {
-                osMonthsStr = NA_OUTPUT;
-            }
-        } else {
-            throw new IllegalArgumentException("Aborting.  Cannot process VITAL STATUS:  " + vitalStatus);
-        }
+        String osMonthsStr = SurvivalCalculator.calculateOsMonths(vitalStatus, daysToFu,
+                daysToAlive, daysToDead);
         osMonthsMap.put(caseId, osMonthsStr);
     }
 
     private void computeDfsMonths(String caseId, String recurredStatus,
             String daysToNewTumorEventAfterInitialTreatment, String daysToFollowUp) {
-        String dfsMonthsStr = NA_OUTPUT;
-
-        if (recurredStatus.equalsIgnoreCase("YES")) {
-            if (fieldHasData(daysToNewTumorEventAfterInitialTreatment)) {
-                double dfsMonths = convertDaysToMonths(daysToNewTumorEventAfterInitialTreatment);
-                dfsMonthsStr = formatter.format(dfsMonths);
-            } else {
-                dfsMonthsStr = NA_OUTPUT;
-            }
-        } else if (recurredStatus.equalsIgnoreCase("NO")) {
-            if (fieldHasData(daysToFollowUp)) {
-                double dfsMonths = convertDaysToMonths(daysToFollowUp);
-                dfsMonthsStr = formatter.format(dfsMonths);
-            } else {
-                dfsMonthsStr = NA_OUTPUT;
-            }
-        } else {
-            dfsMonthsStr = NA_OUTPUT;
-        }
+        String dfsMonthsStr = SurvivalCalculator.calculateDfsMonths(recurredStatus,
+                daysToNewTumorEventAfterInitialTreatment, daysToFollowUp);
         dfsMonthsMap.put(caseId, dfsMonthsStr);
-    }
-
-    private boolean fieldHasData(String fieldValue) {
-        if (fieldValue.trim().length() > 0) {
-            if (!fieldValue.equalsIgnoreCase(NA_INPUT)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public String getDfsMonths(String caseId) {
-        return dfsMonthsMap.get(caseId);
-    }
-
-    public String getOsMonths(String caseId) {
-        return osMonthsMap.get(caseId);
     }
 
     public String getNewClinicalTable() {
         return newTable.toString();
-    }
-
-    private double convertDaysToMonths(String numberOfDays) {
-        int numDays = Integer.parseInt(numberOfDays);
-        return numDays * ONE_DAY;
     }
 
     private void appendGermlineMutationColumns(GermlineMutationSummarizer germlineMutationSummarizer,

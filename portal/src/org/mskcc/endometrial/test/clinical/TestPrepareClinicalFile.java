@@ -25,25 +25,6 @@ public class TestPrepareClinicalFile extends TestCase {
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile
                 (clinFile, msiFile, somaticFile, germlineFile, hyperMutatedFile,
                 cnaClusterFile, mlh1MethFile, coverageFile, false);
-        String dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-A5-A0GJ");
-        assertEquals ("0.39", dfsMonths);
-        String osMonths = prepareClinicalFile.getOsMonths("TCGA-A5-A0GJ");
-        assertEquals ("47.54", osMonths);
-
-        dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-EY-A1G7");
-        assertEquals("3.12", dfsMonths);
-        osMonths = prepareClinicalFile.getOsMonths("TCGA-EY-A1G7");
-        assertEquals("6.21", osMonths);
-
-        dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-AP-A1E3");
-        assertEquals("NA", dfsMonths);
-
-        osMonths = prepareClinicalFile.getOsMonths("TCGA-B5-A0K7");
-        assertEquals("17.05", osMonths);
-
-        dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-B5-A0K7");
-        assertEquals("10.55", dfsMonths);
-
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         assertEquals (80, sequencedCaseSet.size());
         assertTrue(sequencedCaseSet.contains("TCGA-A5-A0G1"));
