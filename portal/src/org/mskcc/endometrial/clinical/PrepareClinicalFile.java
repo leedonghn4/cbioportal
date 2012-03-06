@@ -1,6 +1,8 @@
 package org.mskcc.endometrial.clinical;
 
+import org.mskcc.endometrial.cna.CnaClusterReader;
 import org.mskcc.endometrial.cna.CnaSummarizer;
+import org.mskcc.endometrial.methylation.MethylationReader;
 import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
 
@@ -10,14 +12,8 @@ import java.util.*;
 
 /**
  * Prepares the Endometrial Clinical File.
- * <p/>
- * Does the following:
- * <p/>
- * 1.  Calculates OS_MONTHS
- * 2.  Calculates DFS_MONTHS
- * 3.  Merges in MSI Values
- * <p/>
- * We assume the clinical file has the following headers:
+ *
+ * We assume the original clinical file has the following headers:
  * 0:  bcr_patient_barcode
  * 1:  age_at_initial_pathologic_diagnosis
  * 2:  days_to_birth
@@ -33,20 +29,6 @@ import java.util.*;
  * 12:  NewDaystoFU
  * 13:  NewDaystoAlive
  * 14:  NewDaystoDead
- * <p/>
- * We also assume the MSI file has the following headers:
- * 0:  tcga_id
- * 1:  TCGA ID
- * 2:  BAT40
- * 3:  BAT26
- * 4:  BAT25
- * 5:  D17S250
- * 6:  TGFBII
- * 7:  D5S346
- * 8:  D2S123
- * 9:  Penta D
- * 10:  Penta E
- * 11:  MSI CLASS
  */
 public class PrepareClinicalFile {
     private static final double ONE_DAY = 0.0328549112;
@@ -60,7 +42,6 @@ public class PrepareClinicalFile {
     private HashMap<String, String> osMonthsMap = new HashMap<String, String>();
     private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
-    private HashMap<String, String> msiMap = new HashMap<String, String>();
     private HashSet<String> sequencedCaseSet;
     private HashSet<String> endoGrade1Set = new HashSet<String>();
     private HashSet<String> endoGrade2Set = new HashSet<String>();
@@ -70,10 +51,11 @@ public class PrepareClinicalFile {
     private HashSet<String> highestMutSet = new HashSet<String>();
     private HashSet<String> highMutSet = new HashSet<String>();
     private HashSet<String> lowMutSet = new HashSet<String>();
-    private HashMap<String, String> cnaClusterAssignmentMap = new HashMap<String, String>();
-    private HashMap<String, String> mlh1HyperMethylatedMap = new HashMap<String, String>();
     private HashMap<String, Long> coverageMap = new HashMap<String, Long>();
     private File mafFile;
+    private CnaClusterReader cnaClusterReader;
+    private MsiReader msiReader;
+    private MethylationReader mlh1Reader;
 
     /**
      * Constructor.
@@ -90,17 +72,17 @@ public class PrepareClinicalFile {
             File cnaClusterFile, File mlh1MethFile, File coverageFile,
             boolean performSanityChecks) throws IOException {
         this.mafFile = somaticMafFile;
-        readMsiFile(msiFile);
+        msiReader = new MsiReader(msiFile);
+        mlh1Reader = new MethylationReader(mlh1MethFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
         GermlineMutationSummarizer germlineMutationSummarizer = new
                 GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
-        readMlh1MethylatedMap(mlh1MethFile);
         readCoverageFile(coverageFile);
 
-        readCnaClusterAssignments(cnaClusterFile);
+        cnaClusterReader = new CnaClusterReader(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
@@ -136,8 +118,8 @@ public class PrepareClinicalFile {
             appendMutationCounts(mutationSummarizer, caseId);
             categorizeByHistologicalSubType(histSubType, caseId);
 
-            if (mlh1HyperMethylatedMap.containsKey(caseId)) {
-                newTable.append(TAB + mlh1HyperMethylatedMap.get(caseId));
+            if (mlh1Reader.getMethylationStatus(caseId) != null) {
+                newTable.append(TAB + mlh1Reader.getMethylationStatus(caseId));
             } else {
                 newTable.append(TAB + NA_OUTPUT);
             }
@@ -205,30 +187,6 @@ public class PrepareClinicalFile {
         }
     }
 
-    public String getMlh1HypermethylatedStatus (String caseId) {
-        return mlh1HyperMethylatedMap.get(caseId);
-    }
-
-    private void readMlh1MethylatedMap (File mlh1File) throws IOException {
-        FileReader reader = new FileReader(mlh1File);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String line = bufferedReader.readLine();
-        while (line != null) {
-            String parts[] = line.split("\t");
-            String barCode = parts[0];
-            String value = parts[1];
-
-            //  bar code ids look like this:  TCGA-A5-A0VO-01A-21D-A10A-05
-            String idParts[] = barCode.split("-");
-            if (barCode.trim().length()>0) {
-                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
-                mlh1HyperMethylatedMap.put(caseId, value);
-            }
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-    }
-
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
         long totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
                 + mutationSummarizer.getNonSilentMutationCount(caseId);
@@ -257,7 +215,7 @@ public class PrepareClinicalFile {
     }
 
     private void appendCnaClusterColumn(String caseId) {
-        String cnaCluster = cnaClusterAssignmentMap.get(caseId);
+        String cnaCluster = cnaClusterReader.getCnaClusterAssignment(caseId);
         if (cnaCluster == null) {
             newTable.append (TAB + NA_OUTPUT);
         } else {
@@ -274,7 +232,7 @@ public class PrepareClinicalFile {
     }
 
     private void appendMsiStatus(String caseId) {
-        String msiStatus = msiMap.get(caseId);
+        String msiStatus = msiReader.getMsiStatus(caseId);
         if (msiStatus != null) {
             newTable.append(TAB + msiStatus);
         } else {
@@ -292,28 +250,6 @@ public class PrepareClinicalFile {
         }
         newTable.append(TAB + dfsMonthsMap.get(caseId));
         newTable.append(TAB + osMonthsMap.get(caseId));
-    }
-
-    private void readCnaClusterAssignments(File cnaClusterFile) throws IOException {
-        FileReader reader = new FileReader(cnaClusterFile);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String line = bufferedReader.readLine();  //  The header line.
-        line = bufferedReader.readLine();
-        while (line != null) {
-            String parts[] = line.split("\t");
-            String barCode = parts[0];
-            String cnaCluster = parts[1];
-
-            //  bar code ids look like this:  TCGA-A5-A0G1-01
-            String idParts[] = barCode.split("-");
-            if (barCode.trim().length()>0) {
-                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
-                cnaClusterAssignmentMap.put(caseId, cnaCluster);
-            }
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
@@ -348,21 +284,9 @@ public class PrepareClinicalFile {
         outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_sequenced",
                 "Subtype:  Endometriod:  Grades 1-3 - Sequenced", true, outputDir);
 
-        HashSet<String> cluster1Set = new HashSet<String>();
-        HashSet<String> cluster2Set = new HashSet<String>();
-        HashSet<String> cluster3Set = new HashSet<String>();
-        Iterator<String> caseIterator = cnaClusterAssignmentMap.keySet().iterator();
-        while (caseIterator.hasNext()) {
-            String caseId = caseIterator.next();
-            String clusterId = cnaClusterAssignmentMap.get(caseId);
-            if (clusterId.equals("1")) {
-                cluster1Set.add(caseId);
-            } else if (clusterId.equals("2")) {
-                cluster2Set.add(caseId);
-            } else if (clusterId.equals("3")) {
-                cluster3Set.add(caseId);
-            }
-        }
+        HashSet<String> cluster1Set = cnaClusterReader.getCluster1Set();
+        HashSet<String> cluster2Set = cnaClusterReader.getCluster2Set();
+        HashSet<String> cluster3Set = cnaClusterReader.getCluster3Set();
         outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_tcga_cna_cluster_1_sequenced",
                 "CNA Cluster 1 - Sequenced",
                 "CNA Cluster 1 - Endometrioids with very few or no SNCA (Sequenced Cases Only)", true, outputDir);
@@ -474,31 +398,6 @@ public class PrepareClinicalFile {
         }
     }
 
-    public String getMsiStatus(String caseId) {
-        return msiMap.get(caseId);
-    }
-
-    private void readMsiFile(File msiFile) throws IOException {
-        FileReader reader = new FileReader(msiFile);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String line = bufferedReader.readLine();  //  The header line.
-        line = bufferedReader.readLine();
-        while (line != null) {
-            String parts[] = line.split("\t");
-            String barCode = parts[1];
-            String msiClass = parts[11];
-
-            //  bar code ids look like this:  TCGA-A6-2671-01A-01D-1861-23
-            String idParts[] = barCode.split("-");
-            if (barCode.trim().length()>0) {
-                String caseId = "TCGA-" + idParts[0] + "-" + idParts[1];
-                msiMap.put(caseId, msiClass);
-            }
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-    }
-
     private void computeOsMonths(String caseId, String vitalStatus, String daysToFu, String daysToAlive,
             String daysToDead) {
         String osMonthsStr = NA_OUTPUT;
@@ -593,14 +492,6 @@ public class PrepareClinicalFile {
     private void appendColumns(ArrayList<String> list, StringBuffer table) {
         for (String value:  list) {
             table.append(TAB + value);
-        }
-    }
-
-    private void appendBoolean(boolean isMutated, StringBuffer newTable) {
-        if (isMutated) {
-            newTable.append(TAB + "1");
-        } else {
-            newTable.append(TAB + "0");
         }
     }
 

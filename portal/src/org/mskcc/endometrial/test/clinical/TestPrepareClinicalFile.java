@@ -44,15 +44,9 @@ public class TestPrepareClinicalFile extends TestCase {
         dfsMonths = prepareClinicalFile.getDfsMonths("TCGA-B5-A0K7");
         assertEquals("10.55", dfsMonths);
 
-        String msiStatus = prepareClinicalFile.getMsiStatus("TCGA-AP-A051");
-        assertEquals("MSI-H", msiStatus);
-
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         assertEquals (80, sequencedCaseSet.size());
         assertTrue(sequencedCaseSet.contains("TCGA-A5-A0G1"));
-
-        assertEquals ("1", prepareClinicalFile.getMlh1HypermethylatedStatus("TCGA-A5-A0VO"));
-        assertEquals ("0", prepareClinicalFile.getMlh1HypermethylatedStatus("TCGA-AX-A0J0"));
 
         assertEquals(33040160, prepareClinicalFile.getNumBasesCovered("TCGA-A5-A0G1"));
         assertEquals(28911508, prepareClinicalFile.getNumBasesCovered("TCGA-A5-A0GP"));
