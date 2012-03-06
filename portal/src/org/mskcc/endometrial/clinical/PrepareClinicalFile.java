@@ -3,6 +3,7 @@ package org.mskcc.endometrial.clinical;
 import org.mskcc.endometrial.cna.CnaClusterReader;
 import org.mskcc.endometrial.cna.CnaSummarizer;
 import org.mskcc.endometrial.methylation.MethylationReader;
+import org.mskcc.endometrial.mutation.CoverageReader;
 import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
 
@@ -51,11 +52,11 @@ public class PrepareClinicalFile {
     private HashSet<String> highestMutSet = new HashSet<String>();
     private HashSet<String> highMutSet = new HashSet<String>();
     private HashSet<String> lowMutSet = new HashSet<String>();
-    private HashMap<String, Long> coverageMap = new HashMap<String, Long>();
     private File mafFile;
     private CnaClusterReader cnaClusterReader;
     private MsiReader msiReader;
     private MethylationReader mlh1Reader;
+    private CoverageReader coverageReader;
 
     /**
      * Constructor.
@@ -80,7 +81,7 @@ public class PrepareClinicalFile {
         GermlineMutationSummarizer germlineMutationSummarizer = new
                 GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
-        readCoverageFile(coverageFile);
+        coverageReader = new CoverageReader(coverageFile);
 
         cnaClusterReader = new CnaClusterReader(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
@@ -131,7 +132,7 @@ public class PrepareClinicalFile {
             newTable.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
             newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
 
-            newTable.append(TAB + getNumBasesCovered(caseId));
+            newTable.append(TAB + coverageReader.getCoverage(caseId));
             appendGermlineMutationFields(germlineMutationSummarizer, caseId, newTable);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
@@ -156,35 +157,6 @@ public class PrepareClinicalFile {
                 + "COVERED_BASES");
         appendGermlineMutationColumns(germlineMutationSummarizer, newTable);
         newTable.append(NEW_LINE);
-    }
-
-    public void readCoverageFile(File coverageFile) throws IOException{
-        FileReader reader = new FileReader(coverageFile);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String line = bufferedReader.readLine();  // Skip Header
-        line = bufferedReader.readLine();
-        while (line != null) {
-            String parts[] = line.split("\t");
-            String barCode = parts[0];
-            long coveredBases = Long.parseLong(parts[1]);
-
-            //  bar code ids look like this:  TCGA-A5-A0G1-01A-11D-A122-09
-            String idParts[] = barCode.split("-");
-            if (barCode.trim().length() > 0) {
-                String caseId = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
-                coverageMap.put(caseId, coveredBases);
-            }
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-    }
-
-    public long getNumBasesCovered(String caseId) {
-        if (coverageMap.containsKey(caseId)) {
-            return coverageMap.get(caseId);
-        } else {
-            return 0;
-        }
     }
 
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {

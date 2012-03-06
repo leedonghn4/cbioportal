@@ -47,8 +47,5 @@ public class TestPrepareClinicalFile extends TestCase {
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         assertEquals (80, sequencedCaseSet.size());
         assertTrue(sequencedCaseSet.contains("TCGA-A5-A0G1"));
-
-        assertEquals(33040160, prepareClinicalFile.getNumBasesCovered("TCGA-A5-A0G1"));
-        assertEquals(28911508, prepareClinicalFile.getNumBasesCovered("TCGA-A5-A0GP"));
     }
 }
