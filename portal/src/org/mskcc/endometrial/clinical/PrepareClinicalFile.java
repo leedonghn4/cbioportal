@@ -21,28 +21,16 @@ public class PrepareClinicalFile {
     private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
     private HashSet<String> sequencedCaseSet;
-    private HashSet<String> endoGrade1Set = new HashSet<String>();
-    private HashSet<String> endoGrade2Set = new HashSet<String>();
-    private HashSet<String> endoGrade3Set = new HashSet<String>();
-    private HashSet<String> serousSet = new HashSet<String>();
-    private HashSet<String> mixedSet = new HashSet<String>();
-    private HashSet<String> highestMutSet = new HashSet<String>();
-    private HashSet<String> highMutSet = new HashSet<String>();
-    private HashSet<String> lowMutSet = new HashSet<String>();
     private File mafFile;
     private CnaClusterReader cnaClusterReader;
     private MsiReader msiReader;
     private MethylationReader mlh1Reader;
     private CoverageReader coverageReader;
+    private CaseListUtil caseListUtil = new CaseListUtil();
 
     /**
      * Constructor.
-     *
-     * @param clinicalFile Clinical File.
-     * @param msiFile   MSI File.
-     * @param somaticMafFile   Somatic MAF Mutation File.
-     * @param germlineMafFile  Germline MAF Mutation File.
-     *                         
+
      * @throws IOException IO Error.
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File somaticMafFile, 
@@ -50,17 +38,13 @@ public class PrepareClinicalFile {
             File cnaClusterFile, File mlh1MethFile, File coverageFile,
             boolean performSanityChecks) throws IOException {
         this.mafFile = somaticMafFile;
-        msiReader = new MsiReader(msiFile);
-        mlh1Reader = new MethylationReader(mlh1MethFile);
+        initReaders(msiFile, cnaClusterFile, mlh1MethFile, coverageFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
         GermlineMutationSummarizer germlineMutationSummarizer = new
                 GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
-        coverageReader = new CoverageReader(coverageFile);
-
-        cnaClusterReader = new CnaClusterReader(cnaClusterFile);
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
@@ -78,14 +62,11 @@ public class PrepareClinicalFile {
             String daysToFu = parts[12];
             String daysToAlive = parts[13];
             String daysToDead = parts[14];
+            caseListUtil.categorizeByHistologicalSubType(histSubType, caseId);
 
-            // Compute DFS_MONTHS
             computeDfsMonths(caseId, recurredStatus, daysToNewTumorEventAfterInitialTreatment, daysToFu);
-
-            // Compute OS_MONTHS
             computeOsMonths(caseId, vitalStatus, daysToFu, daysToAlive, daysToDead);
-
-            newTable.append(line.trim().trim());
+            newTable.append(line.trim());
 
             appendSurvivalColumns(recurredStatus, caseId);
             appendMsiStatus(caseId);
@@ -94,21 +75,8 @@ public class PrepareClinicalFile {
             appendCnaColumns(cnaSummarizer, caseId);
             appendCnaClusterColumn(caseId);
             appendMutationCounts(mutationSummarizer, caseId);
-            categorizeByHistologicalSubType(histSubType, caseId);
-
-            if (mlh1Reader.getMethylationStatus(caseId) != null) {
-                newTable.append(TAB + mlh1Reader.getMethylationStatus(caseId));
-            } else {
-                newTable.append(TAB + NA_OUTPUT);
-            }
-
-            newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
-            newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
-            newTable.append(TAB + mutationSummarizer.getTAMutationCount(caseId));
-            newTable.append(TAB + mutationSummarizer.getCTMutationCount(caseId));
-            newTable.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
-            newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
-
+            appendMlh1MethylationStatus(caseId);
+            appendMutationSpectra(mutationSummarizer, caseId);
             newTable.append(TAB + coverageReader.getCoverage(caseId));
             appendGermlineMutationFields(germlineMutationSummarizer, caseId, newTable);
             newTable.append(NEW_LINE);
@@ -117,13 +85,46 @@ public class PrepareClinicalFile {
         bufferedReader.close();
     }
 
+    private void initReaders(File msiFile, File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
+        msiReader = new MsiReader(msiFile);
+        mlh1Reader = new MethylationReader(mlh1MethFile);
+        coverageReader = new CoverageReader(coverageFile);
+        cnaClusterReader = new CnaClusterReader(cnaClusterFile);
+    }
+
+    private void appendMutationSpectra(MutationSummarizer mutationSummarizer, String caseId) {
+        newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
+        newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
+        newTable.append(TAB + mutationSummarizer.getTAMutationCount(caseId));
+        newTable.append(TAB + mutationSummarizer.getCTMutationCount(caseId));
+        newTable.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
+        newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
+    }
+
+    private void appendMlh1MethylationStatus(String caseId) {
+        if (mlh1Reader.getMethylationStatus(caseId) != null) {
+            newTable.append(TAB + mlh1Reader.getMethylationStatus(caseId));
+        } else {
+            newTable.append(TAB + NA_OUTPUT);
+        }
+    }
+
     private void appendColumnHeaders(GermlineMutationSummarizer germlineMutationSummarizer, String newHeaderLine) {
-        newTable.append(newHeaderLine.trim() + TAB + "DFS_STATUS" + TAB + "DFS_MONTHS" + TAB + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB + "SEQUENCED" + TAB
-                + "GISTIC" + TAB + "SEQUENCED_AND_GISTIC" + TAB + "CNA_ALTERED_1" + TAB
-                + "CNA_ALTERED_2" + TAB + "CNA_CLUSTER" + TAB
-                + "SILENT_MUTATION_COUNT" + TAB + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "TOTAL_SNV_COUNT" +  TAB + "INDEL_MUTATION_COUNT" + TAB
+        newTable.append(newHeaderLine.trim() + TAB
+                + "DFS_STATUS" + TAB
+                + "DFS_MONTHS" + TAB
+                + "OS_MONTHS" + TAB
+                + "MSI_STATUS" + TAB
+                + "SEQUENCED" + TAB
+                + "GISTIC" + TAB
+                + "SEQUENCED_AND_GISTIC" + TAB
+                + "CNA_ALTERED_1" + TAB
+                + "CNA_ALTERED_2" + TAB
+                + "CNA_CLUSTER" + TAB
+                + "SILENT_MUTATION_COUNT" + TAB
+                + "NON_SILENT_MUTATION_COUNT" + TAB
+                + "TOTAL_SNV_COUNT" +  TAB
+                + "INDEL_MUTATION_COUNT" + TAB
                 + "MLH1_HYPERMETHYLATED" + TAB
                 + "TG_COUNT" + TAB
                 + "TC_COUNT" + TAB
@@ -202,113 +203,7 @@ public class PrepareClinicalFile {
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_all",
-                "Subtype:  Endometriod:  Grade 1 - All",false, outputDir);
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, "ucec_tcga_endo_grade1_sequenced",
-                "Subtype:  Endometriod:  Grade 1 - Sequenced", true, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_all",
-                "Subtype:  Endometriod:  Grade 2 - All", false, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, "ucec_tcga_endo_grade2_sequenced",
-                "Subtype:  Endometriod:  Grade 2 - Sequenced", true, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_all",
-                "Subtype:  Endometriod:  Grade 3 - All", false, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, "ucec_tcga_endo_grade3_sequenced",
-                "Subtype:  Endometriod:  Grade 3 - Sequenced", true, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_all",
-                "Subtype:  Endometriod:  Serous - All", false, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, "ucec_tcga_serous_sequenced",
-                "Subtype:  Serous - Sequenced", true, outputDir);
-
-        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_all",
-                "Subtype:  Mixed Serous and Endometriod - All", false, outputDir);
-        outputCaseSet(mixedSet, sequencedCaseSet, "ucec_tcga_mixed_sequenced",
-                "Subtype:  Mixed Serous and Endometriod - Sequenced", true, outputDir);
-        
-        HashSet<String> allEndoSet = new HashSet<String>();
-        allEndoSet.addAll(endoGrade1Set);
-        allEndoSet.addAll(endoGrade2Set);
-        allEndoSet.addAll(endoGrade3Set);
-        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_all",
-                "Subtype:  Endometriod:  Grades 1-3 - All",false, outputDir);
-        outputCaseSet(allEndoSet, sequencedCaseSet, "ucec_tcga_endo_sequenced",
-                "Subtype:  Endometriod:  Grades 1-3 - Sequenced", true, outputDir);
-
-        HashSet<String> cluster1Set = cnaClusterReader.getCluster1Set();
-        HashSet<String> cluster2Set = cnaClusterReader.getCluster2Set();
-        HashSet<String> cluster3Set = cnaClusterReader.getCluster3Set();
-        outputCaseSet(cluster1Set, sequencedCaseSet, "ucec_tcga_cna_cluster_1_sequenced",
-                "CNA Cluster 1 - Sequenced",
-                "CNA Cluster 1 - Endometrioids with very few or no SNCA (Sequenced Cases Only)", true, outputDir);
-        outputCaseSet(cluster2Set, sequencedCaseSet, "ucec_tcga_cna_cluster_2_sequenced",
-                "CNA Cluster 2 - Sequenced",
-                "CNA Cluster 2 - Endometrioids with some SNCA (Sequenced Cases Only)", true, outputDir);
-        outputCaseSet(cluster3Set, sequencedCaseSet, "ucec_tcga_cna_cluster_3_sequenced",
-                "CNA Cluster 3 - Sequenced",
-                "CNA Cluster 3 - Serous Like (Sequenced Cases Only)", true, outputDir);
-
-        //  Output Mutation Categories
-        outputCaseSet(highestMutSet, sequencedCaseSet, "ucec_tcga_highest_mut",
-                "Mutation Rate:  Highest", true, outputDir);
-        outputCaseSet(highMutSet, sequencedCaseSet, "ucec_tcga_high_mut",
-                "Mutation Rate:  High", true, outputDir);
-        outputCaseSet(lowMutSet, sequencedCaseSet, "ucec_tcga_low_mut",
-                "Mutation Rate:  Low", true, outputDir);
-    }
-
-    private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
-            String stableId, String name, String description, boolean onlyIncludeSequencedCases,
-            String outputDir) throws IOException {
-        StringBuffer caseIds = new StringBuffer();
-        int sampleCount = 0;
-        for (String caseId:  caseSet) {
-            if (onlyIncludeSequencedCases) {
-                if (sequencedCaseSet.contains(caseId)) {
-                    caseIds.append(caseId + TAB);
-                    sampleCount++;
-                }
-            } else {
-                caseIds.append(caseId + TAB);
-                sampleCount++;
-            }
-        }
-
-        name = name + " [" + sampleCount + " samples]";
-        description = description + " [Auto generated on " + new Date() + "].";
-        File outputFile = new File(outputDir + "/case_lists/" + stableId + ".txt");
-        System.out.println ("Writing case set:  " + outputFile.getAbsolutePath());
-        FileWriter outWriter = new FileWriter(outputFile);
-        outWriter.write("cancer_study_identifier: ucec_tcga\n");
-        outWriter.write("stable_id: " + stableId + "\n");
-        outWriter.write("case_list_name: " + name + "\n");
-        outWriter.write("case_list_description: " + description + "\n");
-        outWriter.write("case_list_ids:  " + caseIds + "\n");
-        outWriter.flush();
-        outWriter.close();
-    }
-
-    private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
-            String stableId, String name, boolean onlyIncludeSequencedCases,
-            String outputDir) throws IOException {
-        outputCaseSet(caseSet, sequencedCaseSet, stableId, name, name, onlyIncludeSequencedCases,
-                outputDir);
-    }
-
-    private void categorizeByHistologicalSubType(String histSubType, String caseId) {
-        if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 1)")) {
-            endoGrade1Set.add(caseId);
-        } else if(histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 2)")) {
-            endoGrade2Set.add(caseId);
-        } else if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 3)")) {
-            endoGrade3Set.add(caseId);
-        } else if (histSubType.equals("Uterine serous endometrial adenocarcinoma")) {
-            serousSet.add(caseId);
-        } else if (histSubType.equals("Mixed serous and endometrioid")) {
-            mixedSet.add(caseId);
-        } else if (histSubType.equals("[Discrepancy]")) {
-            //  Do nothing.  ignore.
-        } else {
-            throw new IllegalArgumentException ("Aborting.  Unknown Histological Subtype:  " + histSubType);
-        }
+        caseListUtil.writeCaseLists(sequencedCaseSet, cnaClusterReader, outputDir);
     }
 
     public HashSet<String> getSequencedCaseSet() {
