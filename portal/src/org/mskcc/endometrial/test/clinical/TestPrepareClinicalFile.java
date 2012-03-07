@@ -18,12 +18,12 @@ public class TestPrepareClinicalFile extends TestCase {
         File msiFile = new File ("test_data/msi_test.txt");
         File somaticFile = new File ("test_data/endo_maf_test.txt");
         File germlineFile = new File ("test_data/mlh1_germline.txt");
-        File hyperMutatedFile = new File("test_data/hypermutated_cases.txt");
+        File cnaFile = new File("test_data/endo_data_CNA.txt");
         File cnaClusterFile = new File ("test_data/cna_clusters_test.txt");
         File mlh1MethFile = new File ("test_data/mlh1_meth_test.txt");
         File coverageFile = new File ("test_data/coverage_test.txt");
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile
-                (clinFile, msiFile, somaticFile, germlineFile, hyperMutatedFile,
+                (clinFile, msiFile, somaticFile, germlineFile, cnaFile,
                 cnaClusterFile, mlh1MethFile, coverageFile, false);
         HashSet<String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         assertEquals (80, sequencedCaseSet.size());
