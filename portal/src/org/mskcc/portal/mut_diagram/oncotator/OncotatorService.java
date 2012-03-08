@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 /**
- * Connects to OncotatorRecord and Retrieves Details on a Single Mutation.
+ * Connects to Oncotator and Retrieves Details on a Single Mutation.
  */
 public class OncotatorService {
     private static OncotatorService oncotatorService;
