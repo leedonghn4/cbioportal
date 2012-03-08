@@ -100,10 +100,10 @@ public class MutationMap {
         mutation.setGene(new CanonicalGene(-1, geneSymbol));
         mutation.setMutationType(variantClassification);
         mutation.setChr(chr);
-        mutation.setStart(startPos);
-        mutation.setEnd(endPos);
-        mutation.setReferenceAllele(referenceAllele);
-        mutation.setTumorAllele(tumorAllele);
+        mutation.setStartPosition(startPos);
+        mutation.setEndPosition(endPos);
+        mutation.setRefAllele(referenceAllele);
+        mutation.setObservedAllele(tumorAllele);
         return mutation;
     }
 

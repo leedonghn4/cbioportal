@@ -32,6 +32,46 @@ my $fileProperties = {
         geneSymbolCol => 'Hybridization REF',
     },
     # the following type is used when running generate case lists on already created staging files
+	'data_mRNA_ULL.txt' => {
+        example => 'data_mRNA_ULL.txt',
+        structure => 'profile',
+        numHeaderRows => 1,
+        geneIDcol => 'Entrez_Gene_Id',
+        geneSymbolCol => undef,
+    },
+    # the following type is used when running generate case lists on already created staging files
+	'data_mRNA_MicMa.txt' => {
+        example => 'data_mRNA_MicMa.txt',
+        structure => 'profile',
+        numHeaderRows => 1,
+        geneIDcol => 'Entrez_Gene_Id',
+        geneSymbolCol => undef,
+    },
+    # the following type is used when running generate case lists on already created staging files
+	'data_mRNA_FW_MDG.txt' => {
+        example => 'data_mRNA_FW_MDG.txt',
+        structure => 'profile',
+        numHeaderRows => 1,
+        geneIDcol => 'Entrez_Gene_Id',
+        geneSymbolCol => undef,
+    },
+    # the following type is used when running generate case lists on already created staging files
+	'data_mRNA_DBCG.txt' => {
+        example => 'data_mRNA_DBCG.txt',
+        structure => 'profile',
+        numHeaderRows => 1,
+        geneIDcol => 'Entrez_Gene_Id',
+        geneSymbolCol => undef,
+    },
+    # the following type is used when running generate case lists on already created staging files
+	'data_mRNA_DBCG_Z.txt' => {
+        example => 'data_mRNA_DBCG_Z.txt',
+        structure => 'profile',
+        numHeaderRows => 1,
+        geneIDcol => 'Entrez_Gene_Id',
+        geneSymbolCol => undef,
+    },
+    # the following type is used when running generate case lists on already created staging files
 	'data_expression_median.txt' => {
         example => 'data_expression_median.txt',
         structure => 'profile',
@@ -63,12 +103,20 @@ my $fileProperties = {
         geneIDcol => undef,
         geneSymbolCol => 'geneSymbol',
     },
-    '<CANCER>.rnaseq.txt' => {
-        example => 'KIRC.rnaseq.txt',
+    # the following type is used when running generate case lists on already created staging files
+	'data_expression_Zscores.txt' => {
+        example => 'data_expression_Zscores.txt',
         structure => 'profile',
         numHeaderRows => 1,
         geneIDcol => undef,
-        geneSymbolCol => 'Symbol',
+        geneSymbolCol => 'geneSymbol',
+    },
+    '<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt' => {
+        example => 'BRCA.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt',
+        structure => 'profile',
+        numHeaderRows => 2,
+        geneIDcol => undef,
+        geneSymbolCol => 'Hybridization REF',
     },
     # the following type is used when running generate case lists on already created staging files
 	'data_RNA_Seq_expression_median.txt' => {

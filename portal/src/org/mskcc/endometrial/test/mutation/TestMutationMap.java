@@ -35,10 +35,10 @@ public class TestMutationMap extends TestCase {
         //  Verify Mutation Record Details
         ExtendedMutation mutation = mutationList.get(0);
         assertEquals("19", mutation.getChr());
-        assertEquals(58861760, mutation.getStart());
-        assertEquals(58861760, mutation.getEnd());
+        assertEquals(58861760, mutation.getStartPosition());
+        assertEquals(58861760, mutation.getEndPosition());
         assertEquals("Missense_Mutation", mutation.getMutationType());
-        assertEquals("C", mutation.getReferenceAllele());
-        assertEquals("T", mutation.getTumorAllele());
+        assertEquals("C", mutation.getRefAllele());
+        assertEquals("T", mutation.getObservedAllele());
     }
 }

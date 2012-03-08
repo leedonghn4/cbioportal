@@ -42,9 +42,11 @@ my( $customDirectory, $customFileType, $DeepFirehoseDirectory, $runDate, $custom
 # map - key is customFileType, value is gdac dir - file pair
 my $customFileProperties = {
 	'AGILENT-MRNA' => [ 'gdac.broadinstitute.org_<CANCER>.Merge_transcriptome__agilentg4502a_07_3__unc_edu__Level_3__unc_lowess_normalization_gene_level__data.Level_3.<date><version>', '<CANCER>.transcriptome__agilentg4502a_07_3__unc_edu__Level_3__unc_lowess_normalization_gene_level__data.data.txt'],
-	'RNA-SEQ' => [ 'gdac.broadinstitute.org_<CANCER>.RNA_Seq.<date><version>', '<CANCER>_rnaseq.txt'],
+	'RNA-SEQ' => [ 'gdac.broadinstitute.org_<CANCER>.Merge_rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.Level_3.<date><version>', '<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt'],
 	'CNA' => [ 'gdac.broadinstitute.org_<CANCER>.CopyNumber_Gistic2.Level_4.<date><version>', 'all_thresholded.by_genes.txt'],
+	'LOG2CNA' => [ 'gdac.broadinstitute.org_<CANCER>.CopyNumber_Gistic2.Level_4.<date><version>', 'all_data_by_genes.txt'],
 	'MAF' => [ 'gdac.broadinstitute.org_<CANCER>.Mutation_Assessor.Level_4.<date><version>', '<CANCER>.maf.annotated'],
+	'SEG' => [ 'gdac.broadinstitute.org_<CANCER>.CopyNumber_Preprocess.Level_4.<date><version>', '<CANCER>.Use_Me_Level_3__segmented_cna__seg.tsv'],
 };
 
 main();
@@ -82,8 +84,7 @@ sub main{
 sub moveGDACOverridesFile{
 	my( $customFile, $cancer, $destDir, $destFile ) = @_;
 	# in override dir, cancer directory is called <CANCER>_tcga
-	my @directories = ( $customDirectory, $cancer . '_tcga' );
-	my $fromFile = File::Spec->catdir( @directories, $customFile );
+	my $fromFile = File::Spec->catdir( ($customDirectory, $cancer . '_tcga' ), $customFile );
 
     my $CancersFirehoseDataDir = File::Spec->catfile( $DeepFirehoseDirectory, $cancer, $runDate . '00' );
 
@@ -93,6 +94,14 @@ sub moveGDACOverridesFile{
 	if ( $customFileType eq "CNA" ) {
 	  $latestVersionOfLog2CNAFile = getLastestVersionOfFile( $CancersFirehoseDataDir, $destDir, "all_data_by_genes.txt", $cancer, $runDate );
 	  print "latest version of Log2CNA: $latestVersionOfLog2CNAFile\n";
+	}
+
+	# if we are using custom Log2CNA, we will need to move over cna,
+	# lets get latest version before we get next version
+	my $latestVersionOfCNAFile;
+	if ( $customFileType eq "LOG2CNA" ) {
+	  $latestVersionOfCNAFile = getLastestVersionOfFile( $CancersFirehoseDataDir, $destDir, "all_thresholded.by_genes.txt", $cancer, $runDate );
+	  print "latest version of CNA: $latestVersionOfCNAFile\n";
 	}
 
     my( $customFileDir, $customFileFile ) = getNextVersionOfFile( $CancersFirehoseDataDir, 
@@ -106,15 +115,29 @@ sub moveGDACOverridesFile{
     print `cmp  $fromFile $toFile`;
 
 	# if using custom CNA, lets now copy over Log2CNA
-	if ( $customFileType eq "CNA"  && defined($latestVersionOfLog2CNAFile) )
-	{
-	  my $newLog2CNAFile = File::Spec->catfile( $customFileDir, "all_data_by_genes.txt" );
-	  print "\ncopying Log2CNA:\n", "from: $latestVersionOfLog2CNAFile\n", "  to: $newLog2CNAFile\n";
-	  system( "cp $latestVersionOfLog2CNAFile $newLog2CNAFile"); 
-	  print `cmp  $latestVersionOfLog2CNAFile $newLog2CNAFile`;
+	if ( $customFileType eq "CNA") {
+	  if (defined($latestVersionOfLog2CNAFile) ) {
+		my $newLog2CNAFile = File::Spec->catfile( $customFileDir, "all_data_by_genes.txt" );
+		print "\ncopying Log2CNA:\n", "from: $latestVersionOfLog2CNAFile\n", "  to: $newLog2CNAFile\n";
+		system( "cp $latestVersionOfLog2CNAFile $newLog2CNAFile"); 
+		print `cmp  $latestVersionOfLog2CNAFile $newLog2CNAFile`;
+	  }
+	  else {
+		warn "Copying custom CNA and cannot find Log2CNA data\n";
+	  }
 	}
-	else {
-	  warn "Copying custom CNA and cannot find Log2CNA data\n";
+
+	# if using custom LOG2CNA, lets now copy over cna
+	if ( $customFileType eq "LOG2CNA") {
+	  if (defined($latestVersionOfCNAFile) ) {
+		my $newCNAFile = File::Spec->catfile( $customFileDir, "all_thresholded.by_genes.txt" );
+		print "\ncopying cna:\n", "from: $latestVersionOfCNAFile\n", "  to: $newCNAFile\n";
+		system( "cp $latestVersionOfCNAFile $newCNAFile"); 
+		print `cmp  $latestVersionOfCNAFile $newCNAFile`;
+	  }
+	  else {
+		warn "Copying custom Log2CNA and cannot find CNA data\n";
+	  }
 	}
 	
 	# must also create an empty directory in which the sig_genes.txt file will be created    
@@ -130,9 +153,20 @@ sub moveGDACOverridesFile{
 # get a lexicographically later version of a file
 sub getNextVersionOfFile{
     my( $CancersFirehoseDataDir, $directoryNamePattern, $fileNamePattern, $cancer, $runDate ) =@_;
+	$directoryNamePattern =~ s/<RNA-SEQ-PLATFORM>/hiseq/;
+	$fileNamePattern =~ s/<RNA-SEQ-PLATFORM>/hiseq/;
     my $latestVersion = getLastestVersionOfFile( $CancersFirehoseDataDir, $directoryNamePattern, $fileNamePattern, $cancer, $runDate );
     my($volume, $latestDir, $latestFile ) = File::Spec->splitpath( $latestVersion );
     my $nextDir = $latestDir;
+	# if we are processing RNA-SEQ and didn't find illuminahiseq,
+	# check for illuminaga before creating a new version of illuminahiseq
+	unless ( -d $nextDir && $directoryNamePattern =~ /rnaseq/ ) {
+	  $directoryNamePattern =~ s/hiseq/ga/;
+	  $fileNamePattern =~ s/hiseq/ga/;
+	  $latestVersion = getLastestVersionOfFile( $CancersFirehoseDataDir, $directoryNamePattern, $fileNamePattern, $cancer, $runDate );
+	  ($volume, $latestDir, $latestFile ) = File::Spec->splitpath( $latestVersion );
+	  $nextDir = $latestDir;
+	}
 	unless ( -d $nextDir) {
 		my $customFileDir = File::Spec->catfile($CancersFirehoseDataDir, $directoryNamePattern);
 		my $cancer_UC = uc( $cancer );

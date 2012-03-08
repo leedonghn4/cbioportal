@@ -9,6 +9,7 @@
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
+drop table IF EXISTS uniprot_id_mapping;
 drop table IF EXISTS cancer_study;
 drop table IF EXISTS users;
 drop table IF EXISTS authorities;
@@ -33,6 +34,7 @@ drop table IF EXISTS interaction;
 drop table if EXISTS sanger_cancer_census;
 drop table if EXISTS gene_set;
 drop table if EXISTS clinical_free_form;
+drop table if EXISTS oncotatorRecord;
 
 drop table IF EXISTS protein_array_info;
 drop table IF EXISTS protein_array_target;
@@ -150,6 +152,16 @@ CREATE TABLE IF NOT EXISTS `gene_alias` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
+
+--
+-- Table structure for table `uniprot_id_mapping`
+--
+
+CREATE TABLE IF NOT EXISTS `uniprot_id_mapping` (
+  `ENTREZ_GENE_ID` int(255) NOT NULL,
+  `UNIPROT_ID` varchar(255) NOT NULL,
+  PRIMARY KEY  (`ENTREZ_GENE_ID`, `UNIPROT_ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `genetic_alteration`
@@ -363,4 +375,10 @@ CREATE TABLE IF NOT EXISTS `clinical_free_form` (
   `CASE_ID` varchar(256) NOT NULL,
   `PARAM_NAME` varchar(256) NOT NULL,
   `PARAM_VALUE` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `oncotatorRecord` (
+  `CACHE_KEY` varchar(255) NOT NULL,
+  `JSON` longtext NOT NULL,
+  KEY `key` (`CACHE_KEY`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

@@ -1,8 +1,36 @@
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="com.google.common.base.Joiner" %>
+<%@ page import="java.io.UnsupportedEncodingException" %>
+<%@ page import="org.mskcc.portal.model.GeneWithScore" %>
 <%@ page import="org.mskcc.portal.servlet.QueryBuilder" %>
 <%@ page import="org.mskcc.portal.servlet.ServletXssUtil" %>
 <%@ page import="org.mskcc.portal.util.GlobalProperties" %>
+<%@ page import="org.mskcc.cgds.dao.DaoGeneOptimized" %>
+<%@ page import="org.mskcc.cgds.model.CanonicalGene" %>
 <%
-		String segFileURL = GlobalProperties.getSegfileUrl();
+	  // get URL to seg file used as parameter to IGV
+	  String segFileURL = GlobalProperties.getSegfileUrl();
+
+      // construct gene list parameter to IGV
+      // use geneWithScoreList so we don't get any OQL
+      List<String> onlyGenesList = new ArrayList<String>();
+      for (GeneWithScore geneWithScore : geneWithScoreList) {
+          CanonicalGene gene = DaoGeneOptimized.getInstance().getGene(geneWithScore.getGene());
+           
+          if (gene!=null && !gene.isMicroRNA()) {
+              onlyGenesList.add(geneWithScore.getGene());
+          }
+      }
+      String encodedGeneList = "";
+      if (onlyGenesList.size() > 0) {
+          try {
+              encodedGeneList = URLEncoder.encode(Joiner.on(' ').join(onlyGenesList), "UTF-8");
+          }
+          catch(UnsupportedEncodingException e) {
+          }
+      }
 %>
 
 <div class="section" id="igv_tab">
@@ -11,11 +39,13 @@
             <td style="padding-right:25px; vertical-align:top;"><img src="images/IGVlogo.png" alt=""/></td>
             <td style="vertical-align:top">
 
+				<P>Use the <a href="http://www.broadinstitute.org/igv/home">Integrative Genomics
+                Viewer (IGV)</a> to explore and visualize copy number data.
                 <p>
                     The <a href="http://www.broadinstitute.org/igv/home">Integrative Genomics
                     Viewer (IGV)</a> is a high-performance visualization tool for interactive exploration
-                    of large, integrated datasets. It supports a wide variety of data types including
-                    sequence alignments, microarrays, and genomic annotations.
+                    of large, integrated datasets. It supports a wide variety of data types including sequence alignments, 
+					gene expression, copy number amplifications and deletions, mutations, and genomic annotations
                 </p>
 
                 <p>Clicking the launch button below will:</p>
@@ -29,7 +59,7 @@
                 </p>
 
                 <br>
-                    <a id="igvLaunch" href="#" onclick="prepIGVLaunch('<%= cancerTypeId %>','<%= geneList %>')"><img src="images/webstart.jpg" alt=""/></a>
+                    <a id="igvLaunch" href="#" onclick="prepIGVLaunch('<%= cancerTypeId %>','<%= encodedGeneList %>')"><img src="images/webstart.jpg" alt=""/></a>
                 <br>
 
                 <p>

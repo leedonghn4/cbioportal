@@ -1,6 +1,9 @@
 package org.mskcc.cgds.model;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.mskcc.portal.mut_diagram.oncotator.OncotatorRecord;
 
 /**
  * Encapsules Details regarding a Single Mutation.
@@ -9,7 +12,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public class ExtendedMutation {
     private static final String GERMLINE = "germline";
-
     private int geneticProfileId;
     private String caseId;
     private CanonicalGene gene;
@@ -20,16 +22,16 @@ public class ExtendedMutation {
     private String chr;
     private long startPosition;
     private long endPosition;
+    private String refAllele;
+    private String observedAllele;
     private String aminoAcidChange;
     private String mutationType;
     private String functionalImpactScore;
     private String linkXVar;
     private String linkPdb;
     private String linkMsa;
-    private String referenceAllele;
-    private String tumorAllele;
-    private long start;
-    private long end;
+    private String color;
+    private OncotatorRecord oncotatorRecord;
 
     public ExtendedMutation() {
     }
@@ -74,6 +76,7 @@ public class ExtendedMutation {
         return mutationStatus;
     }
 
+    @JsonIgnore
     public boolean isGermlineMutation() {
         return getMutationStatus() != null && getMutationStatus().equalsIgnoreCase(GERMLINE);
     }
@@ -206,52 +209,56 @@ public class ExtendedMutation {
         this.sequencer = sequencer;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getRefAllele() {
+        return refAllele;
+    }
+
+    public void setRefAllele(String refAllele) {
+        this.refAllele = refAllele;
+    }
+
+    public String getObservedAllele() {
+        return observedAllele;
+    }
+
+    public void setObservedAllele(String observedAllele) {
+        this.observedAllele = observedAllele;
+    }
+
+    public OncotatorRecord getOncotatorRecord() {
+        return oncotatorRecord;
+    }
+
+    public void setOncotatorRecord(OncotatorRecord oncotatorRecord) {
+        this.oncotatorRecord = oncotatorRecord;
+    }
+
+    @JsonIgnore
     public void setGene(CanonicalGene gene) {
         this.gene = gene;
     }
 
+    @JsonIgnore
     public CanonicalGene getGene() {
         return gene;
     }
 
+    @JsonIgnore
     public long getEntrezGeneId() {
         return gene.getEntrezGeneId();
     }
 
+    @JsonIgnore
     public String getGeneSymbol() {
         return gene.getHugoGeneSymbolAllCaps();
-    }
-
-    public String getReferenceAllele() {
-        return referenceAllele;
-    }
-
-    public void setReferenceAllele(String referenceAllele) {
-        this.referenceAllele = referenceAllele;
-    }
-
-    public String getTumorAllele() {
-        return tumorAllele;
-    }
-
-    public void setTumorAllele(String tumorAllele) {
-        this.tumorAllele = tumorAllele;
-    }
-
-    public long getStart() {
-        return start;
-    }
-
-    public void setStart(long start) {
-        this.start = start;
-    }
-
-    public long getEnd() {
-        return end;
-    }
-
-    public void setEnd(long end) {
-        this.end = end;
     }
 
     @Override

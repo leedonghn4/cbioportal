@@ -48,10 +48,9 @@ use FirehoseTransformationWorkflow;
 # $codeForCGDS          directory storing cgds code
 # $GenesFile            file containing genes (gene info file from NCBI)
 # $runDate              date of file run - name for the suffix of the data dirs
-# $SkipCaseList         if defined, skip case list generation
 sub create_cgds_input_files{
 	my( $Cancers, $Summary, $CGDSDataDirectory, $CancerDataDir, $runDirectory, $FirehoseXformWorkflow, $codeForCGDS, 
-	$GenesFile, $runDate, $SkipCaseList ) = @_;
+	$GenesFile, $runDate ) = @_;
     
 	my $fileUtil = File::Util->new();
 
@@ -76,16 +75,11 @@ sub create_cgds_input_files{
         # summary: create column with abbreviation
         $runSummary->{$cancerInputDirectory} = {};
         
-        # create directories for CGDS input files
-		unless (defined( $SkipCaseList )) {
-		  $fileUtil->make_dir( File::Spec->catfile( $CGDSDataDirectory, $cancerInputDirectory, 'case_lists' ), '--if-not-exists' );
-		}
-        
         # process the cancer
         CreateCancersCGDSinput( $globalHash, $cancer, $name,
            File::Spec->catfile( $CancerDataDir, $cancer, $runDirectory ),
            File::Spec->catfile( $CGDSDataDirectory, $cancerInputDirectory), 
-           $FirehoseXformWorkflow, $runSummary, $codeForCGDS, $runDate, $SkipCaseList );
+           $FirehoseXformWorkflow, $runSummary, $codeForCGDS, $runDate );
     }
     clean_up( $runSummary, $Summary ); 
     print "\n";
@@ -111,7 +105,7 @@ sub generate_case_lists{
         my( $cancer, $name ) = split( /\s*:\s*/, $line );
         print "\nProcessing $cancer ($name):\n";
 
-		my @possibleCancerCenter = ("tcga", "mskcc");
+		my @possibleCancerCenter = ("tcga", "mskcc", "scand");
 		foreach my $possibleCancerCenter (@possibleCancerCenter) {
 
 		  my $cancerInputDirectory = $cancer . "_"  . $possibleCancerCenter;
@@ -140,7 +134,9 @@ sub generate_case_lists{
 						   "data_microRNA.txt", "data_microRNA_outliers.txt",
 						   "data_CNA_consensus.txt", "data_CNA_RAE.txt",
 						   "data_brca1_binary_methylation.txt", "",
-						   "data_protein.txt", "data_miRNA.txt",
+						   "data_protein.txt", "data_miRNA.txt", "data_expression_Zscores.txt",
+						   "data_mRNA_DBCG.txt", "data_mRNA_DBCG_Z.txt", "data_mRNA_FW_MDG.txt",
+						   "data_mRNA_MicMa.txt", "data_data_mRNA_ULL.txt",
 						   "data_miRNA_median_Zscores.txt", "data_expression_merged_median_Zscores.txt");
 		  my %filesToSkip = map { $_ => 1 } @skipFiles;
 		  # interate over all data_*.txt files in CancersCGDSinputDir
@@ -183,19 +179,13 @@ sub generate_case_lists{
 # $codeForCGDS: dir of CGDS code 
 # $GenesFile: file with gene data
 # $runDate: [optional] rundate of Firehose (dir name below $cancer)
-# $SkipCaseList         if defined, skip case list generation
 sub CreateCancersCGDSinput{
     my( $globalHash, $cancer, $name, $CancersFirehoseDataDir, $CancersCGDSinputDir, $FirehoseXformWorkflow, $runSummary, 
-        $codeForCGDS, $runDate, $SkipCaseList ) = @_;
+        $codeForCGDS, $runDate ) = @_;
         
     # create CGDS input data and meta files
     my $FirehoseFileMetadata_objects = create_data_and_meta_files( $globalHash, $cancer, $CancersFirehoseDataDir, $CancersCGDSinputDir, 
         $FirehoseXformWorkflow, $codeForCGDS, $runDate );
-
-	# create case lists
-	unless (defined( $SkipCaseList )) {
-	  create_case_lists( $cancer, $CancersFirehoseDataDir, $CancersCGDSinputDir, $FirehoseFileMetadata_objects, $runDate, $runSummary );
-	}
 
     # create cancer-type name file
     createCancerTypeNameFile( $FirehoseFileMetadata_objects, $cancer, $name, $CancersCGDSinputDir );    
@@ -264,6 +254,11 @@ sub create_data_and_meta_files{
             # todo: should turn CTable caching on, but cache files in a tmp dir
             # todo: important optimization; since some firehose files are used multiple times, avoid duplicating them in $FirehoseFileMetadata_objects
 
+			# if we are processing an rna seq, we need to preprocess the file
+			if ($FullFirehoseFile =~ /rnaseq/) {
+			  $FullFirehoseFile = preprocessRNASEQ($FullFirehoseFile, $firehoseFile, $cancer );
+			}
+
             # first disable CTable progress messages; sigh, doesn't work
             # Data::CTable->progress_class(0); 
             my $cTable = Data::CTable->new( { _CacheOnRead   => 0 }, $FullFirehoseFile );
@@ -289,6 +284,11 @@ sub create_data_and_meta_files{
                 }
                 
             }
+
+			# if we just processed an rna seq file, we need to delete the tmp file that was made
+			if ($FullFirehoseFile =~ /rnaseq/) {
+			  File::Remove->remove($FullFirehoseFile);
+			}
         }
         
         my $FirehoseDirAndFiles =  englishList( @explicitFiles );            
@@ -487,7 +487,7 @@ sub create_case_lists{
               'All samples with mRNA expression data (<cases> samples)',
         },
         'cases_RNA_Seq_mRNA.txt' => {
-            'FirehoseFile'          => '<CANCER>.rnaseq.txt',
+            'FirehoseFile'          => '<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt',
             'xformFunc'               => undef,
             'stable_id'             => '<cancer>_<cancer_center>_rna_seq_mrna',
             'cancer_study_identifier'        => '<cancer>_<cancer_center>',
@@ -645,7 +645,7 @@ sub create_case_lists{
         [qw( stable_id cancer_study_identifier case_list_name case_list_description )] ); 
     
 	my $cghSource = 'all_thresholded.by_genes.txt';
-	my $rnaSEQSource = '<CANCER>.rnaseq.txt';
+	my $rnaSEQSource = '<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt';
 	my $mrnaSource = '<CANCER>.transcriptome__agilentg4502a_07_3__unc_edu__Level_3__unc_lowess_normalization_gene_level__data.data.txt';
 	my $sequencedSource = '<CANCER>.maf.annotated';
 	my $methylationSource = '<CANCER>.methylation__humanmethylation27__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.data.txt';
@@ -685,9 +685,9 @@ sub create_case_lists{
 	  }
 	}
 	else {
-	  my $rnaSeqExpressionFile = getLastestVersionOfFile( $CancersFirehoseDataDir, "gdac.broadinstitute.org_<CANCER>.RNA_Seq.<date><version>", "<CANCER>.rnaseq.txt", $cancer, $runDate );
+	  my $rnaSeqExpressionFile = getLastestVersionOfFile( $CancersFirehoseDataDir, "gdac.broadinstitute.org_<CANCER>.Merge_rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.Level_3.<date><version>", "<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt", $cancer, $runDate );
 	  if ( defined( $rnaSeqExpressionFile ) ) {
-		$mrnaSource = "<CANCER>.rnaseq.txt";
+		$mrnaSource = "<CANCER>.rnaseq__illumina<RNA-SEQ-PLATFORM>_rnaseq__unc_edu__Level_3__gene_expression__data.data.txt";
 	  }
 	}
 
@@ -740,7 +740,7 @@ sub create_many_to_one_case_lists{
         # substitute <CANCER> with this cancer, uppercased 
         my $cancerUC = uc( $cancer );
         $possibleFirehoseFile =~ s/<CANCER>/$cancerUC/g;
-        
+
         if( exists( $file_to_FirehoseFileMetadata_object{ $possibleFirehoseFile} ) ){
             push @FirehoseFileMetadata_objects_of_interest, $file_to_FirehoseFileMetadata_object{ $possibleFirehoseFile}; 
             # print "Found $possibleFirehoseFile\n";

@@ -75,7 +75,7 @@ public class GermlineMutationSummarizer {
                     if (geneSymbol.equals("MSH6") && aaChange.equals("p.R158C")) {
                         //  Skip over mis-annotated MSH6 gene
                         //  this gene is annotated by Wash U. as a missense mutation
-                        //  but, according to Oncotator, it's actually a silent mutation.
+                        //  but, according to OncotatorRecord, it's actually a silent mutation.
                     } else {
                         extractMMRGene(geneSymbol, caseId, likelyDeleterious, aaChange, referenceAllele);
                     }
