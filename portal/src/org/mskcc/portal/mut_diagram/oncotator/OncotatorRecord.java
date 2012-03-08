@@ -1,5 +1,7 @@
 package org.mskcc.portal.mut_diagram.oncotator;
 
+import java.util.ArrayList;
+
 /**
  * Encapsulate a Single Record from OncotatorRecord.
  */
@@ -11,6 +13,7 @@ public class OncotatorRecord {
     private String variantClassification;
     private int exonAffected;
     private String cosmicOverlappingMutations;
+    private ArrayList<CosmicRecord> cosmicRecordList = new ArrayList<CosmicRecord>();
 
     public OncotatorRecord(String key) {
         this.key = key;
@@ -67,8 +70,45 @@ public class OncotatorRecord {
             return cosmicOverlappingMutations;
         }
     }
+    
+    public ArrayList<CosmicRecord> getCosmicRecords() {
+        return cosmicRecordList;
+    }
 
     public void setCosmicOverlappingMutations(String cosmicOverlappingMutations) {
         this.cosmicOverlappingMutations = cosmicOverlappingMutations;
+        this.cosmicRecordList = extractCosmicRecords(cosmicOverlappingMutations);
+    }
+
+    /**
+     * Gets the Number of COSMIC Records that Match this variant exactly.
+     * Matching is determined by protein change string.
+     * @return boolean.
+     */
+    public int getNumExtactCosmicRecords() {
+        for (CosmicRecord cosmicRecord:  cosmicRecordList) {
+            if (proteinChange.equals(cosmicRecord.getProteinChange())) {
+                return cosmicRecord.getNumRecords();
+            }
+        }
+        return 0;
+    }
+    
+    private ArrayList<CosmicRecord> extractCosmicRecords(String cosmicString) {
+        //  String looks like this:  p.?(4)|p.Y27_N212>Y(2)|p.Y27fs*1(2)|p.E40*(1)
+        ArrayList<CosmicRecord> localList = new ArrayList<CosmicRecord>();
+        if (cosmicString != null && cosmicString.trim().length() > 0) {
+            String parts[] = cosmicString.split("\\|");
+            for (String part:  parts) {
+                part = part.replace("(", "#");
+                part = part.replace(")", "#");
+                String subparts[] = part.split("#");
+                String aaPart = subparts[0];
+                Integer count = Integer.parseInt(subparts[1]);
+                CosmicRecord record = new CosmicRecord(aaPart, count);
+                localList.add(record);
+            }
+        }
+        return localList;
     }
 }
