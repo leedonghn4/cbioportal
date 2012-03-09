@@ -41,6 +41,11 @@ public class CoverageReader {
      * @return  Coverage.
      */
     public Long getCoverage(String caseId) {
-        return coverageMap.get(caseId);
+        Long value = coverageMap.get(caseId);
+        if (value != null) {
+            return value;
+        } else {
+            return new Long(0);
+        }
     }
 }
