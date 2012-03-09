@@ -8,6 +8,7 @@ import org.mskcc.endometrial.mutation.MutationMap;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -38,10 +39,13 @@ public class TestGenomicMap extends TestCase {
         assertEquals("1", genomicMap.getMutated_3("A1BG", "TCGA-D1-A162"));
         assertEquals("0", genomicMap.getMutated_3("BRCA1", "TCGA-D1-A162"));
 
-        assertEquals("2", genomicMap.getCNA_1("A1BG", "TCGA-D1-A162"));
-        assertEquals("NA", genomicMap.getCNA_1("BRCA1", "TCGA-D1-A162"));
+        assertEquals("2", genomicMap.getCNA_0("A1BG", "TCGA-D1-A162"));
+        assertEquals("NA", genomicMap.getCNA_0("BRCA1", "TCGA-D1-A162"));
 
         assertEquals("3", genomicMap.getAltered_1("A1BG", "TCGA-D1-A162"));
         assertEquals("0", genomicMap.getAltered_1("BRCA1", "TCGA-D1-A162"));
+        
+        ArrayList<String> dataFields = genomicMap.getDataFields("A1BG", "TCGA-D1-A162");
+        assertEquals(6, dataFields.size());
     }
 }

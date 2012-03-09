@@ -22,9 +22,50 @@ public class GenomicMap {
     private static String THREE = "3";
     private static String NA = "NA";
 
+    /**
+     * Constructor.
+     *
+     * @param mutationMap   Mutation Map Object.
+     * @param copyNumberMap Copy Number Map Object.
+     */
     public GenomicMap(MutationMap mutationMap, CopyNumberMap copyNumberMap) {
         this.mutationMap = mutationMap;
         this.copyNumberMap = copyNumberMap;
+    }
+
+    /**
+     * Gets Column Headings for Specified Gene.
+     * @param gene  Gene Symbol.
+     * @return ArrayList of Column Headings.
+     */
+    public ArrayList<String> getColumnHeaders(String gene) {
+        ArrayList<String> columnList = new ArrayList<String>();
+        columnList.add(gene + "_MUTATED_0");
+        columnList.add(gene + "_MUTATED_1");
+        columnList.add(gene + "_MUTATED_2");
+        columnList.add(gene + "_MUTATED_3");
+        columnList.add(gene + "_CNA_0");
+        columnList.add(gene + "_ALTERED_0");
+        return columnList;
+    }
+
+    /**
+     * Gets Data Fields for Specified Gene / Case ID Pair.
+     * @param gene      Gene Symbol.
+     * @param caseId    Case ID.
+     * @return ArrayList of Column Fields.
+     * @throws IOException  IO Error.
+     * @throws DaoException Database Access Error.
+     */
+    public ArrayList<String> getDataFields(String gene, String caseId) throws IOException, DaoException {
+        ArrayList<String> columnList = new ArrayList<String>();
+        columnList.add(getMutated_0(gene, caseId));
+        columnList.add(getMutated_1(gene, caseId));
+        columnList.add(getMutated_2(gene, caseId));
+        columnList.add(getMutated_3(gene, caseId));
+        columnList.add(getCNA_0(gene, caseId));
+        columnList.add(getAltered_1(gene, caseId));
+        return columnList;
     }
 
     /**
@@ -124,7 +165,7 @@ public class GenomicMap {
      * @param caseId    Case ID.
      * @return GISTIC Discrete Value, e.g. -2, -1, 0, 1, 2.
      */
-    public String getCNA_1 (String gene, String caseId) {
+    public String getCNA_0(String gene, String caseId) {
         String cnaValue = copyNumberMap.getCopyNumberValue(gene, caseId);
         if (cnaValue != null) {
             return cnaValue;

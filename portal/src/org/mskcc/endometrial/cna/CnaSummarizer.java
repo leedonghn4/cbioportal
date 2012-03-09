@@ -1,5 +1,7 @@
 package org.mskcc.endometrial.cna;
 
+import org.mskcc.endometrial.mutation.MafUtil;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 public class CnaSummarizer {
     private String[] colNames;
     private HashSet<String> geneSet = new HashSet<String>();
+    private HashSet<String> caseSet = new HashSet<String>();
     private HashMap<String, Integer> cnaCount1Map = new HashMap<String, Integer>();
     private HashMap<String, Integer> cnaCount2Map = new HashMap<String, Integer>();
 
@@ -37,7 +40,7 @@ public class CnaSummarizer {
     }
 
     public boolean hasCnaData(String caseId) {
-        if (cnaCount1Map.containsKey(caseId)) {
+        if (caseSet.contains(caseId)) {
             return true;
         } else {
             return false;
@@ -76,15 +79,16 @@ public class CnaSummarizer {
 
     private void initCounters(String colNames[]) {
         for (int i=2; i<colNames.length; i++) {
-            String caseId = colNames[i];
+            String caseId = MafUtil.extractCaseId(colNames[i]);
             cnaCount1Map.put(caseId, 0);
             cnaCount2Map.put(caseId, 0);
+            caseSet.add(caseId);
         }
     }
 
     private void iterateThroughAllCases(String[] parts) {
         for (int i=2; i<parts.length; i++) {
-            String caseId = colNames[i];
+            String caseId = MafUtil.extractCaseId(colNames[i]);
             String value = parts[i];
             incrementCounters(value, caseId);
         }

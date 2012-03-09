@@ -1,11 +1,16 @@
 package org.mskcc.endometrial.clinical;
 
+import org.mskcc.cgds.dao.DaoException;
 import org.mskcc.endometrial.cna.CnaClusterReader;
 import org.mskcc.endometrial.cna.CnaSummarizer;
+import org.mskcc.endometrial.cna.CopyNumberMap;
+import org.mskcc.endometrial.genomic.GenomicMap;
 import org.mskcc.endometrial.methylation.MethylationReader;
 import org.mskcc.endometrial.mutation.CoverageReader;
 import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
+import org.mskcc.endometrial.mutation.MutationMap;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
+import org.mskcc.endometrial.rppa.RppaReader;
 
 import java.io.*;
 import java.util.*;
@@ -25,8 +30,13 @@ public class PrepareClinicalFile {
     private CnaClusterReader cnaClusterReader;
     private MsiReader msiReader;
     private MethylationReader mlh1Reader;
+    private RppaReader rppaReader;
     private CoverageReader coverageReader;
     private CaseListUtil caseListUtil = new CaseListUtil();
+    private HashSet<String> targetGeneSet;
+    private MutationMap mutationMap;
+    private CopyNumberMap copyNumberMap;
+    private GenomicMap genomicMap;
 
     /**
      * Constructor.
@@ -34,11 +44,17 @@ public class PrepareClinicalFile {
      * @throws IOException IO Error.
      */
     public PrepareClinicalFile(File clinicalFile, File msiFile, File somaticMafFile, 
-            File germlineMafFile, File cnaFile,
-            File cnaClusterFile, File mlh1MethFile, File coverageFile,
-            boolean performSanityChecks) throws IOException {
+            File germlineMafFile, File cnaFile, File cnaClusterFile, File mlh1MethFile, File coverageFile,
+            File rppaFile, boolean performSanityChecks) throws IOException, DaoException {
+        initTargetGeneSet();
         this.mafFile = somaticMafFile;
-        initReaders(msiFile, cnaClusterFile, mlh1MethFile, coverageFile);
+        System.out.println("Reading in mutation data...");
+        this.mutationMap = new MutationMap(somaticMafFile, targetGeneSet);
+        this.copyNumberMap = new CopyNumberMap(cnaFile, targetGeneSet);
+        System.out.println("Reading in CNA data...");
+        this.genomicMap = new GenomicMap(mutationMap, copyNumberMap);
+
+        initReaders(msiFile, cnaClusterFile, mlh1MethFile, coverageFile, rppaFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
@@ -79,17 +95,50 @@ public class PrepareClinicalFile {
             appendMutationSpectra(mutationSummarizer, caseId);
             newTable.append(TAB + coverageReader.getCoverage(caseId));
             appendGermlineMutationFields(germlineMutationSummarizer, caseId, newTable);
+            appendTargetGeneSet(caseId, newTable);
+            appendRppaData(caseId, newTable);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
     }
+    
+    private void initTargetGeneSet() {
+        targetGeneSet = new HashSet<String>();
+        targetGeneSet.add("PTEN");
+        targetGeneSet.add("PIK3CA");
+        targetGeneSet.add("PIK3R1");
+        targetGeneSet.add("PIK3R2");
+        targetGeneSet.add("AKT1");
+        targetGeneSet.add("AKT2");
+        targetGeneSet.add("AKT3");
+    }
 
-    private void initReaders(File msiFile, File cnaClusterFile, File mlh1MethFile, File coverageFile) throws IOException {
+    private void initReaders(File msiFile, File cnaClusterFile, File mlh1MethFile, File coverageFile,
+             File rppaFile) throws IOException {
+        System.out.println("Reading in MSI Data...");
         msiReader = new MsiReader(msiFile);
+        System.out.println("Reading in MLH1 Hypermethylation Data...");
         mlh1Reader = new MethylationReader(mlh1MethFile);
+        System.out.println("Reading in Sequence Coverage Data...");
         coverageReader = new CoverageReader(coverageFile);
+        System.out.println("Reading in CNA Clusters...");
         cnaClusterReader = new CnaClusterReader(cnaClusterFile);
+        rppaReader = new RppaReader(rppaFile);
+    }
+    
+    private void appendTargetGeneSet(String caseId, StringBuffer newTable) throws IOException, DaoException {
+        Iterator<String> geneIterator = targetGeneSet.iterator();
+        while(geneIterator.hasNext()) {
+            String geneSymbol = geneIterator.next();
+            ArrayList<String> dataFields = genomicMap.getDataFields(geneSymbol, caseId);
+            appendColumns(dataFields, newTable);
+        }
+    }
+    
+    private void appendRppaData(String caseId, StringBuffer newTable) {
+        ArrayList<String> dataFields = rppaReader.getDataValues(caseId);
+        appendColumns(dataFields, newTable);
     }
 
     private void appendMutationSpectra(MutationSummarizer mutationSummarizer, String caseId) {
@@ -134,9 +183,25 @@ public class PrepareClinicalFile {
                 + "CA_COUNT" + TAB
                 + "COVERED_BASES");
         appendGermlineMutationColumns(germlineMutationSummarizer, newTable);
+        appendTargetGeneSetColumns();
+        appendRppaColumns();
         newTable.append(NEW_LINE);
     }
 
+    private void appendTargetGeneSetColumns() {
+        Iterator<String> geneIterator = targetGeneSet.iterator();
+        while(geneIterator.hasNext()) {
+            String geneSymbol = geneIterator.next();
+            ArrayList<String> headingList = genomicMap.getColumnHeaders(geneSymbol);
+            appendColumns(headingList, newTable);
+        }
+    }
+    
+    private void appendRppaColumns() {
+        ArrayList<String> headingList = rppaReader.getRppaHeaders();
+        appendColumns(headingList, newTable);
+    }
+    
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
         long totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
                 + mutationSummarizer.getNonSilentMutationCount(caseId);
@@ -286,13 +351,14 @@ public class PrepareClinicalFile {
                     "<cna_file> <cna_clusters_file> <mlh1_meth_file> <output_dir>");
             System.exit(1);
         }
+
         PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
                 new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
-                new File(args[5]), new File(args[6]), new File(args[7]), true);
+                new File(args[5]), new File(args[6]), new File(args[7]), new File(args[8]), true);
 
-        prepareClinicalFile.writeCaseLists(args[8]);
+        prepareClinicalFile.writeCaseLists(args[9]);
 
-        File newClinicalFile = new File(args[8] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[9] + "/ucec_clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
