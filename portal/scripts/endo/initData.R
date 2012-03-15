@@ -19,6 +19,7 @@ initData <- function() {
   df = transform(df, COL3="#FFFFFF", stringsAsFactors=FALSE)
   df = transform(df, COL4="#FFFFFF", stringsAsFactors=FALSE)
   df = transform(df, COL5="#FFFFFF", stringsAsFactors=FALSE)
+  df = transform(df, COL6="#FFFFFF", stringsAsFactors=FALSE)
   msi_colors = c("#DDDDDD", "#CCFFCC", "#FFCCFF", "#FF0000")
   cna_colors = c("#CCFFFF", "#33FFFF", "#0000FF")
   rppa_colors = c("red", "green")
@@ -39,5 +40,9 @@ initData <- function() {
   
   df[!is.na(df$PTEN_PROTEIN_LEVEL) & df$AKT_pT308 <= 0,]$COL5=rppa_colors[1]
   df[!is.na(df$PTEN_PROTEIN_LEVEL) & df$AKT_pT308 > 0,]$COL5=rppa_colors[2]
+
+  df[df$tumor_grade %in% "Grade 1",]$COL6=cna_colors[1]
+  df[df$tumor_grade %in% "Grade 2",]$COL6=cna_colors[2]
+  df[df$tumor_grade %in% "Grade 3",]$COL6=cna_colors[3]
   return (df)
 }
