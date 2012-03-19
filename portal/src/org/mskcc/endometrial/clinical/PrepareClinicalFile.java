@@ -65,19 +65,21 @@ public class PrepareClinicalFile {
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
         validateHeader(line);
+        String headers[] = line.split("\t");
         String newHeaderLine = transformHeader(line);
         appendColumnHeaders(germlineMutationSummarizer, newHeaderLine);
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
             String caseId = parts[0];
-            String histSubType = parts[4];
-            String daysToNewTumorEventAfterInitialTreatment = parts[8];
-            String vitalStatus = parts[10];
-            String recurredStatus = parts[9];
-            String daysToFu = parts[12];
-            String daysToAlive = parts[13];
-            String daysToDead = parts[14];
+            String histSubType = getValue("histological_typeCorrected", "histological_type", headers, parts);
+            String daysToNewTumorEventAfterInitialTreatment = getValue("daysToNewTumorEventAfterInitialTreatment",
+                    "days_to_new_tumor_event_after_initial_treatment", headers, parts);
+            String vitalStatus = getValue("NewVitalStatus", "vital_status", headers, parts);
+            String recurredStatus = getValue("Recurred/Progressed", headers, parts);
+            String daysToFu = getValue("NewDaystoFU", "days_to_last_followup", headers, parts);
+            String daysToAlive = getValue("NewDaystoAlive", "days_to_last_known_alive", headers, parts);
+            String daysToDead = getValue("NewDaystoDead", "days_to_death", headers, parts);
             caseListUtil.categorizeByHistologicalSubType(histSubType, caseId);
 
             computeDfsMonths(caseId, recurredStatus, daysToNewTumorEventAfterInitialTreatment, daysToFu);
@@ -113,6 +115,27 @@ public class PrepareClinicalFile {
         targetGeneSet.add("AKT2");
         targetGeneSet.add("AKT3");
     }
+    
+    private String getValue (String targetHeader, String[] colHeaders, String[] parts) {
+        for (int i=0; i<colHeaders.length; i++) {
+            String currentHeader = colHeaders[i];
+            if (currentHeader.equalsIgnoreCase(targetHeader)) {
+                return parts[i]; 
+            }
+        }
+        throw new NullPointerException("Could not find column with name:  " + targetHeader);
+    }
+
+    private String getValue (String targetHeader1, String targetHeader2, String[] colHeaders, String[] parts) {
+        for (int i=0; i<colHeaders.length; i++) {
+            String currentHeader = colHeaders[i];
+            if (currentHeader.equalsIgnoreCase(targetHeader1) || currentHeader.equalsIgnoreCase(targetHeader2)) {
+                return parts[i];
+            }
+        }
+        throw new NullPointerException("Could not find column with name:  [" + targetHeader1
+                + ", " + targetHeader2 + "]");
+    }    
 
     private void initReaders(File msiFile, File cnaClusterFile, File mlh1MethFile, File coverageFile,
              File rppaFile) throws IOException {
