@@ -17,8 +17,7 @@ compareClasses_0 <- function(metric, class1_df, class2_df, class1, class2) {
 compareClasses_1_3 <- function(metric, class1_df, class2_df, class1, class2) {
   num_class1_altered_no = nrow(class1_df[class1_df[[metric]]==0 | class1_df[[metric]]==1,])
   num_class1_altered_yes = nrow(class1_df[class1_df[[metric]]==2,])
-  
-  num_class2_altered2_no = nrow(class2_df[class2_df[[metric]]==0, class2_df[[metric]]==0,])
+  num_class2_altered2_no = nrow(class2_df[class2_df[[metric]]==0 | class2_df[[metric]]==1,])
   num_class2_altered_yes = nrow(class2_df[class2_df[[metric]]==2,])
   
   t = matrix (c(num_class1_altered_yes,num_class1_altered_no,num_class2_altered_yes,num_class2_altered2_no), nrow=2)

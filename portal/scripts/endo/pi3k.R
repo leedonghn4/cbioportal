@@ -2,6 +2,7 @@
 library(heatmap.plus)
 library ("gplots")
 options(warn=-1)
+options(scipen=99) 
 
 source("/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/scripts/endo/heatmap.R")
 source("/Users/ceramie/dev/cbio-cancer-genomics-portal/portal/scripts/endo/oncoprint.R")
@@ -62,7 +63,19 @@ serous_df = subset(serous_df, MUTATION_RATE_CLUSTER %in% "1_LOW")
 endometriod_df = subset(df, SUBTYPE %in% c("Endo-Grade-1", "Endo-Grade-2", "Endo-Grade-3"))
 grades_1_2_df = subset(endometriod_df, tumor_grade %in% c("Grade 1", "Grade 2"))
 grade_3_df = subset(endometriod_df, tumor_grade %in% c("Grade 3"))
-analyze(grades_1_2_df, grade_3_df, "Endometriod:  Grades 1,2", "Endometriod:  Grade 3")
+#analyze(grades_1_2_df, grade_3_df, "Endometriod:  Grades 1,2", "Endometriod:  Grade 3")
+
+#######################################
+# Endometriod:  MUT HIGH v. MUT HIGHEST
+mut_highest_df = subset(df, MUTATION_RATE_CLUSTER %in% "3_HIGHEST")
+mut_high_df = subset(df, MUTATION_RATE_CLUSTER %in% "2_HIGH")
+#analyze(mut_highest_df, mut_high_df, "Mut:  Highest", "Mut:  High")
+
+#######################################
+# Endometriod:  MUT HIGH v. MUT HIGHEST
+mut_high_highest_df = subset(df, MUTATION_RATE_CLUSTER %in% c("2_HIGH", "3_HIGHEST"))
+mut_low_df = subset(df, MUTATION_RATE_CLUSTER %in% "1_LOW")
+analyze(mut_high_highest_df, mut_low_df, "Mut:  High, Highest", "Mut:  Low")
 
 #######################################
 # Endometriod:  MUT LOW
