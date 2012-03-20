@@ -23,8 +23,8 @@ initData <- function() {
   msi_colors = c("#DDDDDD", "#CCFFCC", "#FFCCFF", "#FF0000")
   cna_colors = c("#CCFFFF", "#33FFFF", "#0000FF")
   rppa_colors = c("red", "green")
-  df[df$MSI_STATUS %in% "Indeterminant",]$COL1=msi_colors[1]
-  df[df$MSI_STATUS %in% "Not Done",]$COL1=msi_colors[1]
+  df[df$MSI_STATUS %in% "Indeterminate",]$COL1=msi_colors[1]
+  df[df$MSI_STATUS %in% "Not Tested",]$COL1=msi_colors[1]
   df[df$MSI_STATUS %in% "MSS",]$COL1=msi_colors[2]
   df[df$MSI_STATUS %in% "MSI-L",]$COL1=msi_colors[3]
   df[df$MSI_STATUS %in% "MSI-H",]$COL1=msi_colors[4]

@@ -108,10 +108,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="PrepareClinicalFile.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="304" column="19" selection-start="13424" selection-end="13424" vertical-scroll-proportion="9.949368">
+            <state line="138" column="0" selection-start="6087" selection-end="6620" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MsiReader.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/MsiReader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="61" column="0" selection-start="2039" selection-end="2039" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OncotatorService.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/mut_diagram/oncotator/OncotatorService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="26" column="84" selection-start="887" selection-end="887" vertical-scroll-proportion="0.5840868">
               <folding />
             </state>
           </provider>
@@ -133,6 +151,7 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java" />
+        <option value="$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/MsiReader.java" />
       </list>
     </option>
   </component>
@@ -141,8 +160,8 @@
     <option name="LAST_EDITED_TAB_NAME" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="65" />
-    <option name="y" value="216" />
+    <option name="x" value="271" />
+    <option name="y" value="133" />
     <option name="width" value="1920" />
     <option name="height" value="983" />
   </component>
@@ -657,7 +676,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="216" width="1920" height="983" extended-state="0" />
+    <frame x="271" y="133" width="1920" height="983" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -781,16 +800,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/scripts/ResetDatabase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="47" selection-start="2625" selection-end="2625" vertical-scroll-proportion="0.8130841" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/model/ClinicalParameterMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="48" selection-start="878" selection-end="899" vertical-scroll-proportion="0.7921022" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/cgds/test/dao/TestDaoClinicalFreeForm.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="42" column="40" selection-start="1974" selection-end="1974" vertical-scroll-proportion="0.8943089" />
@@ -869,7 +878,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/PrepareClinicalFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="304" column="19" selection-start="13424" selection-end="13424" vertical-scroll-proportion="9.949368">
+        <state line="138" column="0" selection-start="6087" selection-end="6620" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/endometrial/clinical/MsiReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="61" column="0" selection-start="2039" selection-end="2039" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/portal/src/org/mskcc/portal/mut_diagram/oncotator/OncotatorService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="84" selection-start="887" selection-end="887" vertical-scroll-proportion="0.5840868">
           <folding />
         </state>
       </provider>

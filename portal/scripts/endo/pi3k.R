@@ -72,25 +72,8 @@ mut_high_df = subset(df, MUTATION_RATE_CLUSTER %in% "2_HIGH")
 #analyze(mut_highest_df, mut_high_df, "Mut:  Highest", "Mut:  High")
 
 #######################################
-# Endometriod:  MUT HIGH v. MUT HIGHEST
+# Endometriod:  MUT HIGH + MUT HIGHEST v. LOW
 mut_high_highest_df = subset(df, MUTATION_RATE_CLUSTER %in% c("2_HIGH", "3_HIGHEST"))
 mut_low_df = subset(df, MUTATION_RATE_CLUSTER %in% "1_LOW")
 analyze(mut_high_highest_df, mut_low_df, "Mut:  High, Highest", "Mut:  Low")
 
-#######################################
-# Endometriod:  MUT LOW
-#sub_df = subset(df, SUBTYPE %in% c("Endo-Grade-1", "Endo-Grade-2", "Endo-Grade-3"))
-#sub_df = subset(sub_df, MUTATION_RATE_CLUSTER %in% "1_LOW")
-#oncoprints_all(sub_df, "Endometriod - Mut Low")
-
-#######################################
-# Endometriod:  MUT HIGH
-#sub_df = subset(df, SUBTYPE %in% c("Endo-Grade-1", "Endo-Grade-2", "Endo-Grade-3"))
-#sub_df = subset(sub_df, MUTATION_RATE_CLUSTER %in% "2_HIGH")
-#oncoprints_all(sub_df, "Endometriod - Mut High")
-
-#######################################
-# Endometriod:  MUT HIGHEST
-#sub_df = subset(df, SUBTYPE %in% c("Endo-Grade-1", "Endo-Grade-2", "Endo-Grade-3"))
-#sub_df = subset(sub_df, MUTATION_RATE_CLUSTER %in% "3_HIGHEST")
-#oncoprints_all(sub_df, "Endometriod - Mut Highest")

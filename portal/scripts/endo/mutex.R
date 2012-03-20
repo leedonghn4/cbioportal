@@ -50,18 +50,22 @@ computeMutEx3 <- function (class_df) {
 computeMutEx4 <- function (class_df) {
   class_df = createTempMutColumns(class_df, "PIK3CA_MUTATED_1", "PIK3R1_MUTATED_1")
   t = table(class_df$TEMP_MUTATED_1, class_df$TEMP_MUTATED_2)
-  f = fisher.test(t)
-  row = data.frame(METRIC="PIK3CA_MUTATED_1 v. PIK3R1_MUTATED_1", P_VALUE=f$p.value)
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
+    f = fisher.test(t)
+    row = data.frame(METRIC="PIK3CA_MUTATED_1 v. PIK3R1_MUTATED_1", P_VALUE=f$p.value)
+  } else {
+    row = data.frame(METRIC="PIK3CA_MUTATED_1 v. PIK3R1_MUTATED_1", P_VALUE=-1)
+  }
 }
 
 computeMutEx5 <- function (class_df) {
   class_df = createTempMutColumns(class_df, "PIK3R1_MUTATED_1", "PIK3R2_MUTATED_1")
   t = table(class_df$TEMP_MUTATED_1, class_df$TEMP_MUTATED_2)
-  if (dim(t)[2]==2) {
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
     f = fisher.test(t)
     row = data.frame(METRIC="PIK3R1_MUTATED_1 v. PIK3R2_MUTATED_1", P_VALUE=f$p.value)
   } else {
-    row = data.frame(METRIC="PIK3R1_MUTATED_1 v. PIK3R2_MUTATED_1", P_VALUE=1)
+    row = data.frame(METRIC="PIK3R1_MUTATED_1 v. PIK3R2_MUTATED_1", P_VALUE=-1)
   }
 }
 
@@ -69,24 +73,32 @@ computeMutEx6 <- function (class_df) {
   class_df = createTempMutColumns(class_df, "PTEN_MUTATED_3", "PIK3CA_MUTATED_3")
   t = table(class_df$TEMP_MUTATED_1, class_df$TEMP_MUTATED_2)
   print (t)
-  f = fisher.test(t)
-  row = data.frame(METRIC="PTEN_MUTATED_3 v. PIK3CA_MUTATED_3", P_VALUE=f$p.value)
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
+    f = fisher.test(t)
+    row = data.frame(METRIC="PTEN_MUTATED_3 v. PIK3CA_MUTATED_3", P_VALUE=f$p.value)
+  } else {
+    row = data.frame(METRIC="PTEN_MUTATED_3 v. PIK3CA_MUTATED_3", P_VALUE=-1)
+  }
 }
 
 computeMutEx7 <- function (class_df) {
   class_df = createTempMutColumns(class_df, "PIK3CA_MUTATED_3", "PIK3R1_MUTATED_3")
   t = table(class_df$TEMP_MUTATED_1, class_df$TEMP_MUTATED_2)
-  f = fisher.test(t)
-  row = data.frame(METRIC="PIK3CA_MUTATED_3 v. PIK3R1_MUTATED_3", P_VALUE=f$p.value)
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
+    f = fisher.test(t)
+    row = data.frame(METRIC="PIK3CA_MUTATED_3 v. PIK3R1_MUTATED_3", P_VALUE=f$p.value)
+  } else {
+    row = data.frame(METRIC="PIK3CA_MUTATED_3 v. PIK3R1_MUTATED_3", P_VALUE=-1)
+  }
 }
 
 computeMutEx8 <- function (class_df) {
   class_df = createTempMutColumns(class_df, "PIK3R1_MUTATED_3", "PIK3R2_MUTATED_3")
   t = table(class_df$TEMP_MUTATED_1, class_df$TEMP_MUTATED_2)
-  if (dim(t)[2]==2) {
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
     f = fisher.test(t)
     row = data.frame(METRIC="PIK3R1_MUTATED_3 v. PIK3R2_MUTATED_3", P_VALUE=f$p.value)
   } else {
-    row = data.frame(METRIC="PIK3R1_MUTATED_3 v. PIK3R2_MUTATED_3", P_VALUE=1)
+    row = data.frame(METRIC="PIK3R1_MUTATED_3 v. PIK3R2_MUTATED_3", P_VALUE=-1)
   }
 }
