@@ -81,7 +81,8 @@ plotNonSilentRateInDelSize <- function(sub_df) {
 	t1 <- seq(from=t0[1], to=t0[2]) 
 	p = qplot(1:nrow(sub_df), NON_SILENT_RATE, data=sub_df, size=INDEL_RATIO, colour=factor(cl.clusters), shape=1)
 	p = p + geom_point(aes(y=NON_SILENT_RATE))
-	p = p + scale_size(to = c(1, 8))
+  # NB:  Limits of scale are set; this may need to be manually tweaked in the future
+	p = p + scale_size(to = c(1, 8), limits=c(0.0, 0.15))
 	p = p + opts(title="Indel Ratios:  Top 75 Cases")
 	p = p + ylab("Mutation Rate (mutations per 10^6 bases)")
 	p = p + xlab("All Sequenced Cases (Ordered by NonSilent Mutation Rate)")
