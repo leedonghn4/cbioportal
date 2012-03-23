@@ -28,8 +28,12 @@ computeMutEx1 <- function (class_df) {
 
 computeMutEx2 <- function (class_df) {
   t = table(class_df$PIK3R1_MUTATED_0, class_df$PIK3R2_MUTATED_0)
-  f = fisher.test(t)
-  row = data.frame(METRIC="PIK3R1_MUTATED_0 v. PIK3R2_MUTATED_0", P_VALUE=f$p.value)
+  if (dim(t)[1]==2 & dim(t)[2]==2) {
+    f = fisher.test(t)
+    row = data.frame(METRIC="PIK3R1_MUTATED_0 v. PIK3R2_MUTATED_0", P_VALUE=f$p.value)
+  } else {
+    row = data.frame(METRIC="PIK3R1_MUTATED_0 v. PIK3R2_MUTATED_0", P_VALUE=1)
+  }
 }
 
 createTempMutColumns <- function(class_df, metric1, metric2) {

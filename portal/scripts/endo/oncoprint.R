@@ -41,4 +41,15 @@ oncoprints_all <- function(sub_df, title) {
   m2 = as.matrix(colors)
   colors = c("#EEEEEE", "pink", "red")
   oncoprint(m1, m2, colors, paste(title, "Mut - Level 3")) 
+
+  # the genes / events to focus on, extract the columns we want to place in the Heatmap
+  events = subset(sub_df, select=c(PTEN_ALTERED_0, PIK3CA_ALTERED_0, PIK3R1_ALTERED_0, 
+      PIK3R2_ALTERED_0, AKT1_ALTERED_0, AKT2_ALTERED_0, AKT3_ALTERED_0))
+  colors = subset(sub_df, select=c(COL1, COL2, COL3, COL4, COL5, COL6))
+  
+  # Convert to Matrix and transpose
+  m1 = t(as.matrix(events))
+  m2 = as.matrix(colors)
+  colors = c("#EEEEEE", "red", "blue", "purple")
+  oncoprint(m1, m2, colors, paste(title, "Altered - Level 3")) 
 }  
