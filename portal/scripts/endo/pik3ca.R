@@ -1,7 +1,15 @@
 #!/usr/bin/Rscript --no-save
+library(survival)
 
 # Read in Unified Clinical File
 df = read.delim("~/SugarSync/endo/data/out/ucec_clinical_with_clusters_unified.txt")
+
+# Encode DFS_STATUS_BOOLEAN
+# 0 = Disease Free
+# 1 = Recurred / Progressed
+df = transform (df, DFS_STATUS_BOOLEAN=NA)
+df[df$DFS_STATUS=="DiseaseFree",]$DFS_STATUS_BOOLEAN=0
+df[df$DFS_STATUS=="Recurred",]$DFS_STATUS_BOOLEAN=1
 
 # Create new SUBTYPE Column that has Shorter Labels
 df = transform(df, SUBTYPE="NA")
@@ -47,6 +55,10 @@ df[df$tumor_grade=="Grade 1",]$GRADE_GROUP="LOW-GRADE"
 df[df$tumor_grade=="Grade 2",]$GRADE_GROUP="LOW-GRADE"
 df[df$tumor_grade=="Grade 3",]$GRADE_GROUP="HIGH-GRADE"
 
+# Create new PIK3CA Mutation Columns
+df = transform(df, PIK3CA_BIALLEIC_MUTATION=0)
+df[df$PIK3CA_MUTATED_1==2,]$PIK3CA_BIALLEIC_MUTATION=1
+
 # Restrict to Sequenced Cases Only
 df = subset(df, SEQUENCED=="Y")
 
@@ -79,9 +91,6 @@ test4 = list (METRIC="Age", YOUNGER=pt[2,1], OLDER=pt[2,2], P_VALUE=signif(f$p.v
 
 # Compare Frequency of Biallelic PIK3CA Mutations in the Different Grades
 # Restrict to Endometriod, Mut Low Only
-df = transform(df, PIK3CA_BIALLEIC_MUTATION=0)
-df[df$PIK3CA_MUTATED_1==2,]$PIK3CA_BIALLEIC_MUTATION=1
-
 temp_df = subset(df, SUBTYPE %in% c("Endometriod"))
 temp_df = subset(temp_df, MUTATION_RATE_CLUSTER %in% c("1_LOW"))
 t = table(temp_df$PIK3CA_BIALLEIC_MUTATION, temp_df$GRADE_GROUP)
@@ -106,3 +115,40 @@ t = table(temp_df$PIK3CA_BIALLEIC_MUTATION, temp_df$AGE_GROUP)
 pt = prop.table(t, 2)
 f = fisher.test(t)
 test8 = list (METRIC="Age", YOUNGER=pt[2,1], OLDER=pt[2,2], P_VALUE=signif(f$p.value, digits=4), TEST="Fisher's Exact")
+
+# Survival Analysis of Patients with PIK3CA Mutation v. those without
+temp_df = subset(df, SUBTYPE %in% c("Endometriod"))
+temp_df = subset(temp_df, MUTATION_RATE_CLUSTER %in% c("1_LOW"))
+
+dfs_surv = Surv (temp_df$DFS_MONTHS, temp_df$DFS_STATUS_BOOLEAN)
+dfs_surv_fit = survfit(dfs_surv ~ temp_df$PIK3CA_MUTATED_0)
+dfs_log_rank = survdiff (dfs_surv ~ temp_df$PIK3CA_MUTATED_0)
+
+print(dfs_log_rank)
+print(dfs_surv_fit)
+
+labels=c("PIK3CA WT", "PIK3CA MUT")
+colors=c("black", "red")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
+
+# Survival Analysis of Patients with PIK3CA Single Mutation v. PIK3CA biallelic v. PIK3CA WT
+temp_df = subset(df, SUBTYPE %in% c("Endometriod"))
+temp_df = subset(temp_df, MUTATION_RATE_CLUSTER %in% c("1_LOW"))
+#temp_df = subset(temp_df, PIK3CA_MUTATED_1 %in% c(0,1))
+
+dfs_surv = Surv (temp_df$DFS_MONTHS, temp_df$DFS_STATUS_BOOLEAN)
+dfs_surv_fit = survfit(dfs_surv ~ temp_df$PIK3CA_MUTATED_1)
+dfs_log_rank = survdiff (dfs_surv ~ temp_df$PIK3CA_MUTATED_1)
+
+print(dfs_log_rank)
+print(dfs_surv_fit)
+
+labels=c("PIK3CA WT", "PIK3CA Single Mutation", "PIK3CA >1 Mutation")
+colors=c("black", "red", "blue")
+plot (dfs_surv_fit, col=colors, yscale=100, xlab="Months Disease Free", ylab="% Disease Free", cex.main=1.0, cex.axis=1.0, cex.lab=1.0, font=1)
+legend ("topright", bty="n", labels, fill=colors)
+p_val <- 1 - pchisq(dfs_log_rank$chisq, length(dfs_log_rank$n) - 1)
+legend ("topright", bty="n", paste("Log-rank test p-value: ", signif(p_val, 4)), inset=c(0.0, 0.37))
