@@ -178,12 +178,13 @@ public final class OncoVizDataServlet extends HttpServlet {
         if (mutationList != null) {
             writer.write("<table>");
             writer.write("<tr><th>Case ID</th><th>Genomic Change</th><th>Exon Affected</th><th>Protein Change</th>" +
-                    "<th>COSMIC</th><th>Key</th></tr>");
+                    "<th>Color</th><th>COSMIC</th><th>Key</th></tr>");
             for (ExtendedMutation mutation:  mutationList) {
                 writer.write("<tr><td>" + mutation.getCaseId() + "</td>");
                 writer.write("<td>" + mutation.getOncotatorRecord().getGenomeChange() + "</td>");
                 writer.write("<td>" + mutation.getOncotatorRecord().getExonAffected() + "</td>");
                 writer.write("<td>" + mutation.getOncotatorRecord().getProteinChange() + "</td>");
+                writer.write("<td>" + mutation.getColor() + "</td>");
                 writer.write("<td>" + mutation.getOncotatorRecord().getCosmicOverlappingMutations() + "</td>");
                 writer.write("<td><a href='http://jsonviewer.stack.hu/#http://www.broadinstitute.org/oncotator/mutation/" + mutation.getOncotatorRecord().getKey() + "'>OncotatorRecord JSON</a></td>");
                 writer.write("</tr>");

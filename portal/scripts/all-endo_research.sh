@@ -18,7 +18,7 @@
 ./importClinicalData.pl ~/SugarSync/endo/data/out/ucec_clinical_unified.txt
 
 # Imports Mutation Data
-./importProfileData.pl --data ~/SugarSync/endo/data/UCEC.maf.annotated --meta ~/SugarSync/endo/data/meta_mutations_MAF.txt --dbmsAction clobber
+./importProfileData.pl --data ~/SugarSync/endo/data/UCEC_03_18_2012.maf.annotated --meta ~/SugarSync/endo/data/meta_mutations_MAF.txt --dbmsAction clobber
 
 # Imports Copy Number Data
 ./importProfileData.pl --data ~/SugarSync/endo/data/data_CNA.txt --meta ~/SugarSync/endo/data/meta_CNA.txt --dbmsAction clobber
