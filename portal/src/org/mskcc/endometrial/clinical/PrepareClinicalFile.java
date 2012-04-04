@@ -26,6 +26,7 @@ public class PrepareClinicalFile {
     private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
     private HashSet<String> sequencedCaseSet;
+    private HashSet<String> gisticCaseSet;
     private File mafFile;
     private CnaClusterReader cnaClusterReader;
     private MsiReader msiReader;
@@ -57,6 +58,7 @@ public class PrepareClinicalFile {
         initReaders(msiFile, cnaClusterFile, mlh1MethFile, coverageFile, rppaFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
+        gisticCaseSet = cnaSummarizer.getGisticCaseSet();
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
         GermlineMutationSummarizer germlineMutationSummarizer = new
                 GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
@@ -291,7 +293,7 @@ public class PrepareClinicalFile {
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
-        caseListUtil.writeCaseLists(sequencedCaseSet, cnaClusterReader, outputDir);
+        caseListUtil.writeCaseLists(sequencedCaseSet, gisticCaseSet, cnaClusterReader, outputDir);
     }
 
     public HashSet<String> getSequencedCaseSet() {

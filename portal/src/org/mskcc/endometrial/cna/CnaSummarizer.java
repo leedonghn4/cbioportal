@@ -38,6 +38,10 @@ public class CnaSummarizer {
         }
         bufferedReader.close();
     }
+    
+    public HashSet<String> getGisticCaseSet() {
+        return caseSet;
+    }
 
     public boolean hasCnaData(String caseId) {
         if (caseSet.contains(caseId)) {
