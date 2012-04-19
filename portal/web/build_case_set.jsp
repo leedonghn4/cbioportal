@@ -11,7 +11,7 @@
 <div class="query_step_section" id="step3">
 <form action="build_case_set_execute.jsp" METHOD="GET"> 
 <%
-    CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId("ucec_tcga ");
+    CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId("ucec_tcga");
 
     DaoClinicalFreeForm daoClinicalFreeForm = new DaoClinicalFreeForm();
     HashSet<String> clinicalCaseSet = daoClinicalFreeForm.getAllCases(cancerStudy.getInternalId());
