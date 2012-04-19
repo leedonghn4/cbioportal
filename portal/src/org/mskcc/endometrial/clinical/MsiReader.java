@@ -10,7 +10,8 @@ import java.util.HashMap;
  * Reads in MSI Status for all Cases.
  */
 public class MsiReader {
-    private HashMap<String, String> msiMap = new HashMap<String, String>();
+    private HashMap<String, String> msi7MarkerMap = new HashMap<String, String>();
+    private HashMap<String, String> msi5MarkerMap = new HashMap<String, String>();
 
     /**
      * Constructor.
@@ -26,12 +27,12 @@ public class MsiReader {
         while (line != null) {
             String parts[] = line.split("\t");
             String barCode = getValue("bcr_patient_barcode", "TCGA ID", headers, parts);
-            String msiClass = getValue("MSI CLASS", "mononucleotide_and_dinucleotide_marker_panel_analysis_status",
-                    headers, parts);
-
+            String msiClass7Marker = getValue("7 Marker MSI Call", "7_marker_msi_call", headers, parts);
+            String msiClass5Marker = getValue("5 Concensus Marker MSI Call", "5_marker_msi_call", headers, parts);
             if (barCode.trim().length()>0) {
                 String caseId = extractCaseId(barCode);
-                msiMap.put(caseId, msiClass);
+                msi7MarkerMap.put(caseId, msiClass7Marker);
+                msi5MarkerMap.put(caseId, msiClass5Marker);
             }
             line = bufferedReader.readLine();
         }
@@ -39,12 +40,21 @@ public class MsiReader {
     }
 
     /**
-     * Gets the MSI Status for the Specified Case.
+     * Gets the 7 Marker MSI Status for the Specified Case.
      * @param caseId Case ID.
      * @return MSI Status.
      */
-    public String getMsiStatus(String caseId) {
-        return msiMap.get(caseId);
+    public String getMsi7Status(String caseId) {
+        return msi7MarkerMap.get(caseId);
+    }
+
+    /**
+     * Gets the 5 Marker MSI Status for the Specified Case.
+     * @param caseId Case ID.
+     * @return MSI Status.
+     */
+    public String getMsi5Status(String caseId) {
+        return msi5MarkerMap.get(caseId);
     }
 
     private String extractCaseId(String barCode) {

@@ -31,45 +31,27 @@ public class CaseListUtil {
      * @param caseId        Case ID.
      */
     public void categorizeByHistologicalSubType(String histSubType, String caseId) {
-        if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 1)")) {
+        if (histSubType.equals("EndoGr1")) {
             endoGrade1Set.add(caseId);
-        } else if(histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 2)")) {
+        } else if(histSubType.equals("EndoGr2")) {
             endoGrade2Set.add(caseId);
-        } else if (histSubType.equals("Endometrioid endometrial adenocarcinoma (Grade 3)")) {
+        } else if (histSubType.equals("EndoGr3")) {
             endoGrade3Set.add(caseId);
-        } else if (histSubType.equals("Uterine serous endometrial adenocarcinoma")) {
+        } else if (histSubType.equals("SerousGr3")) {
             serousSet.add(caseId);
-        } else if (histSubType.equals("Mixed serous and endometrioid")) {
+        } else if (histSubType.equals("MixedGr3")) {
             mixedSet.add(caseId);
-        } else if (histSubType.equals("[Discrepancy]")) {
-            //  Do nothing.  ignore.
+        } else if (histSubType.equals("Normal")) {
+            // do nothing...
         } else {
             throw new IllegalArgumentException ("Aborting.  Unknown Histological Subtype:  " + histSubType);
         }
     }
 
     public void writeCaseLists(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,
-           CnaClusterReader cnaClusterReader,
            String outputDir) throws IOException {
         outputHistologicalSubtypes(sequencedCaseSet, gisticCaseSet, outputDir);
         outputAllEndometriodCases(sequencedCaseSet, gisticCaseSet, outputDir);
-        outputCNAClusters(sequencedCaseSet, gisticCaseSet, cnaClusterReader, outputDir);
-    }
-
-    private void outputCNAClusters(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,
-               CnaClusterReader cnaClusterReader, String outputDir) throws IOException {
-        HashSet<String> cluster1Set = cnaClusterReader.getCluster1Set();
-        HashSet<String> cluster2Set = cnaClusterReader.getCluster2Set();
-        HashSet<String> cluster3Set = cnaClusterReader.getCluster3Set();
-        outputCaseSet(cluster1Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_cna_cluster_1_sequenced",
-                "CNA Cluster 1 - Sequenced + GISTIC",
-                "CNA Cluster 1 - Endometrioids with very few or no SNCA (Sequenced + GISTIC Cases Only)", true, outputDir);
-        outputCaseSet(cluster2Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_cna_cluster_2_sequenced",
-                "CNA Cluster 2 - Sequenced + GISTIC",
-                "CNA Cluster 2 - Endometrioids with some SNCA (Sequenced + GISTIC Cases Only)", true, outputDir);
-        outputCaseSet(cluster3Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_cna_cluster_3_sequenced",
-                "CNA Cluster 3 - Sequenced + GISTIC",
-                "CNA Cluster 3 - Serous Like (Sequenced + GISTIC Cases Only)", true, outputDir);
     }
 
     private void outputAllEndometriodCases(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,

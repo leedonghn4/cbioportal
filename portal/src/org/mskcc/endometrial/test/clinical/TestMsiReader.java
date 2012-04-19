@@ -14,7 +14,9 @@ public class TestMsiReader extends TestCase {
     public void testPrepareClinicalFile() throws IOException {
         File msiFile = new File ("test_data/msi_test.txt");
         MsiReader msiReader = new MsiReader(msiFile);
-        assertEquals("MSI-H", msiReader.getMsiStatus("TCGA-AP-A051"));
-        assertEquals("MSI-H", msiReader.getMsiStatus("TCGA-D1-A1NZ"));
+        assertEquals("MSS", msiReader.getMsi5Status("TCGA-A5-A0G3"));
+        assertEquals("MSS", msiReader.getMsi7Status("TCGA-A5-A0G3"));
+        assertEquals("MSI-H", msiReader.getMsi5Status("TCGA-A5-A0GB"));
+        assertEquals("MSI-H", msiReader.getMsi7Status("TCGA-A5-A0GB"));
     }
 }

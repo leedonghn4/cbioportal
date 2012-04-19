@@ -1,16 +1,14 @@
 package org.mskcc.endometrial.clinical;
 
 import org.mskcc.cgds.dao.DaoException;
-import org.mskcc.endometrial.cna.CnaClusterReader;
+import org.mskcc.endometrial.cluster.ClusterReader;
 import org.mskcc.endometrial.cna.CnaSummarizer;
 import org.mskcc.endometrial.cna.CopyNumberMap;
 import org.mskcc.endometrial.genomic.GenomicMap;
-import org.mskcc.endometrial.methylation.MethylationReader;
 import org.mskcc.endometrial.mutation.CoverageReader;
-import org.mskcc.endometrial.mutation.GermlineMutationSummarizer;
 import org.mskcc.endometrial.mutation.MutationMap;
 import org.mskcc.endometrial.mutation.MutationSummarizer;
-import org.mskcc.endometrial.rppa.RppaReader;
+import org.mskcc.endometrial.rnaseq.RnaSeqReader;
 
 import java.io.*;
 import java.util.*;
@@ -22,100 +20,100 @@ public class PrepareClinicalFile {
     private static final String NA_OUTPUT = "NA";
     private static final String TAB = "\t";
     private static final String NEW_LINE = "\n";
-    private HashMap<String, String> osMonthsMap = new HashMap<String, String>();
-    private HashMap<String, String> dfsMonthsMap = new HashMap<String, String>();
     private StringBuffer newTable = new StringBuffer();
     private HashSet<String> sequencedCaseSet;
     private HashSet<String> gisticCaseSet;
     private File mafFile;
-    private CnaClusterReader cnaClusterReader;
     private MsiReader msiReader;
-    private MethylationReader mlh1Reader;
-    private RppaReader rppaReader;
     private CoverageReader coverageReader;
+    private RnaSeqReader rnaSeqReader;
     private CaseListUtil caseListUtil = new CaseListUtil();
     private HashSet<String> targetGeneSet;
     private MutationMap mutationMap;
     private CopyNumberMap copyNumberMap;
     private GenomicMap genomicMap;
+    private ArrayList<ClusterReader> clusterReaders = new ArrayList<ClusterReader>();
 
     /**
      * Constructor.
 
      * @throws IOException IO Error.
      */
-    public PrepareClinicalFile(File clinicalFile, File msiFile, File somaticMafFile, 
-            File germlineMafFile, File cnaFile, File cnaClusterFile, File mlh1MethFile, File coverageFile,
-            File rppaFile, boolean performSanityChecks) throws IOException, DaoException {
+    public PrepareClinicalFile(File inputDir) throws IOException, DaoException {
         initTargetGeneSet();
+        File clinicalFile = new File(inputDir + "/clinical/clinical.txt");
+        File msiFile = new File(inputDir + "/clinical/msi.txt");
+        File somaticMafFile = new File(inputDir + "/mutation/UCEC_somatic.maf");
+        File cnaFile = new File(inputDir +  "/cna/all_thresholded.by_genes.txt");
+        File coverageFile = new File(inputDir + "/mutation/coverage.txt");
+        File rnaSeqFile = new File(inputDir + "/rna-seq/rna_seq_rpkm.txt");
         this.mafFile = somaticMafFile;
-        System.out.println("Reading in mutation data...");
+        System.out.println("Reading in Mutation data...");
         this.mutationMap = new MutationMap(somaticMafFile, targetGeneSet);
         this.copyNumberMap = new CopyNumberMap(cnaFile, targetGeneSet);
         System.out.println("Reading in CNA data...");
         this.genomicMap = new GenomicMap(mutationMap, copyNumberMap);
-
-        initReaders(msiFile, cnaClusterFile, mlh1MethFile, coverageFile, rppaFile);
+        System.out.println("Reading in Clinical data...");
+        initReaders(inputDir, msiFile, coverageFile, rnaSeqFile);
 
         CnaSummarizer cnaSummarizer = new CnaSummarizer(cnaFile);
         gisticCaseSet = cnaSummarizer.getGisticCaseSet();
         MutationSummarizer mutationSummarizer = new MutationSummarizer(somaticMafFile);
-        GermlineMutationSummarizer germlineMutationSummarizer = new
-                GermlineMutationSummarizer(germlineMafFile, performSanityChecks);
         sequencedCaseSet = mutationSummarizer.getSequencedCaseSet();
         FileReader reader = new FileReader(clinicalFile);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line = bufferedReader.readLine();  //  The header line.
+        this.appendColumnHeaders(line);
         validateHeader(line);
         String headers[] = line.split("\t");
-        String newHeaderLine = transformHeader(line);
-        appendColumnHeaders(germlineMutationSummarizer, newHeaderLine);
+
         line = bufferedReader.readLine();
         while (line != null) {
             String parts[] = line.split("\t");
             String caseId = parts[0];
-            String histSubType = getValue("histological_typeCorrected", "histological_type", headers, parts);
-            String daysToNewTumorEventAfterInitialTreatment = getValue("daysToNewTumorEventAfterInitialTreatment",
-                    "days_to_new_tumor_event_after_initial_treatment", headers, parts);
-            String vitalStatus = getValue("NewVitalStatus", "vital_status", headers, parts);
-            String recurredStatus = getValue("Recurred/Progressed", headers, parts);
-            String daysToFu = getValue("NewDaystoFU", "days_to_last_followup", headers, parts);
-            String daysToAlive = getValue("NewDaystoAlive", "days_to_last_known_alive", headers, parts);
-            String daysToDead = getValue("NewDaystoDead", "days_to_death", headers, parts);
-            caseListUtil.categorizeByHistologicalSubType(histSubType, caseId);
-
-            computeDfsMonths(caseId, recurredStatus, daysToNewTumorEventAfterInitialTreatment, daysToFu);
-            computeOsMonths(caseId, vitalStatus, daysToFu, daysToAlive, daysToDead);
+            String histSubTypeAndGrade = getValue("histology_grade", headers, parts);
+            caseListUtil.categorizeByHistologicalSubType(histSubTypeAndGrade, caseId);
             newTable.append(line.trim());
-
-            appendSurvivalColumns(recurredStatus, caseId);
             appendMsiStatus(caseId);
             appendSequencedColumn(caseId);
-            appendCnaDataAvailableColumns(cnaSummarizer, caseId);
-            appendCnaColumns(cnaSummarizer, caseId);
-            appendCnaClusterColumn(caseId);
+            appendGenomicDataAvailable(cnaSummarizer, caseId);
             appendMutationCounts(mutationSummarizer, caseId);
-            appendMlh1MethylationStatus(caseId);
             appendMutationSpectra(mutationSummarizer, caseId);
             newTable.append(TAB + coverageReader.getCoverage(caseId));
-            appendGermlineMutationFields(germlineMutationSummarizer, caseId, newTable);
+            appendClusters(caseId);
             appendTargetGeneSet(caseId, newTable);
-            appendRppaData(caseId, newTable);
             newTable.append(NEW_LINE);
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
     }
-    
+
+    private void appendClusters(String caseId) {
+        for (ClusterReader clusterReader:  clusterReaders) {
+            ArrayList<String> valueList = clusterReader.getValueList(caseId);
+            if (valueList != null) {
+                for (String value:  valueList) {
+                    newTable.append(TAB + value);
+                }
+            } else {
+                ArrayList<String> headerList = clusterReader.getHeaderList();
+                for (String header:  headerList) {
+                    newTable.append(TAB + NA_OUTPUT);
+                }
+            }
+        }
+    }
+
     private void initTargetGeneSet() {
         targetGeneSet = new HashSet<String>();
-        targetGeneSet.add("PTEN");
-        targetGeneSet.add("PIK3CA");
-        targetGeneSet.add("PIK3R1");
-        targetGeneSet.add("PIK3R2");
-        targetGeneSet.add("AKT1");
-        targetGeneSet.add("AKT2");
-        targetGeneSet.add("AKT3");
+        //        targetGeneSet.add("PTEN");
+        //        targetGeneSet.add("PIK3CA");
+        //        targetGeneSet.add("PIK3R1");
+        //        targetGeneSet.add("PIK3R2");
+        //        targetGeneSet.add("AKT1");
+        //        targetGeneSet.add("AKT2");
+        //        targetGeneSet.add("AKT3");
+        //        targetGeneSet.add("KRAS");
     }
     
     private String getValue (String targetHeader, String[] colHeaders, String[] parts) {
@@ -128,28 +126,22 @@ public class PrepareClinicalFile {
         throw new NullPointerException("Could not find column with name:  " + targetHeader);
     }
 
-    private String getValue (String targetHeader1, String targetHeader2, String[] colHeaders, String[] parts) {
-        for (int i=0; i<colHeaders.length; i++) {
-            String currentHeader = colHeaders[i];
-            if (currentHeader.equalsIgnoreCase(targetHeader1) || currentHeader.equalsIgnoreCase(targetHeader2)) {
-                return parts[i];
-            }
-        }
-        throw new NullPointerException("Could not find column with name:  [" + targetHeader1
-                + ", " + targetHeader2 + "]");
-    }    
-
-    private void initReaders(File msiFile, File cnaClusterFile, File mlh1MethFile, File coverageFile,
-             File rppaFile) throws IOException {
+    private void initReaders(File inputDir, File msiFile, File coverageFile,
+                             File rnaSeqFile) throws IOException {
         System.out.println("Reading in MSI Data...");
         msiReader = new MsiReader(msiFile);
-        System.out.println("Reading in MLH1 Hypermethylation Data...");
-        mlh1Reader = new MethylationReader(mlh1MethFile);
         System.out.println("Reading in Sequence Coverage Data...");
         coverageReader = new CoverageReader(coverageFile);
-        System.out.println("Reading in CNA Clusters...");
-        cnaClusterReader = new CnaClusterReader(cnaClusterFile);
-        rppaReader = new RppaReader(rppaFile);
+
+        System.out.println("Reading in RNA-Seq Data...");
+        rnaSeqReader = new RnaSeqReader(rnaSeqFile);
+
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/cna_clusters.txt")));
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/mrna_expression_clusters.txt")));
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/dna_methylation_clusters.txt")));
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/mlh1_hypermethylated.txt")));
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/mutation_rate_clusters.txt")));
+        clusterReaders.add(new ClusterReader(new File(inputDir + "/clusters/micro_rna_clusters.txt")));
     }
     
     private void appendTargetGeneSet(String caseId, StringBuffer newTable) throws IOException, DaoException {
@@ -161,11 +153,6 @@ public class PrepareClinicalFile {
         }
     }
     
-    private void appendRppaData(String caseId, StringBuffer newTable) {
-        ArrayList<String> dataFields = rppaReader.getDataValues(caseId);
-        appendColumns(dataFields, newTable);
-    }
-
     private void appendMutationSpectra(MutationSummarizer mutationSummarizer, String caseId) {
         newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
         newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
@@ -175,41 +162,32 @@ public class PrepareClinicalFile {
         newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
     }
 
-    private void appendMlh1MethylationStatus(String caseId) {
-        if (mlh1Reader.getMethylationStatus(caseId) != null) {
-            newTable.append(TAB + mlh1Reader.getMethylationStatus(caseId));
-        } else {
-            newTable.append(TAB + NA_OUTPUT);
-        }
-    }
-
-    private void appendColumnHeaders(GermlineMutationSummarizer germlineMutationSummarizer, String newHeaderLine) {
+    private void appendColumnHeaders(String newHeaderLine) {
         newTable.append(newHeaderLine.trim() + TAB
-                + "DFS_STATUS" + TAB
-                + "DFS_MONTHS" + TAB
-                + "OS_MONTHS" + TAB
-                + "MSI_STATUS" + TAB
-                + "SEQUENCED" + TAB
-                + "GISTIC" + TAB
-                + "SEQUENCED_AND_GISTIC" + TAB
-                + "CNA_ALTERED_1" + TAB
-                + "CNA_ALTERED_2" + TAB
-                + "CNA_CLUSTER" + TAB
-                + "SILENT_MUTATION_COUNT" + TAB
-                + "NON_SILENT_MUTATION_COUNT" + TAB
-                + "TOTAL_SNV_COUNT" +  TAB
-                + "INDEL_MUTATION_COUNT" + TAB
-                + "MLH1_HYPERMETHYLATED" + TAB
-                + "TG_COUNT" + TAB
-                + "TC_COUNT" + TAB
-                + "TA_COUNT" + TAB
-                + "CT_COUNT" + TAB
-                + "CG_COUNT" + TAB
-                + "CA_COUNT" + TAB
-                + "COVERED_BASES");
-        appendGermlineMutationColumns(germlineMutationSummarizer, newTable);
+                + "msi_status_7_marker_call" + TAB
+                + "msi_status_5_marker_call" + TAB
+                + "data_maf" + TAB
+                + "data_gistic" + TAB
+                + "data_rna_seq" + TAB
+                + "data_core_sample" + TAB
+                + "silent_mutation_count" + TAB
+                + "non_silent_mutation_count" + TAB
+                + "total_snv_count" + TAB
+                + "indel_mutation_count" + TAB
+                + "tg_count" + TAB
+                + "tc_count" + TAB
+                + "ta_count" + TAB
+                + "ct_count" + TAB
+                + "cg_count" + TAB
+                + "ca_count" + TAB
+                + "covered_bases" + TAB);
+        for (ClusterReader reader:  clusterReaders) {
+            ArrayList<String> headerList = reader.getHeaderList();
+            for (String header:  headerList) {
+                newTable.append(header + TAB);
+            }
+        }
         appendTargetGeneSetColumns();
-        appendRppaColumns();
         newTable.append(NEW_LINE);
     }
 
@@ -221,12 +199,7 @@ public class PrepareClinicalFile {
             appendColumns(headingList, newTable);
         }
     }
-    
-    private void appendRppaColumns() {
-        ArrayList<String> headingList = rppaReader.getRppaHeaders();
-        appendColumns(headingList, newTable);
-    }
-    
+
     private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
         long totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
                 + mutationSummarizer.getNonSilentMutationCount(caseId);
@@ -236,30 +209,22 @@ public class PrepareClinicalFile {
         newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
     }
 
-    private void appendCnaDataAvailableColumns(CnaSummarizer cnaSummarizer, String caseId) {
+    private void appendGenomicDataAvailable(CnaSummarizer cnaSummarizer, String caseId) {
         if (cnaSummarizer.hasCnaData(caseId)) {
             newTable.append (TAB + "Y");
         } else {
             newTable.append (TAB + "N");
         }
-        if (sequencedCaseSet.contains(caseId) && cnaSummarizer.hasCnaData(caseId)) {
+        if (rnaSeqReader.hasRnaReqData(caseId)) {
             newTable.append (TAB + "Y");
         } else {
             newTable.append (TAB + "N");
         }
-    }
-
-    private void appendCnaColumns(CnaSummarizer cnaSummarizer, String caseId) {
-        newTable.append (TAB + cnaSummarizer.getCna1Count(caseId));
-        newTable.append (TAB + cnaSummarizer.getCna2Count(caseId));
-    }
-
-    private void appendCnaClusterColumn(String caseId) {
-        String cnaCluster = cnaClusterReader.getCnaClusterAssignment(caseId);
-        if (cnaCluster == null) {
-            newTable.append (TAB + NA_OUTPUT);
+        if (sequencedCaseSet.contains(caseId) && cnaSummarizer.hasCnaData(caseId)
+                && rnaSeqReader.hasRnaReqData(caseId)) {
+            newTable.append (TAB + "Y");
         } else {
-            newTable.append (TAB + cnaCluster);
+            newTable.append (TAB + "N");
         }
     }
 
@@ -272,94 +237,53 @@ public class PrepareClinicalFile {
     }
 
     private void appendMsiStatus(String caseId) {
-        String msiStatus = msiReader.getMsiStatus(caseId);
-        if (msiStatus != null) {
-            newTable.append(TAB + msiStatus);
+        String msi5Status = msiReader.getMsi5Status(caseId);
+        if (msi5Status != null) {
+            newTable.append(TAB + msi5Status);
+        } else {
+            newTable.append(TAB + NA_OUTPUT);
+        }
+        String msi7Status = msiReader.getMsi7Status(caseId);
+        if (msi7Status != null) {
+            newTable.append(TAB + msi5Status);
         } else {
             newTable.append(TAB + NA_OUTPUT);
         }
     }
 
-    private void appendSurvivalColumns(String recurredStatus, String caseId) {
-        if (recurredStatus.equalsIgnoreCase("YES")) {
-            newTable.append(TAB + "Recurred");
-        } else if (recurredStatus.equalsIgnoreCase("NO")) {
-            newTable.append(TAB + "DiseaseFree");
-        } else {
-            newTable.append(TAB + "");
-        }
-        newTable.append(TAB + dfsMonthsMap.get(caseId));
-        newTable.append(TAB + osMonthsMap.get(caseId));
-    }
-
     public void writeCaseLists(String outputDir) throws IOException {
-        caseListUtil.writeCaseLists(sequencedCaseSet, gisticCaseSet, cnaClusterReader, outputDir);
+        caseListUtil.writeCaseLists(sequencedCaseSet, gisticCaseSet, outputDir);
     }
 
     public HashSet<String> getSequencedCaseSet() {
         return sequencedCaseSet;
     }
 
-    /**
-     * The portal expects specific data column names.  This functions transforms into header names that the
-     * portal likes.
-     */
-    private String transformHeader(String headerLine) {
-        headerLine = headerLine.replaceAll("bcr_patient_barcode", "CASE_ID");
-        headerLine = headerLine.replaceAll("NewVitalStatus", "OS_STATUS");
-        return headerLine;
-    }
+//    /**
+//     * The portal expects specific data column names.  This functions transforms into header names that the
+//     * portal likes.
+//     */
+//    private String transformHeader(String headerLine) {
+//        headerLine = headerLine.replaceAll("bcr_patient_barcode", "CASE_ID");
+//        headerLine = headerLine.replaceAll("NewVitalStatus", "OS_STATUS");
+//        return headerLine;
+//    }
 
     /**
      * Validate the Headers.  If the headers have changed, all bets are off and abort.
      */
     private void validateHeader(String header) {
         String parts[] = header.split("\t");
-        if (!parts[0].equals("bcr_patient_barcode")) {
-            throw new IllegalArgumentException ("Header at 0 was expecting:  bcr_patient_barcode");
+        if (!parts[0].equals("tcga_id")) {
+            throw new IllegalArgumentException ("Header at 0 was expecting:  TCGAID");
         }
-        if (!parts[10].equals("NewVitalStatus")) {
-            throw new IllegalArgumentException ("Header at 10 was expecting:  NewVitalStatus");
+        if (!parts[8].equals("vital_status")) {
+            throw new IllegalArgumentException ("Header at 10 was expecting:  VitalStatus");
         }
-        if (!parts[12].equals("NewDaystoFU")) {
-            throw new IllegalArgumentException ("Header at 12 was expecting:  NewDaystoFU");
-        }
-        if (!parts[13].equals("NewDaystoAlive")) {
-            throw new IllegalArgumentException ("Header at 13 was expecting:  NewDaystoAlive");
-        }
-        if (!parts[14].equals("NewDaystoDead")) {
-            throw new IllegalArgumentException ("Header at 14 was expecting:  NewDaystoDead");
-        }
-    }
-
-    private void computeOsMonths(String caseId, String vitalStatus, String daysToFu, String daysToAlive,
-            String daysToDead) {
-        String osMonthsStr = SurvivalCalculator.calculateOsMonths(vitalStatus, daysToFu,
-                daysToAlive, daysToDead);
-        osMonthsMap.put(caseId, osMonthsStr);
-    }
-
-    private void computeDfsMonths(String caseId, String recurredStatus,
-            String daysToNewTumorEventAfterInitialTreatment, String daysToFollowUp) {
-        String dfsMonthsStr = SurvivalCalculator.calculateDfsMonths(recurredStatus,
-                daysToNewTumorEventAfterInitialTreatment, daysToFollowUp);
-        dfsMonthsMap.put(caseId, dfsMonthsStr);
     }
 
     public String getNewClinicalTable() {
         return newTable.toString();
-    }
-
-    private void appendGermlineMutationColumns(GermlineMutationSummarizer germlineMutationSummarizer,
-            StringBuffer newTable) {
-        ArrayList<String> headingList = germlineMutationSummarizer.getColumnHeadings();
-        appendColumns(headingList, newTable);
-    }
-
-    private void appendGermlineMutationFields(GermlineMutationSummarizer germlineMutationSummarizer,
-            String caseId, StringBuffer newTable) {
-        ArrayList<String> valueList = germlineMutationSummarizer.getValues(caseId);
-        appendColumns(valueList, newTable);
     }
 
     private void appendColumns(ArrayList<String> list, StringBuffer table) {
@@ -370,20 +294,16 @@ public class PrepareClinicalFile {
 
     public static void main(String[] args) throws Exception {
         // check args
-        if (args.length < 4) {
-            System.out.println("command line usage:  prepareClinical.pl <clinical_file> " +
-                    "<msi_file> <somatic_maf_file> <germline_maf_file> " +
-                    "<cna_file> <cna_clusters_file> <mlh1_meth_file> <output_dir>");
+        if (args.length < 1) {
+            System.out.println("command line usage:  prepareClinical.pl <input_id>");
             System.exit(1);
         }
 
-        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]),
-                new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]),
-                new File(args[5]), new File(args[6]), new File(args[7]), new File(args[8]), true);
+        PrepareClinicalFile prepareClinicalFile = new PrepareClinicalFile(new File(args[0]));
 
-        prepareClinicalFile.writeCaseLists(args[9]);
+        prepareClinicalFile.writeCaseLists(args[0]);
 
-        File newClinicalFile = new File(args[9] + "/ucec_clinical_unified.txt");
+        File newClinicalFile = new File(args[0] + "/clinical/clinical_unified.txt");
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
