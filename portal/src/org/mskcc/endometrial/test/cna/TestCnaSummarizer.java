@@ -10,7 +10,7 @@ import org.mskcc.endometrial.cna.CnaSummarizer;
 /**
  * Tests the CnaSummarizer.
  */
-public class TestCnaSummarizder extends TestCase {
+public class TestCnaSummarizer extends TestCase {
 
     public void testCnaSummarizer() throws IOException {
         File cnaFile = new File ("test_data/cna_sample.txt");
