@@ -1,1 +1,1 @@
-./prepareClinicalData.pl ~/SugarSync/endo/data/ClinicalTable_12_30_2011.txt ~/SugarSync/endo/data/MSI_03_19_2012.txt ~/SugarSync/endo/data/UCEC_03_18_2012.maf.annotated ~/SugarSync/endo/data/genome.wustl.edu_UCEC.IlluminaGA_DNASeq.Level_2.1.germline.maf ~/SugarSync/endo/data/data_CNA.txt ~/SugarSync/endo/data/cna_clusters/ucec_cna_clusters.txt ~/SugarSync/endo/data/mlh1_meth.txt ~/SugarSync/endo/data/total_covgs_for_248_cases.txt ~/SugarSync/endo/data/UCEC.rppa.txt ~/SugarSync/endo/data/out
+./prepareClinicalData.pl ~/dev/ucec_tcga/
