@@ -1,6 +1,6 @@
 package org.mskcc.endometrial.clinical;
 
-import org.mskcc.endometrial.cna.CnaClusterReader;
+import org.mskcc.endometrial.rnaseq.RnaSeqReader;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -49,57 +49,57 @@ public class CaseListUtil {
     }
 
     public void writeCaseLists(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,
-           String outputDir) throws IOException {
-        outputHistologicalSubtypes(sequencedCaseSet, gisticCaseSet, outputDir);
-        outputAllEndometriodCases(sequencedCaseSet, gisticCaseSet, outputDir);
+               RnaSeqReader rnaSeqReader, String outputDir) throws IOException {
+        outputHistologicalSubtypes(sequencedCaseSet, gisticCaseSet, rnaSeqReader, outputDir);
+        outputAllEndometriodCases(sequencedCaseSet, gisticCaseSet, rnaSeqReader, outputDir);
     }
 
     private void outputAllEndometriodCases(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,
-               String outputDir) throws IOException {
+               RnaSeqReader rnaSeqReader, String outputDir) throws IOException {
         HashSet<String> allEndoSet = new HashSet<String>();
         allEndoSet.addAll(endoGrade1Set);
         allEndoSet.addAll(endoGrade2Set);
         allEndoSet.addAll(endoGrade3Set);
-        outputCaseSet(allEndoSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_all",
+        outputCaseSet(allEndoSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_all",
                 "Subtype:  Endometriod:  Grades 1-3 - All",false, outputDir);
-        outputCaseSet(allEndoSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_sequenced",
-                "Subtype:  Endometriod:  Grades 1-3 - Sequenced + GISTIC", true, outputDir);
+        outputCaseSet(allEndoSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_core",
+                "Subtype:  Endometriod:  Grades 1-3 - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
     }
 
     private void outputHistologicalSubtypes(HashSet<String> sequencedCaseSet, HashSet<String> gisticCaseSet,
-        String outputDir) throws IOException {
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade1_all",
+        RnaSeqReader rnaSeqReader, String outputDir) throws IOException {
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade1_all",
                 "Subtype:  Endometriod:  Grade 1 - All",false, outputDir);
-        outputCaseSet(endoGrade1Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade1_sequenced",
-                "Subtype:  Endometriod:  Grade 1 - Sequenced + GISTIC", true, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade2_all",
+        outputCaseSet(endoGrade1Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade1_core",
+                "Subtype:  Endometriod:  Grade 1 - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade2_all",
                 "Subtype:  Endometriod:  Grade 2 - All", false, outputDir);
-        outputCaseSet(endoGrade2Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade2_sequenced",
-                "Subtype:  Endometriod:  Grade 2 - Sequenced + GISTIC", true, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade3_all",
+        outputCaseSet(endoGrade2Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade2_core",
+                "Subtype:  Endometriod:  Grade 2 - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade3_all",
                 "Subtype:  Endometriod:  Grade 3 - All", false, outputDir);
-        outputCaseSet(endoGrade3Set, sequencedCaseSet, gisticCaseSet, "ucec_tcga_endo_grade3_sequenced",
-                "Subtype:  Endometriod:  Grade 3 - Sequenced + GISTIC", true, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_serous_all",
+        outputCaseSet(endoGrade3Set, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_endo_grade3_core",
+                "Subtype:  Endometriod:  Grade 3 - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
+        outputCaseSet(serousSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_serous_all",
                 "Subtype:  Endometriod:  Serous - All", false, outputDir);
-        outputCaseSet(serousSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_serous_sequenced",
-                "Subtype:  Serous - Sequenced + GISTIC", true, outputDir);
+        outputCaseSet(serousSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_serous_core",
+                "Subtype:  Serous - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
 
-        outputCaseSet(mixedSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_mixed_all",
+        outputCaseSet(mixedSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_mixed_all",
                 "Subtype:  Mixed Serous and Endometriod - All", false, outputDir);
-        outputCaseSet(mixedSet, sequencedCaseSet, gisticCaseSet, "ucec_tcga_mixed_sequenced",
-                "Subtype:  Mixed Serous and Endometriod - Sequenced + GISTIC", true, outputDir);
+        outputCaseSet(mixedSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, "ucec_tcga_mixed_core",
+                "Subtype:  Mixed Serous and Endometriod - Core (Sequenced + GISTIC + RNA-Seq)", true, outputDir);
     }
 
     private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
-        HashSet<String> gisticCaseSet, String stableId, String name, String description, 
-        boolean onlyIncludeSequencedAndGisticCases,
-        String outputDir) throws IOException {
+        HashSet<String> gisticCaseSet, RnaSeqReader rnaSeqReader, String stableId, String name, String description, 
+        boolean onlyIncludeCoreCases, String outputDir) throws IOException {
         StringBuffer caseIds = new StringBuffer();
         int sampleCount = 0;
         for (String caseId:  caseSet) {
-            if (onlyIncludeSequencedAndGisticCases) {
-                if (sequencedCaseSet.contains(caseId) && gisticCaseSet.contains(caseId)) {
+            if (onlyIncludeCoreCases) {
+                if (sequencedCaseSet.contains(caseId) && gisticCaseSet.contains(caseId) 
+                        && rnaSeqReader.hasRnaReqData(caseId)) {
                     caseIds.append(caseId + TAB);
                     sampleCount++;
                 }
@@ -121,6 +121,7 @@ public class CaseListUtil {
         FileWriter outWriter = new FileWriter(outputFile);
         outWriter.write("cancer_study_identifier: ucec_tcga\n");
         outWriter.write("stable_id: " + stableId + "\n");
+        outWriter.write("case_list_category:  other\n");
         outWriter.write("case_list_name: " + name + "\n");
         outWriter.write("case_list_description: " + description + "\n");
         outWriter.write("case_list_ids:  " + caseIds + "\n");
@@ -129,9 +130,10 @@ public class CaseListUtil {
     }
 
     private void outputCaseSet(HashSet<String> caseSet, HashSet<String> sequencedCaseSet,
-        HashSet<String> gisticCaseSet, String stableId, String name, boolean onlyIncludeSequencedCases,
+        HashSet<String> gisticCaseSet, RnaSeqReader rnaSeqReader, String stableId, String name, 
+        boolean onlyIncludeSequencedCases,
         String outputDir) throws IOException {
-        outputCaseSet(caseSet, sequencedCaseSet, gisticCaseSet, stableId, name, name, onlyIncludeSequencedCases,
-                outputDir);
+        outputCaseSet(caseSet, sequencedCaseSet, gisticCaseSet, rnaSeqReader, stableId, name, name, 
+                onlyIncludeSequencedCases, outputDir);
     }    
 }

@@ -83,7 +83,7 @@ public class SurvivalCalculator {
         return dfsMonthsStr;
     }
 
-    private static double convertDaysToMonths(String numberOfDays) {
+    public static double convertDaysToMonths(String numberOfDays) {
         int numDays = Integer.parseInt(numberOfDays);
         return numDays * ONE_DAY;
     }

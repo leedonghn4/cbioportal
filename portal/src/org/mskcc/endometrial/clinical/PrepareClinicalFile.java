@@ -21,6 +21,7 @@ public class PrepareClinicalFile {
     private static final String TAB = "\t";
     private static final String NEW_LINE = "\n";
     private StringBuffer newTable = new StringBuffer();
+    private StringBuffer portalTable = new StringBuffer();
     private HashSet<String> sequencedCaseSet;
     private HashSet<String> gisticCaseSet;
     private File mafFile;
@@ -69,36 +70,84 @@ public class PrepareClinicalFile {
 
         line = bufferedReader.readLine();
         while (line != null) {
+            StringBuffer currentLine = new StringBuffer();
             String parts[] = line.split("\t");
             String caseId = parts[0];
+            String vitalStatus = parts[8];
+            String dfsStatus = parts[7];
+            String osDays = parts[6];
+            String dfsDays = parts[5];
+
             String histSubTypeAndGrade = getValue("histology_grade", headers, parts);
             caseListUtil.categorizeByHistologicalSubType(histSubTypeAndGrade, caseId);
-            newTable.append(line.trim());
-            appendMsiStatus(caseId);
-            appendSequencedColumn(caseId);
-            appendGenomicDataAvailable(cnaSummarizer, caseId);
-            appendMutationCounts(mutationSummarizer, caseId);
-            appendMutationSpectra(mutationSummarizer, caseId);
-            newTable.append(TAB + coverageReader.getCoverage(caseId));
-            appendClusters(caseId);
-            appendTargetGeneSet(caseId, newTable);
-            newTable.append(NEW_LINE);
+            currentLine.append(line.trim());
+            appendMsiStatus(caseId, currentLine);
+            appendSequencedColumn(caseId, currentLine);
+            appendGenomicDataAvailable(cnaSummarizer, caseId, currentLine);
+            appendMutationCounts(mutationSummarizer, caseId, currentLine);
+            appendMutationSpectra(mutationSummarizer, caseId, currentLine);
+            currentLine.append(TAB + coverageReader.getCoverage(caseId));
+            appendClusters(caseId, currentLine);
+            appendTargetGeneSet(caseId, currentLine);
+
+            newTable.append(currentLine + NEW_LINE);
+
+            appendPortalSurvival(caseId, vitalStatus, osDays, dfsStatus, dfsDays, currentLine);
+            portalTable.append(currentLine + NEW_LINE);
+
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
     }
 
-    private void appendClusters(String caseId) {
+    private void appendPortalSurvival(String caseId, String vitalStatus, String osDays, String dfsStatus, 
+              String dfsDays, StringBuffer currentLine) {
+        currentLine.append(TAB + caseId);
+        if (vitalStatus.equalsIgnoreCase("Dead")) {
+            currentLine.append(TAB + "Deceased");
+        } else if (vitalStatus.equalsIgnoreCase("Alive")) {
+            currentLine.append(TAB + "Living");
+        } else if (vitalStatus.equalsIgnoreCase("NotAvailable") || vitalStatus.equalsIgnoreCase("Missing")
+                || vitalStatus.equals("NotApplicable")){
+            currentLine.append(TAB + "");
+        } else {
+            throw new IllegalArgumentException("Unknown Vital Status:  " + vitalStatus);
+        }
+
+        try {
+            double osMonths = SurvivalCalculator.convertDaysToMonths(osDays);
+            currentLine.append(TAB + osMonths);
+        } catch (NumberFormatException e) {
+            currentLine.append(TAB + "NA");
+        }
+
+        if (dfsStatus.equalsIgnoreCase("YES")) {
+            currentLine.append(TAB + "Recurred");
+        } else if (dfsStatus.equalsIgnoreCase("NO")) {
+            currentLine.append(TAB + "DiseaseFree");
+        } else if (dfsStatus.equals("NotAvailable") || dfsStatus.equalsIgnoreCase("Missing")) {
+            currentLine.append(TAB + "");
+        }
+
+        try {
+            double dfsMonths = SurvivalCalculator.convertDaysToMonths(dfsDays);
+            currentLine.append(TAB + dfsMonths);
+        } catch (NumberFormatException e) {
+            currentLine.append(TAB + "NA");
+        }
+    }
+
+    private void appendClusters(String caseId, StringBuffer currentLine) {
         for (ClusterReader clusterReader:  clusterReaders) {
             ArrayList<String> valueList = clusterReader.getValueList(caseId);
             if (valueList != null) {
                 for (String value:  valueList) {
-                    newTable.append(TAB + value);
+                    currentLine.append(TAB + value);
                 }
             } else {
                 ArrayList<String> headerList = clusterReader.getHeaderList();
                 for (String header:  headerList) {
-                    newTable.append(TAB + NA_OUTPUT);
+                    currentLine.append(TAB + NA_OUTPUT);
                 }
             }
         }
@@ -153,13 +202,14 @@ public class PrepareClinicalFile {
         }
     }
     
-    private void appendMutationSpectra(MutationSummarizer mutationSummarizer, String caseId) {
-        newTable.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
-        newTable.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
-        newTable.append(TAB + mutationSummarizer.getTAMutationCount(caseId));
-        newTable.append(TAB + mutationSummarizer.getCTMutationCount(caseId));
-        newTable.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
-        newTable.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
+    private void appendMutationSpectra(MutationSummarizer mutationSummarizer, String caseId,
+                                       StringBuffer currentLine) {
+        currentLine.append(TAB + mutationSummarizer.getTGMutationCount(caseId));
+        currentLine.append(TAB + mutationSummarizer.getTCMutationCount(caseId));
+        currentLine.append(TAB + mutationSummarizer.getTAMutationCount(caseId));
+        currentLine.append(TAB + mutationSummarizer.getCTMutationCount(caseId));
+        currentLine.append(TAB + mutationSummarizer.getCGMutationCount(caseId));
+        currentLine.append(TAB + mutationSummarizer.getCAMutationCount(caseId));
     }
 
     private void appendColumnHeaders(String newHeaderLine) {
@@ -188,6 +238,13 @@ public class PrepareClinicalFile {
             }
         }
         appendTargetGeneSetColumns();
+        
+        portalTable.append(newTable
+            + "CASE_ID" + TAB
+            + "OS_STATUS" + TAB
+            + "OS_MONTHS" + TAB
+            + "DFS_STATUS" + TAB
+            + "DFS_MONTHS" + NEW_LINE);
         newTable.append(NEW_LINE);
     }
 
@@ -200,59 +257,60 @@ public class PrepareClinicalFile {
         }
     }
 
-    private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId) {
+    private void appendMutationCounts(MutationSummarizer mutationSummarizer, String caseId,
+              StringBuffer currentLine) {
         long totalSnvCount = mutationSummarizer.getSilentMutationCount(caseId)
                 + mutationSummarizer.getNonSilentMutationCount(caseId);
-        newTable.append (TAB + mutationSummarizer.getSilentMutationCount(caseId));
-        newTable.append (TAB + mutationSummarizer.getNonSilentMutationCount(caseId));
-        newTable.append (TAB + totalSnvCount);
-        newTable.append (TAB + mutationSummarizer.getInDelCount(caseId));
+        currentLine.append (TAB + mutationSummarizer.getSilentMutationCount(caseId));
+        currentLine.append (TAB + mutationSummarizer.getNonSilentMutationCount(caseId));
+        currentLine.append (TAB + totalSnvCount);
+        currentLine.append (TAB + mutationSummarizer.getInDelCount(caseId));
     }
 
-    private void appendGenomicDataAvailable(CnaSummarizer cnaSummarizer, String caseId) {
+    private void appendGenomicDataAvailable(CnaSummarizer cnaSummarizer, String caseId, StringBuffer currentLine) {
         if (cnaSummarizer.hasCnaData(caseId)) {
-            newTable.append (TAB + "Y");
+            currentLine.append (TAB + "Y");
         } else {
-            newTable.append (TAB + "N");
+            currentLine.append (TAB + "N");
         }
         if (rnaSeqReader.hasRnaReqData(caseId)) {
-            newTable.append (TAB + "Y");
+            currentLine.append (TAB + "Y");
         } else {
-            newTable.append (TAB + "N");
+            currentLine.append (TAB + "N");
         }
         if (sequencedCaseSet.contains(caseId) && cnaSummarizer.hasCnaData(caseId)
                 && rnaSeqReader.hasRnaReqData(caseId)) {
-            newTable.append (TAB + "Y");
+            currentLine.append (TAB + "Y");
         } else {
-            newTable.append (TAB + "N");
+            currentLine.append (TAB + "N");
         }
     }
 
-    private void appendSequencedColumn(String caseId) {
+    private void appendSequencedColumn(String caseId, StringBuffer currentLine) {
         if (sequencedCaseSet.contains(caseId)) {
-            newTable.append (TAB + "Y");
+            currentLine.append (TAB + "Y");
         } else {
-            newTable.append (TAB + "N");
+            currentLine.append (TAB + "N");
         }
     }
 
-    private void appendMsiStatus(String caseId) {
+    private void appendMsiStatus(String caseId, StringBuffer currentLine) {
         String msi5Status = msiReader.getMsi5Status(caseId);
         if (msi5Status != null) {
-            newTable.append(TAB + msi5Status);
+            currentLine.append(TAB + msi5Status);
         } else {
-            newTable.append(TAB + NA_OUTPUT);
+            currentLine.append(TAB + NA_OUTPUT);
         }
         String msi7Status = msiReader.getMsi7Status(caseId);
         if (msi7Status != null) {
-            newTable.append(TAB + msi5Status);
+            currentLine.append(TAB + msi5Status);
         } else {
-            newTable.append(TAB + NA_OUTPUT);
+            currentLine.append(TAB + NA_OUTPUT);
         }
     }
 
     public void writeCaseLists(String outputDir) throws IOException {
-        caseListUtil.writeCaseLists(sequencedCaseSet, gisticCaseSet, outputDir);
+        caseListUtil.writeCaseLists(sequencedCaseSet, gisticCaseSet, rnaSeqReader, outputDir);
     }
 
     public HashSet<String> getSequencedCaseSet() {
@@ -286,6 +344,10 @@ public class PrepareClinicalFile {
         return newTable.toString();
     }
 
+    public String getPortalClinicalTable() {
+        return portalTable.toString();
+    }
+
     private void appendColumns(ArrayList<String> list, StringBuffer table) {
         for (String value:  list) {
             table.append(TAB + value);
@@ -307,9 +369,14 @@ public class PrepareClinicalFile {
         FileWriter writer = new FileWriter(newClinicalFile);
         writer.write(prepareClinicalFile.getNewClinicalTable());
 
+        File portalClinicalFile = new File(args[0] + "/clinical/UCEC.clinical.txt");
+        FileWriter portalWriter = new FileWriter(portalClinicalFile);
+        portalWriter.write(prepareClinicalFile.getPortalClinicalTable());
+
         HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
         System.out.println ("New Clinical File Written to:  " + newClinicalFile.getAbsolutePath());
+        System.out.println ("New Portal Clinical File Written to:  " + portalClinicalFile.getAbsolutePath());
         writer.flush();
         writer.close();
     }
