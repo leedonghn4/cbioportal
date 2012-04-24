@@ -91,10 +91,8 @@ public class PrepareClinicalFile {
             appendTargetGeneSet(caseId, currentLine);
 
             newTable.append(currentLine + NEW_LINE);
-
             appendPortalSurvival(caseId, vitalStatus, osDays, dfsStatus, dfsDays, currentLine);
             portalTable.append(currentLine + NEW_LINE);
-
             line = bufferedReader.readLine();
         }
         bufferedReader.close();
@@ -125,8 +123,13 @@ public class PrepareClinicalFile {
             currentLine.append(TAB + "Recurred");
         } else if (dfsStatus.equalsIgnoreCase("NO")) {
             currentLine.append(TAB + "DiseaseFree");
-        } else if (dfsStatus.equals("NotAvailable") || dfsStatus.equalsIgnoreCase("Missing")) {
+        } else if (dfsStatus.equals("NotAvailable") 
+                || dfsStatus.equalsIgnoreCase("Missing")
+                || dfsStatus.equals("NotApplicable")
+                || dfsStatus.equals("")) {
             currentLine.append(TAB + "");
+        } else {
+            throw new IllegalArgumentException("Unknown DFS Status:  " + dfsStatus);
         }
 
         try {
@@ -372,6 +375,7 @@ public class PrepareClinicalFile {
         File portalClinicalFile = new File(args[0] + "/clinical/UCEC.clinical.txt");
         FileWriter portalWriter = new FileWriter(portalClinicalFile);
         portalWriter.write(prepareClinicalFile.getPortalClinicalTable());
+        portalWriter.close();
 
         HashSet <String> sequencedCaseSet = prepareClinicalFile.getSequencedCaseSet();
         System.out.println ("Number of cases sequenced:  " + sequencedCaseSet.size());
