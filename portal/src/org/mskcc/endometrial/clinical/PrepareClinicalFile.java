@@ -66,19 +66,19 @@ public class PrepareClinicalFile {
         String line = bufferedReader.readLine();  //  The header line.
         this.appendColumnHeaders(line);
         validateHeader(line);
-        String headers[] = line.split("\t");
+        Map<String,Integer> headers = getHeaderMap(line.split("\t"));
 
         line = bufferedReader.readLine();
         while (line != null) {
             StringBuffer currentLine = new StringBuffer();
             String parts[] = line.split("\t");
-            String caseId = parts[0];
-            String vitalStatus = parts[8];
-            String dfsStatus = parts[7];
-            String osDays = parts[6];
-            String dfsDays = parts[5];
+            String caseId = parts[headers.get("tcga_id")];
+            String vitalStatus = parts[headers.get("vital_status")];
+            String dfsStatus = parts[headers.get("recurred_progressed")];
+            String osDays = parts[headers.get("os_days")];
+            String dfsDays = parts[headers.get("pdf_days")];
 
-            String histSubTypeAndGrade = getValue("histology_grade", headers, parts);
+            String histSubTypeAndGrade = parts[headers.get("histology_grade")];
             caseListUtil.categorizeByHistologicalSubType(histSubTypeAndGrade, caseId);
             currentLine.append(line.trim());
             appendMsiStatus(caseId, currentLine);
@@ -97,16 +97,24 @@ public class PrepareClinicalFile {
         }
         bufferedReader.close();
     }
+    
+    private Map<String,Integer> getHeaderMap(String[] headers) {
+        Map<String,Integer> map = new HashMap<String,Integer>(headers.length);
+        for (int i=0; i<headers.length; i++) {
+            map.put(headers[i], i);
+        }
+        return map;
+    }
 
     private void appendPortalSurvival(String caseId, String vitalStatus, String osDays, String dfsStatus, 
               String dfsDays, StringBuffer currentLine) {
         currentLine.append(TAB + caseId);
-        if (vitalStatus.equalsIgnoreCase("Dead")) {
+        if (vitalStatus.equalsIgnoreCase("Dead")||vitalStatus.equalsIgnoreCase("Deceased")) {
             currentLine.append(TAB + "Deceased");
-        } else if (vitalStatus.equalsIgnoreCase("Alive")) {
+        } else if (vitalStatus.equalsIgnoreCase("Alive")||vitalStatus.equalsIgnoreCase("Living")) {
             currentLine.append(TAB + "Living");
         } else if (vitalStatus.equalsIgnoreCase("NotAvailable") || vitalStatus.equalsIgnoreCase("Missing")
-                || vitalStatus.equals("NotApplicable")){
+                || vitalStatus.equalsIgnoreCase("NotApplicable") || vitalStatus.equalsIgnoreCase("Unknown")){
             currentLine.append(TAB + "");
         } else {
             throw new IllegalArgumentException("Unknown Vital Status:  " + vitalStatus);
@@ -126,7 +134,8 @@ public class PrepareClinicalFile {
         } else if (dfsStatus.equals("NotAvailable") 
                 || dfsStatus.equalsIgnoreCase("Missing")
                 || dfsStatus.equals("NotApplicable")
-                || dfsStatus.equals("")) {
+                || dfsStatus.equals("")
+                || dfsStatus.equalsIgnoreCase("Unknown")) {
             currentLine.append(TAB + "");
         } else {
             throw new IllegalArgumentException("Unknown DFS Status:  " + dfsStatus);
@@ -338,9 +347,9 @@ public class PrepareClinicalFile {
         if (!parts[0].equals("tcga_id")) {
             throw new IllegalArgumentException ("Header at 0 was expecting:  TCGAID");
         }
-        if (!parts[8].equals("vital_status")) {
-            throw new IllegalArgumentException ("Header at 10 was expecting:  VitalStatus");
-        }
+//        if (!parts[8].equals("vital_status")) {
+//            throw new IllegalArgumentException ("Header at 10 was expecting:  VitalStatus");
+//        }
     }
 
     public String getNewClinicalTable() {
