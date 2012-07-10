@@ -257,6 +257,10 @@ public class PrepareClinicalFile {
             + "OS_MONTHS" + TAB
             + "DFS_STATUS" + TAB
             + "DFS_MONTHS" + NEW_LINE);
+        
+        if (newTable.charAt(newTable.length()-1)=='\t') {
+            newTable.deleteCharAt(newTable.length()-1);
+        }
         newTable.append(NEW_LINE);
     }
 
