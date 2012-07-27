@@ -29,6 +29,7 @@
 <div id="right_side">
 <%
 if (SkinUtil.showRightNavDataSets()) {
+	if (false) {
 %>
     <h3>Data Sets</h3>
 <%
@@ -66,6 +67,7 @@ if (SkinUtil.showRightNavDataSets()) {
     </script>
     <div id='chart_div1'></div>
 <%
+	} // if false
     } // if showRightNavDataSets
 %>
 <% if (SkinUtil.showRightNavExamples()) {%>
