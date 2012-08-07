@@ -39,11 +39,11 @@
 	  </properties>
 	</profile>
 	<profile>
-	  <id>target</id>
+	  <id>nci-target</id>
 	  <properties>
 		<web-xml-file>src/main/config/security_enabled_config/web.xml</web-xml-file>
 		<application-context-security-xml-dir>src/main/config/security_enabled_config</application-context-security-xml-dir>
-		<final-war-name>target-portal</final-war-name>
+		<final-war-name>nci-target-portal</final-war-name>
 	  </properties>
 	</profile>
   </profiles>
