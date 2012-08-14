@@ -70,8 +70,8 @@ public final class ImportUniProtIdMapping {
     }
     
     private Set<String> getSwissProtAccessionHuman() throws IOException {
-        String strURL = "http://www.uniprot.org/uniprot/?query="
-                + "taxonomy%3ahuman+AND+reviewed%3ayes&force=yes&format=list";
+        //String strURL = "http://www.uniprot.org/uniprot/?query=taxonomy%3ahuman+AND+reviewed%3ayes&force=yes&format=list";
+		String strURL = "http://www.uniprot.org/uniprot/?query=taxonomy%3ahuman&force=yes&format=list";
         
         MultiThreadedHttpConnectionManager connectionManager =
                 ConnectionManager.getConnectionManager();
