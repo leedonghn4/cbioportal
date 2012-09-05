@@ -319,7 +319,7 @@ public class PrepareClinicalFile {
         }
         String msi7Status = msiReader.getMsi7Status(caseId);
         if (msi7Status != null) {
-            currentLine.append(TAB + msi5Status);
+            currentLine.append(TAB + msi7Status);
         } else {
             currentLine.append(TAB + NA_OUTPUT);
         }
