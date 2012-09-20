@@ -2,6 +2,13 @@
 package org.mskcc.cbio.importer;
 
 // imports
+import org.mskcc.cbio.importer.model.PortalMetadata;
+import org.mskcc.cbio.importer.model.DatatypeMetadata;
+import org.mskcc.cbio.importer.model.TumorTypeMetadata;
+import org.mskcc.cbio.importer.model.FirehoseDatatypeMetadata;
+import org.mskcc.cbio.importer.model.FirehoseDownloadMetadata;
+
+import java.util.Collection;
 
 /**
  * Interface used to get/set configuration properties.
@@ -9,72 +16,47 @@ package org.mskcc.cbio.importer;
 public interface Config {
 
 	/**
-	 * Gets the latest analysis run.
+	 * Gets a collection of TumorTypeMetadata.
 	 *
-	 * Returns the date of the latest analysis run
-	 * processed by the importer as "MM/dd/yyyy"
-	 *
-	 * @return String
+	 * @return Collection<TumorTypeMetadata>
 	 */
-	String getLatestAnalysisRunDownloaded();
+	Collection<TumorTypeMetadata> getTumorTypeMetadata();
 
 	/**
-	 * Sets the latest analysis run processed by the importer.  Argument
-	 * should be of the form "MM/dd/yyyy".
+	 * Gets a collection of DatatypeMetadata.
 	 *
-	 * @param String
+	 * @return Collection<DatatypeMetadata>
 	 */
-	void setLatestAnalysisRunDownloaded(String latestAnalysisRun);
+	Collection<DatatypeMetadata> getDatatypeMetadata();
 
 	/**
-	 * Gets the latest STDDATA run.
+	 * Gets a PortalMetadata object given a portal name.
 	 *
-	 * Returns the date of the latest stddata run
-	 * downloaded by the importer as "MM/dd/yyyy"
-	 *
-	 * @return String
+     * @param portal String
+	 * @return PortalMetadata
 	 */
-	String getLatestSTDDATARunDownloaded();
+	PortalMetadata getPortalMetadata(String portal);
 
 	/**
-	 * Sets the latest stddata run processed by the importer.  Argument
-	 * should be of the form "MM/dd/yyyy".
+	 * Gets FirehoseDownloadMetadata.
 	 *
-	 * @param String
+	 * @return FirehoseDownloadMetadata
 	 */
-	void setLatestSTDDATARunDownloaded(String latestSTDDataRun);
+	FirehoseDownloadMetadata getFirehoseDownloadMetadata();
 
 	/**
-	 * Gets the analysis datatypes to process.
+	 * Gets a collection of FirehoseDatatypeMetadata.
 	 *
-	 * Returns a string, space delimited, with each type to download, like:
-	 *
-	 * "CopyNumber_Gistic2 CopyNumber_Preprocess Correlate_Methylation Mutation_Assessor"
-	 *
-	 * @return String
+	 * @return Collection<FirehoseDatatypeMetadata>
 	 */
-	String getAnalysisDatatypes();
+	Collection<FirehoseDatatypeMetadata> getFirehoseDatatypeMetadata();
 
 	/**
-	 * Gets the stddata datatypes to process.
+	 * Sets FirehoseDownloadMetadata.  Really only used to store
+     * stddata/analysis run dates.
 	 *
-	 * Returns a string, space delimited, with each type to download, like:
-	 *
-	 * "Merge_methylation Merge_rnaseq__ Merge_transcriptome"
-	 *
-	 * @return String
+     * @param firehoseDownloadMetadata FirehoseDownloadMetadata
+	 * @return FirehoseDownloadMetadata
 	 */
-	String getSTDDATADatatypes();
-
-	/**
-	 * Gets the cancer studies to process.
-	 *
-	 * Returns a string, space delimited, with each cancer study
-	 * to process, like:
-	 *
-	 * "blca brca cesc coadread"
-	 *
-	 * @return String
-	 */
-	String getCancerStudiesToDownload();
+	void setFirehoseDownloadMetadata(final FirehoseDownloadMetadata firehoseDownloadMetadata);
 }
