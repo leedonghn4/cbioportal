@@ -167,7 +167,6 @@ sub getLastestVersionOfFile{
 # for search with grep on stored files
 sub prepareFilenameForGrep{
     my( $filename, $cancer, $runDate ) = @_;
-
     # components in <>, such as <cancer>, <date> and <version> indicate varying substrings
     # substitute <cancer> with this cancer
     $filename =~ s/<cancer>/$cancer/g;
@@ -185,6 +184,10 @@ sub prepareFilenameForGrep{
     
     # substitute <version>s with RE any string
     $filename =~ s/<version>/.*/g;
+
+    # substitute <<RNA-SEQ-PLATFORM> with ga or hiseq
+    $filename =~ s/<RNA-SEQ-PLATFORM>/.*/g;
+
     return $filename;
 }
 
@@ -196,9 +199,14 @@ sub getFirehoseDirectoriesAndFiles{
 }
 
 # return the output filename
+# to support igv linking, we now
+# may output files of type <CANCER>.seg
 sub getOutputFile{
-    my($self, $sub) = @_;
-    return $self->_getField( $sub, 'OUTPUT_FILE' );
+    my($self, $sub, $cancer) = @_;
+	my $outputFile = $self->_getField( $sub, 'OUTPUT_FILE' );
+    # substitute <CANCER> with this cancer
+	$outputFile =~ s/<CANCER>/$cancer/g;
+    return $outputFile;
 }
 
 # return the (optional) arguments
@@ -319,8 +327,8 @@ sub _load_subroutine{
     	if( defined( $dirAndFile ) and ref \$dirAndFile eq 'SCALAR' ){
             my( $dir, $file, $rest ) = split( / +/, $dirAndFile ); 
             if( defined( $dir ) and defined( $file ) and !defined($rest) ){
-            	push @{$this_node_in_self->{DIRS_AND_FILES}}, [$dir, $file ];
-            	next;
+			  push @{$this_node_in_self->{DIRS_AND_FILES}}, [$dir, $file ];
+			  next;
             }
 	        warn "$subr: Error: '$dirAndFile' in 'dirsAndFiles' not a pair of strings for subroutine '$sub'";
 	        return undef;
