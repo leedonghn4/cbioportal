@@ -1,20 +1,47 @@
-package org.mskcc.cbio.cgds.scripts;
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
 
-import org.mskcc.cbio.cgds.dao.DaoClinicalData;
-import org.mskcc.cbio.cgds.dao.DaoException;
-import org.mskcc.cbio.cgds.dao.DaoClinicalFreeForm;
-import org.mskcc.cbio.cgds.dao.DaoCancerStudy;
-import org.mskcc.cbio.cgds.util.ConsoleUtil;
-import org.mskcc.cbio.cgds.util.FileUtil;
-import org.mskcc.cbio.cgds.util.ProgressMonitor;
-import org.mskcc.cbio.cgds.model.CancerStudy;
+package org.mskcc.cbio.cgds.scripts;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import org.mskcc.cbio.cgds.dao.DaoCancerStudy;
+import org.mskcc.cbio.cgds.dao.DaoClinicalData;
+import org.mskcc.cbio.cgds.dao.DaoClinicalFreeForm;
+import org.mskcc.cbio.cgds.dao.DaoException;
+import org.mskcc.cbio.cgds.model.CancerStudy;
+import org.mskcc.cbio.cgds.util.ConsoleUtil;
+import org.mskcc.cbio.cgds.util.FileUtil;
+import org.mskcc.cbio.cgds.util.ProgressMonitor;
 
 /**
  * Imports Clinical Data.
@@ -32,6 +59,7 @@ public class ImportClinicalData {
     private int ageCol = -1;
     private CancerStudy cancerStudy;
     private ArrayList<String> freeFormHeaders = new ArrayList<String>();
+    private List<Integer> freeFormInludeColumns = new ArrayList<Integer>();
 
     /**
      * Constructor.
@@ -99,15 +127,12 @@ public class ImportClinicalData {
                             ageAtDiagnosis);
                     
                     if (cancerStudy != null) {
-                        for (int i = 1; i < parts.length; i++) {
+                        for (int i : freeFormInludeColumns) {
                             String name = freeFormHeaders.get(i);
                             String value = parts[i];
                             
-                            if (!this.excludeFromFreeFormTable(name))
-                            {
-                            	daoClinicalFreeForm.addDatum(cancerStudy.getInternalId(),
-                            			caseId, name, value);
-                            }
+                            daoClinicalFreeForm.addDatum(cancerStudy.getInternalId(),
+                                            caseId, name, value);
                         }
                     }
                 }
@@ -128,6 +153,7 @@ public class ImportClinicalData {
         caseIdNames.add("CASE_ID");
         caseIdNames.add("patient");
         caseIdNames.add("ID");
+        caseIdNames.add("tcga_id");
 
         HashSet<String> osStatusNames = new HashSet<String>();
         osStatusNames.add("VITALSTATUS");
@@ -158,48 +184,20 @@ public class ImportClinicalData {
             
             if (caseIdNames.contains(header)) {
                 caseIdCol = i;
-            }
-            if (osStatusNames.contains(header)) {
+            } else if (osStatusNames.contains(header)) {
                 osStatusCol = i;
-            }
-            if (osMonthsNames.contains(header)) {
+            } else if (osMonthsNames.contains(header)) {
                 osMonthsCol = i;
-            }
-            if (dfsMonthsNames.contains(header)) {
+            } else if (dfsMonthsNames.contains(header)) {
                 dfsMonthCol = i;
-            }
-            if (dfsStatusNames.contains(header)) {
+            } else if (dfsStatusNames.contains(header)) {
                 dfsStatusCol = i;
-            }
-            if (ageNames.contains(header)) {
+            } else if (ageNames.contains(header)) {
                 ageCol = i;
+            } else {
+                freeFormInludeColumns.add(i);
             }
         }
-    }
-
-    /**
-     * Decides whether to exclude the given header from the clinical free form
-     * table. Headers such as CASE_ID, OS_STATUS, DFS_STATUS should not be
-     * included in the free form table.
-     * 
-     * @param header	header to be checked
-     * @return			true if the header should be excluded, false otherwise
-     */
-    private boolean excludeFromFreeFormTable(String header)
-    {
-    	boolean exclude = false;
-    	
-    	if (header.equalsIgnoreCase("case_id") ||
-    		header.equalsIgnoreCase("caseid") ||
-    		header.equalsIgnoreCase("os_status") ||
-    		header.equalsIgnoreCase("osstatus") ||
-    		header.equalsIgnoreCase("dfs_status") ||
-    		header.equalsIgnoreCase("dfsstatus"))
-    	{
-    		exclude = true;
-    	}
-    	
-    	return exclude;
     }
     
     private Double getDouble(String parts[], int index) {

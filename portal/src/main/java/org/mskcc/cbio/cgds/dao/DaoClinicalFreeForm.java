@@ -1,16 +1,44 @@
-package org.mskcc.cbio.cgds.dao;
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
 
-import org.mskcc.cbio.cgds.model.ClinicalFreeForm;
-import org.mskcc.cbio.cgds.model.ClinicalParameterMap;
+package org.mskcc.cbio.cgds.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.mskcc.cbio.cgds.model.ClinicalFreeForm;
+import org.mskcc.cbio.cgds.model.ClinicalParameterMap;
 
 /**
  * Data access object for Clinical Free Form Data.
@@ -152,6 +180,55 @@ public class DaoClinicalFreeForm {
             while (rs.next())
             {
             	// get all values as String
+                String caseId = rs.getString("CASE_ID");
+                String paramName = rs.getString("PARAM_NAME");
+                String paramValue = rs.getString("PARAM_VALUE");
+                
+                // create new ClinicalFreeForm instance
+                ClinicalFreeForm data = new ClinicalFreeForm(cancerStudyId,
+                	caseId,
+                	paramName,
+                	paramValue);
+                
+                // add it to the list
+                dataList.add(data);
+            }
+            
+            return dataList;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(con, pstmt, rs);
+        }
+    }
+
+    /**
+     * Retrieves all rows in the clinical_free_form table for the specified cases,
+     * and returns a list of ClinicalFreeForm instances where each instance represents
+     * a single row in the table.
+     * 
+     * @param caseIds
+     * @return list of all ClinicalFreeForm instances for the given cancer study id
+     */
+    public List<ClinicalFreeForm> getCasesByCases(Collection<String> caseIds) throws DaoException
+    {
+    	Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        
+        try{
+            con = JdbcUtil.getDbConnection();
+            pstmt = con.prepareStatement ("SELECT * FROM `clinical_free_form`" +
+                    "WHERE CASE_ID IN('"
+                    + StringUtils.join(caseIds,"','") +"')");
+            rs = pstmt.executeQuery();
+            
+            ArrayList<ClinicalFreeForm> dataList = new ArrayList<ClinicalFreeForm>();
+            
+            while (rs.next())
+            {
+            	// get all values as String
+                int cancerStudyId = rs.getInt("CANCER_STUDY_ID");
                 String caseId = rs.getString("CASE_ID");
                 String paramName = rs.getString("PARAM_NAME");
                 String paramValue = rs.getString("PARAM_VALUE");

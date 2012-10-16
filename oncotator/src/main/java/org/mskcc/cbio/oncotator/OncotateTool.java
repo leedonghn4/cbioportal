@@ -1,3 +1,30 @@
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
+
 package org.mskcc.cbio.oncotator;
 
 
@@ -12,61 +39,77 @@ import java.util.HashMap;
 /**
  * Command Line Tool to Oncotate a Single MAF File.
  */
-public class OncotateTool {
+public class OncotateTool
+{
     private final static String TAB = "\t";
     private int buildNumErrors = 0;
-    private OncotatorService oncotatorService = OncotatorService.getInstance();
+    private OncotatorService oncotatorService;
     private static int MAX_NUM_RECORDS_TO_PROCESS = -1;
-    private static int ONCO_HEADERS_COUNT = 5;
-    private HashMap<String, Integer> genomicCountMap = new HashMap<String, Integer>();
+    private static final int DEFAULT_ONCO_HEADERS_COUNT = 5;
+    //private HashMap<String, Integer> genomicCountMap;
 
-    public OncotateTool(File inputMafFile,
-		    File outputMafFile) throws IOException, SQLException
+    public OncotateTool()
     {
-        outputFileNames(inputMafFile, outputMafFile);
-        FileReader reader = new FileReader(inputMafFile);
-        BufferedReader bufReader = new BufferedReader(reader);
-        String headerLine = bufReader.readLine();
-        MafUtil mafUtil = new MafUtil(headerLine);
-        String dataLine = bufReader.readLine();
-        
-        int numRecordsProcessed = 0;
-        FileWriter writer = new FileWriter(outputMafFile);
-        
-        writeHeaders(headerLine, writer);
-        
-        while (dataLine != null)
-        {
-            MafRecord mafRecord = mafUtil.parseRecord(dataLine);
-            String variantClassification = mafRecord.getVariantClassification();
-
-            // adjust data line before writing to make sure the consistency
-            // among the lines
-            writer.write(this.adjustDataLine(dataLine, mafUtil));
-            
-            //  Skip Silent Mutations
-            if (!variantClassification.equalsIgnoreCase("Silent")) {
-                conditionallyOncotateRecord(mafRecord, writer);
-                numRecordsProcessed++;
-                conditionallyAbort(numRecordsProcessed);
-            } else {
-                writeEmptyDataFields(writer);
-            }
-            writer.write("\n");
-            dataLine = bufReader.readLine();
-        }
-        
-        System.out.println("Total Number of Records Processed:  " + numRecordsProcessed);
-        for (String coords:  genomicCountMap.keySet()) {
-            Integer count = genomicCountMap.get(coords);
-            if (count > 1) {
-                System.out.println(coords + "\t" + (count-1));
-            }
-        }
-        
-        reader.close();
-        writer.close();
+	    this.oncotatorService = OncotatorService.getInstance();
+	    //this.genomicCountMap = new HashMap<String, Integer>();
     }
+
+	private int oncotateMaf(File inputMafFile,
+			File outputMafFile,
+			boolean noCache) throws IOException, SQLException
+	{
+		// determine whether to use the DB cache or not
+		this.oncotatorService.setUseCache(!noCache);
+
+		outputFileNames(inputMafFile, outputMafFile);
+
+		FileReader reader = new FileReader(inputMafFile);
+		BufferedReader bufReader = new BufferedReader(reader);
+		String headerLine = bufReader.readLine();
+		MafUtil mafUtil = new MafUtil(headerLine);
+		String dataLine = bufReader.readLine();
+
+		int numRecordsProcessed = 0;
+		FileWriter writer = new FileWriter(outputMafFile);
+
+		writeHeaders(headerLine,
+		             calculateOncoHeaderCount(mafUtil),
+		             writer);
+
+		while (dataLine != null)
+		{
+			MafRecord mafRecord = mafUtil.parseRecord(dataLine);
+			String variantClassification = mafRecord.getVariantClassification();
+
+			// adjust data line before writing to make sure the consistency
+			// among the lines
+			writer.write(this.adjustDataLine(dataLine, mafUtil));
+
+			//  Skip Silent Mutations
+			if (!variantClassification.equalsIgnoreCase("Silent")) {
+				conditionallyOncotateRecord(mafRecord, writer);
+				numRecordsProcessed++;
+				conditionallyAbort(numRecordsProcessed);
+			} else {
+				writeEmptyDataFields(writer);
+			}
+			writer.write("\n");
+			dataLine = bufReader.readLine();
+		}
+
+		System.out.println("Total Number of Records Processed:  " + numRecordsProcessed);
+//		for (String coords:  genomicCountMap.keySet()) {
+//			Integer count = genomicCountMap.get(coords);
+//			if (count > 1) {
+//				System.out.println(coords + "\t" + (count-1));
+//			}
+//		}
+
+		reader.close();
+		writer.close();
+
+		return this.oncotatorService.getErrorCount();
+	}
 
     private void outputFileNames(File inputMafFile, File outputMafFile) {
         System.out.println("Reading MAF From:  " + inputMafFile.getAbsolutePath());
@@ -80,39 +123,66 @@ public class OncotateTool {
     }
 
     private void writeEmptyDataFields(FileWriter writer) throws IOException {
-        for (int i=0; i<ONCO_HEADERS_COUNT; i++) {
+        for (int i=0; i< DEFAULT_ONCO_HEADERS_COUNT; i++) {
             writer.write(TAB + "");
         }
     }
 
-    private void writeHeaders(String headerLine, FileWriter writer) throws IOException
+    private void writeHeaders(String headerLine,
+		    Integer oncoHeaderCount,
+		    FileWriter writer) throws IOException
     {
-        writer.write(headerLine.trim());
-        
-        // write new headers only if the oncotator headers do not already exist
-        // in the current MAF file (assuming if it contains one of the oncotator
-        // headers, then it contains all of them)
-        if (!headerLine.contains("ONCOTATOR_VARIANT_CLASSIFICATION"))
+	    String newHeaderLine = headerLine.trim();
+
+        // header has oncotator columns, remove those column from the end
+	    // (assuming oncotator columns are always at the end)
+        if (oncoHeaderCount > 0)
         {
-        	writer.write(TAB + "ONCOTATOR_VARIANT_CLASSIFICATION");
-            writer.write(TAB + "ONCOTATOR_PROTEIN_CHANGE");
-            writer.write(TAB + "ONCOTATOR_COSMIC_OVERLAPPING");
-            writer.write(TAB + "ONCOTATOR_DBSNP_RS");
-            writer.write(TAB + "ONCOTATOR_GENE_SYMBOL");
+	        String[] parts = newHeaderLine.split(TAB);
+	        newHeaderLine = "";
+
+	        for (int i = 0; i < parts.length - oncoHeaderCount; i++)
+	        {
+		        newHeaderLine += parts[i];
+
+		        if (i != parts.length - oncoHeaderCount - 1)
+		        {
+			        newHeaderLine += TAB;
+		        }
+	        }
         }
+
+		// write the new header line (without oncotator columns)
+	    writer.write(newHeaderLine);
+
+        // append oncotator headers to the end of the header list
+        writer.write(TAB + "ONCOTATOR_VARIANT_CLASSIFICATION");
+        writer.write(TAB + "ONCOTATOR_PROTEIN_CHANGE");
+        writer.write(TAB + "ONCOTATOR_COSMIC_OVERLAPPING");
+        writer.write(TAB + "ONCOTATOR_DBSNP_RS");
+        writer.write(TAB + "ONCOTATOR_GENE_SYMBOL");
         
         writer.write("\n");
     }
 
-    private void conditionallyOncotateRecord(MafRecord mafRecord, FileWriter writer) throws IOException, SQLException {
+    private void conditionallyOncotateRecord(MafRecord mafRecord,
+		    FileWriter writer) throws IOException, SQLException
+    {
         String ncbiBuild = mafRecord.getNcbiBuild();
-        if (!ncbiBuild.equals("37")) {
+
+	    if (!ncbiBuild.equals("37") &&
+	        !ncbiBuild.equalsIgnoreCase("hg19") &&
+	        !ncbiBuild.equalsIgnoreCase("GRCh37"))
+	    {
             outputBuildNumErrorMessage(ncbiBuild);
             buildNumErrors++;
+
             if (buildNumErrors > 10) {
                 abortDueToBuildNumErrors();
             }
-        } else {
+        }
+	    else
+	    {
             oncotateRecord(mafRecord, writer);
         }
     }
@@ -138,12 +208,12 @@ public class OncotateTool {
         if (tumorAllele != null) {
             String coords = createCoordinates(chr, start, end, refAllele, tumorAllele);
             System.out.println(coords);
-            if (genomicCountMap.containsKey(coords)) {
-                Integer count = genomicCountMap.get(coords);
-                genomicCountMap.put(coords, count+1);
-            } else {
-                genomicCountMap.put(coords, 1);
-            }
+//            if (genomicCountMap.containsKey(coords)) {
+//                Integer count = genomicCountMap.get(coords);
+//                genomicCountMap.put(coords, count+1);
+//            } else {
+//                genomicCountMap.put(coords, 1);
+//            }
             OncotatorRecord oncotatorRecord =
                     oncotatorService.getOncotatorRecord(chr, start, end, refAllele,tumorAllele);
             writeOncotatorResults(writer, oncotatorRecord);
@@ -158,7 +228,7 @@ public class OncotateTool {
         String tumorAllel1 = mafRecord.getTumorSeqAllele1();
         String tumorAllel2 = mafRecord.getTumorSeqAllele2();
         String tumorAllele = null;
-        if (!refAllele.equals(tumorAllel1)) {
+        if (!refAllele.equalsIgnoreCase(tumorAllel1)) {
             tumorAllele = tumorAllel1;
         } else if(!refAllele.equalsIgnoreCase(tumorAllel2)) {
             tumorAllele = tumorAllel2;
@@ -200,7 +270,8 @@ public class OncotateTool {
     /**
      * Adjusts the data line for consistency.
      * 
-     * If the data is already oncotated removes last ONCO_HEADERS_COUNT columns
+     * If the data is already oncotated removes oncotator columns
+     * (assuming they are the last columns of the row)
      * to enable re-oncotation. Otherwise adjusts the data line to have columns
      * exactly the same as the number of column headers to prevent incorrect
      * oncotating.
@@ -211,66 +282,123 @@ public class OncotateTool {
      */
     private String adjustDataLine(String dataLine, MafUtil util)
     {
-    	//String line = dataLine.trim();
-    	String line = new String(dataLine);
-    	String[] parts = line.split(TAB, -1);
-    	
-    	// diff should be zero if (# of headers == # of data cols)
-    	int diff = util.getHeaderCount() - parts.length;
-    	
-    	// check if already oncotated
-    	boolean oncotated = (util.getOncoVariantClassificationIndex() != -1);
+    	String line = "";
+	    boolean oncotated = false;
+
+	    // check if already oncotated
+	    Integer actualOncoHeaderCount = calculateOncoHeaderCount(util);
     	
     	// file already oncotated
-    	if (oncotated)
+	    if (actualOncoHeaderCount > 0)
     	{
-        	line = new String();
+		    String[] parts = dataLine.split(TAB, -1);
         	
-    		// remove last ONCO_HEADERS_COUNT data columns
+    		// remove oncotator data columns at the end of the row
     		// (to enable overwrite instead of appending new cols to the end)
-    		for (int i = 0; i < parts.length - ONCO_HEADERS_COUNT; i++)
+    		for (int i = 0; i < parts.length - actualOncoHeaderCount; i++)
     		{
     			line += parts[i];
     			
-    			if (i != parts.length - ONCO_HEADERS_COUNT - 1)
+    			if (i != parts.length - actualOncoHeaderCount - 1)
     			{
     				line += TAB;
     			}
-    				
     		}
     	}
-    	// not oncotated, but header and data mismatch
-    	else if (diff > 0)
-    	{
-    		// append appropriate number of tabs
-    		for (int i = 0; i < diff; i++)
-    		{
-    			line += TAB;
-    		}
-    	}
+    	// not oncotated, adjust tabs if necessary
+    	else
+	    {
+		    line = util.adjustDataLine(dataLine);
+	    }
     	
     	return line;
     }
 
+	private Integer calculateOncoHeaderCount(MafUtil util)
+	{
+		Integer oncoHeaderCount = 0;
+
+		if (util.getOncoVariantClassificationIndex() != -1)
+		{
+			oncoHeaderCount++;
+		}
+
+		if (util.getOncoProteinChangeIndex() != -1)
+		{
+			oncoHeaderCount++;
+		}
+
+		if (util.getOncoDbSnpRsIndex() != -1)
+		{
+			oncoHeaderCount++;
+		}
+
+		if (util.getOncoCosmicOverlappingIndex() != -1)
+		{
+			oncoHeaderCount++;
+		}
+
+		if (util.getOncoGeneSymbolIndex() != -1)
+		{
+			oncoHeaderCount++;
+		}
+
+		return oncoHeaderCount;
+	}
+
     public static void main(String[] args)
     {
-        if (args.length < 2)
+        String inputMaf = null;
+	    String outputMaf = null;
+	    boolean noCache = false;
+
+	    if (args.length < 2)
         {
-            System.out.println("command line usage: oncotateMaf.sh <input_maf_file> <output_maf_file");
+            System.out.println("command line usage: oncotateMaf.sh [-nocache] <input_maf_file> <output_maf_file");
             System.exit(1);
         }
+	    else
+	    {
+		    if (args[0].equals("-nocache"))
+		    {
+			    noCache = true;
+			    inputMaf = args[1];
+			    outputMaf = args[2];
+		    }
+		    else
+		    {
+			    inputMaf = args[0];
+			    outputMaf = args[1];
+		    }
+	    }
 
         Date start = new Date();
+	    int oncoResult = 0;
 
         try {
-            OncotateTool tool = new OncotateTool(new File(args[0]), new File(args[1]));
-        } catch (Exception e) {
+            OncotateTool tool = new OncotateTool();
+	        oncoResult = tool.oncotateMaf(new File(inputMaf),
+	                                      new File(outputMaf),
+	                                      noCache);
+        }
+        catch (Exception e)
+        {
             System.out.println("Error occurred:  " + e.getMessage());
             e.printStackTrace();
-        } finally {
+        }
+        finally
+        {
             Date end = new Date();
             double timeElapsed = (end.getTime() - start.getTime()) / 1000.0;
             System.out.println("Total time:  " + timeElapsed + " seconds.");
+
+	        // check errors at the end
+	        if (oncoResult != 0)
+	        {
+		        // TODO produce different error codes, for different types of errors?
+		        System.out.println("Process completed with " + oncoResult + " error(s).");
+		        System.exit(2);
+	        }
         }
     }
 }

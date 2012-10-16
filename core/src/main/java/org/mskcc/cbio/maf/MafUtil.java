@@ -1,3 +1,30 @@
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
+
 package org.mskcc.cbio.maf;
 
 /**
@@ -49,6 +76,12 @@ public class MafUtil
     private int oncoVariantClassificationIndex = -1; // ONCOTATOR_VARIANT_CLASSIFICATION
     private int oncoCosmicOverlappingIndex = -1; // ONCOTATOR_DBSNP_RS
     private int oncoDbSnpRsIndex = -1; // ONCOTATOR_COSMIC_OVERLAPPING
+	private int oncoGeneSymbolIndex = -1; // ONCOTATOR_GENE_SYMBOL
+	private int maFImpactIndex = -1; // MA:FImpact
+	private int maLinkVarIndex = -1; // MA:link.var
+	private int maLinkMsaIndex = -1; // MA:link.MSA
+	private int maLinkPdbIndex = -1; // MA:link.PDB
+	private int maProteinChangeIndex = -1; // MA:protein.change
     
     private int headerCount; // number of headers in the header line
 
@@ -142,7 +175,19 @@ public class MafUtil
 	        	oncoCosmicOverlappingIndex = i;
 	        } else if(header.equalsIgnoreCase("ONCOTATOR_DBSNP_RS")) {
 	        	oncoDbSnpRsIndex = i;
-	        }
+            } else if(header.equalsIgnoreCase("ONCOTATOR_GENE_SYMBOL")) {
+	            oncoGeneSymbolIndex = i;
+            } else if(header.equalsIgnoreCase("MA:FImpact")) {
+				maFImpactIndex = i;
+            } else if(header.equalsIgnoreCase("MA:link.var")) {
+	            maLinkVarIndex = i;
+            } else if(header.equalsIgnoreCase("MA:link.MSA")) {
+	            maLinkMsaIndex = i;
+            } else if(header.equalsIgnoreCase("MA:link.PDB")) {
+	            maLinkPdbIndex = i;
+            } else if(header.equalsIgnoreCase("MA:protein.change")) {
+	            maProteinChangeIndex = i;
+            }
             // TODO will be decided later...
 //	        } else if(header.equalsIgnoreCase("t_ref_count")) { // TODO alternative header names?
 //	        	tumorRefCountIndex = i;
@@ -161,6 +206,7 @@ public class MafUtil
         String parts[] = line.split("\t", -1);
         
         MafRecord record = new MafRecord();
+
         record.setCenter(getPartString(centerIndex, parts));
         record.setChr(getPartString(chrIndex, parts));
         record.setStartPosition(getPartLong(startPositionIndex, parts));
@@ -193,14 +239,23 @@ public class MafUtil
         record.setValidationMethod(getPartString(validationMethodIndex, parts));
         record.setScore(getPartString(scoreIndex, parts));
         record.setBamFile(getPartString(bamFileIndex, parts));
-        record.setTumorAltCount(getPartInt(tumorAltCountIndex, parts));
+
+	    record.setTumorAltCount(getPartInt(tumorAltCountIndex, parts));
         record.setTumorRefCount(getPartInt(tumorRefCountIndex, parts));
         record.setNormalAltCount(getPartInt(normalAltCountIndex, parts));
         record.setNormalRefCount(getPartInt(normalRefCountIndex, parts));
-        record.setOncotatorProteinChange(getPartString(oncoProteinChangeIndex, parts));
+
+	    record.setMaFuncImpact(getPartString(maFImpactIndex, parts));
+	    record.setMaLinkVar(getPartString(maLinkVarIndex, parts));
+	    record.setMaLinkMsa(getPartString(maLinkMsaIndex, parts));
+	    record.setMaLinkPdb(getPartString(maLinkPdbIndex, parts));
+	    record.setMaProteinChange(getPartString(maProteinChangeIndex, parts));
+
+	    record.setOncotatorProteinChange(getPartString(oncoProteinChangeIndex, parts));
         record.setOncotatorVariantClassification(getPartString(oncoVariantClassificationIndex, parts));
         record.setOncotatorCosmicOverlapping(getPartString(oncoCosmicOverlappingIndex, parts));
         record.setOncotatorDbSnpRs(getPartString(oncoDbSnpRsIndex, parts));
+	    // TODO also add onco gene symbol to the record (currently we do not need the value)?
 
         return record;
     }
@@ -246,6 +301,43 @@ public class MafUtil
             return MafRecord.NA_INT;
         }
     }
+
+	public String adjustDataLine(String dataLine)
+	{
+		String line = dataLine;
+		String[] parts = line.split("\t", -1);
+
+		// diff should be zero if (# of headers == # of data cols)
+		int diff = this.getHeaderCount() - parts.length;
+
+		// number of header columns are more than number of data columns
+		if (diff > 0)
+		{
+			// append appropriate number of tabs
+			for (int i = 0; i < diff; i++)
+			{
+				line += "\t";
+			}
+		}
+		// number of data columns are more than number of header columns
+		else if (diff < 0)
+		{
+			line = "";
+
+			// just truncate the data (discard the trailing columns)
+			for (int i = 0; i < this.getHeaderCount(); i++)
+			{
+				line += parts[i];
+
+				if (i < this.getHeaderCount() - 1)
+				{
+					line += "\t";
+				}
+			}
+		}
+
+		return line;
+	}
 
     public int getChrIndex() {
         return chrIndex;
@@ -406,7 +498,36 @@ public class MafUtil
 	public int getOncoDbSnpRsIndex() {
 		return oncoDbSnpRsIndex;
 	}
-	
+
+	public int getOncoGeneSymbolIndex() {
+		return oncoGeneSymbolIndex;
+	}
+
+	public int getMaFImpactIndex()
+	{
+		return maFImpactIndex;
+	}
+
+	public int getMaLinkVarIndex()
+	{
+		return maLinkVarIndex;
+	}
+
+	public int getMaLinkMsaIndex()
+	{
+		return maLinkMsaIndex;
+	}
+
+	public int getMaLinkPdbIndex()
+	{
+		return maLinkPdbIndex;
+	}
+
+	public int getMaProteinChangeIndex()
+	{
+		return maProteinChangeIndex;
+	}
+
     public int getHeaderCount() {
 		return headerCount;
 	}
