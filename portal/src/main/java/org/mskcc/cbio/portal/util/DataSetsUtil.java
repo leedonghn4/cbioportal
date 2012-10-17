@@ -110,7 +110,7 @@ public class DataSetsUtil {
 		List<CancerStudy> cancerStudyList = accessControl.getCancerStudies();
 
 		// first element is 'all', remove it
-		cancerStudyList.remove(0); 
+		//cancerStudyList.remove(0); 
 
 		// process the list
 		for (CancerStudy cancerStudy : cancerStudyList) {
