@@ -76,7 +76,7 @@ public class PrepareClinicalFile {
             String vitalStatus = parts[headers.get("vital_status")];
             String dfsStatus = parts[headers.get("recurred_progressed")];
             String osDays = parts[headers.get("os_days")];
-            String dfsDays = parts[headers.get("pdf_days")];
+            String dfsDays = parts[headers.get("pfs_days")];
 
             String histSubTypeAndGrade = parts[headers.get("histology_grade")];
             caseListUtil.categorizeByHistologicalSubType(histSubTypeAndGrade, caseId);
