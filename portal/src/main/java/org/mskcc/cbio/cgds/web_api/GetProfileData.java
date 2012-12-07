@@ -281,10 +281,6 @@ public class GetProfileData {
             CanonicalGene canonicalGene = (CanonicalGene) gene;
             buf.append(canonicalGene.getEntrezGeneId()).append (WebApiUtil.TAB);
             buf.append (canonicalGene.getHugoGeneSymbolAllCaps());
-        } else if (gene instanceof MicroRna) {
-            MicroRna microRna = (MicroRna) gene;
-            buf.append("-999999").append (WebApiUtil.TAB);
-            buf.append (microRna.getMicroRnaId());
         }
         outputRow (dataRow, buf);
     }

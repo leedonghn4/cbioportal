@@ -79,10 +79,6 @@ public class GeneticProfileReader {
          DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
          daoGeneticAlteration.deleteAllRecordsInGeneticProfile(existingGeneticProfile.getGeneticProfileId());
 
-         System.out.println("Deleting all matching records in table:  micro_rna_alteration");
-         DaoMicroRnaAlteration daoMicroRnaAlteration = DaoMicroRnaAlteration.getInstance();
-         daoMicroRnaAlteration.deleteAllRecordsInGeneticProfile(existingGeneticProfile.getGeneticProfileId());
-
          System.out.println("Deleting all matching records in table:  mutation");
          DaoMutation daoMutation = DaoMutation.getInstance();
          daoMutation.deleteAllRecordsInGeneticProfile(existingGeneticProfile.getGeneticProfileId());

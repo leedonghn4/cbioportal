@@ -41,8 +41,7 @@ import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
  * Utility Class for Retrieving Genetic Alteration Data.
  *
  * This class is a wrapper for multiple DAO Classes, and enables you to retrieve different types
- * of genomic data, and based on different types of genes, e.g. canonical (protein-coding) genes
- * and microRNAs.
+ * of genomic data, and based on different types of genes, e.g. canonical (protein-coding) genes.
  *
  * @author Ethan Cerami.
  */
@@ -64,9 +63,7 @@ public class GeneticAlterationUtil {
             throws DaoException {
         ArrayList<String> dataRow = new ArrayList<String>();
         DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
-        DaoMicroRnaAlteration daoMicroRnaAlteration = DaoMicroRnaAlteration.getInstance();
 
-        //  First branch:  are we dealing with a canonical (protein-coding) gene or a microRNA?
         if (targetGene instanceof CanonicalGene) {
             CanonicalGene canonicalGene = (CanonicalGene) targetGene;
             Map<String, String> caseMap;
@@ -88,20 +85,6 @@ public class GeneticAlterationUtil {
                         (targetGeneticProfile.getGeneticProfileId(),
                                 canonicalGene.getEntrezGeneId());
             }
-
-            //  Iterate through all cases in the profile
-            for (String caseId:  targetCaseList) {
-                String value = caseMap.get(caseId);
-                if (value == null) {
-                    dataRow.add (NAN);
-                } else {
-                    dataRow.add (value);
-                }
-            }
-        } else if (targetGene instanceof MicroRna) {
-            MicroRna microRna = (MicroRna) targetGene;
-            HashMap<String, String> caseMap = daoMicroRnaAlteration.getMicroRnaAlterationMap
-                    (targetGeneticProfile.getGeneticProfileId(), microRna.getMicroRnaId());
 
             //  Iterate through all cases in the profile
             for (String caseId:  targetCaseList) {

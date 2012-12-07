@@ -109,9 +109,6 @@ public class ImportTabDelimData {
      * @throws DaoException Database Error.
      */
     public void importData() throws IOException, DaoException {
-        DaoMicroRna daoMicroRna = new DaoMicroRna();
-        microRnaIdSet = daoMicroRna.getEntireSet();
-
         geneticProfile = DaoGeneticProfile.getGeneticProfileById(geneticProfileId);
 
         FileReader reader = new FileReader(mutationFile);
@@ -148,7 +145,6 @@ public class ImportTabDelimData {
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
 
         DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
-        DaoMicroRnaAlteration daoMicroRnaAlteration = DaoMicroRnaAlteration.getInstance();
 
         while (line != null) {
             if (pMonitor != null) {
@@ -227,24 +223,11 @@ public class ImportTabDelimData {
         }
         if (MySQLbulkLoader.isBulkLoad()) {
            daoGeneticAlteration.flushGeneticAlteration();
-           daoMicroRnaAlteration.flushMicroRnaAlteration();
         }
         
         if (numRecordsStored == 0) {
             throw new DaoException ("Something has gone wrong!  I did not save any records" +
                     " to the database!");
-        }
-    }
-
-    private void storeMicroRnaAlterations(String[] values,
-            DaoMicroRnaAlteration daoMicroRnaAlteration, String microRnaId) throws DaoException {
-
-        //  Check that we have not already imported information regarding this microRNA.
-        //  This is an important check, because a GISTIC or RAE file may contain
-        //  multiple rows for the same gene, and we only want to import the first row.
-        if (!importedMicroRNASet.contains(microRnaId)) {
-            daoMicroRnaAlteration.addMicroRnaAlterations(geneticProfileId, microRnaId, values);
-            importedMicroRNASet.add(microRnaId);
         }
     }
 

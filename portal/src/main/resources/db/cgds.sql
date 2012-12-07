@@ -148,14 +148,6 @@ CREATE TABLE `genetic_alteration` (
   KEY `QUICK_LOOK_UP2` (`ENTREZ_GENE_ID`,`GENETIC_PROFILE_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-drop table IF EXISTS micro_rna_alteration;
-CREATE TABLE `micro_rna_alteration` (
-  `GENETIC_PROFILE_ID` int(11) NOT NULL,
-  `MICRO_RNA_ID` varchar(50) NOT NULL,
-  `VALUES` longtext NOT NULL,
-  UNIQUE KEY `QUICK_LOOK_UP1` (`GENETIC_PROFILE_ID`,`MICRO_RNA_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
 --
 -- Table structure for table `genetic_profile`
 --
@@ -180,19 +172,6 @@ CREATE TABLE `genetic_profile_cases` (
   `GENETIC_PROFILE_ID` int(11) NOT NULL,
   `ORDERED_CASE_LIST` longtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
--- --------------------------------------------------------
-
---
--- Table structure for table `micro_rna`
---
-drop table IF EXISTS micro_rna;
-CREATE TABLE `micro_rna` (
-  `ID` varchar(50) NOT NULL,
-  `VARIANT_ID` varchar(50) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
