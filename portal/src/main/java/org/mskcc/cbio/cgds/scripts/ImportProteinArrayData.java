@@ -1,3 +1,30 @@
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
+
 
 package org.mskcc.cbio.cgds.scripts;
 
@@ -113,22 +140,23 @@ public class ImportProteinArrayData {
         String[] genes = parts[0].split(" ");
         fixSymbols(genes);
         String arrayId = parts[1];
-        if (daoPAI.getProteinArrayInfo(arrayId)==null) {
-            Pattern p = Pattern.compile("(p[STY][0-9]+)");
-            Matcher m = p.matcher(arrayId);
-            String type, residue;
-            if (m.find()) {
-                type = "phosphorylation";
-                residue = m.group(1);
-                importPhosphoGene(genes, residue);
-            } else {
-                type = "protein_level";
-                p = Pattern.compile("(cleaved[A-Z][0-9]+)");
-                m = p.matcher(arrayId);
-                residue = m.find() ? m.group(1) : null;
-                importRPPAProteinAlias(genes);
-            }
         
+        Pattern p = Pattern.compile("(p[STY][0-9]+)");
+        Matcher m = p.matcher(arrayId);
+        String type, residue;
+        if (m.find()) {
+            type = "phosphorylation";
+            residue = m.group(1);
+            importPhosphoGene(genes, residue, arrayId);
+        } else {
+            type = "protein_level";
+            p = Pattern.compile("(cleaved[A-Z][0-9]+)");
+            m = p.matcher(arrayId);
+            residue = m.find() ? m.group(1) : null;
+            importRPPAProteinAlias(genes);
+        }
+        
+        if (daoPAI.getProteinArrayInfo(arrayId)==null) {
             ProteinArrayInfo pai = new ProteinArrayInfo(arrayId, type,  
                             StringUtils.join(genes, "/"), residue, null);
             daoPAI.addProteinArrayInfo(pai);
@@ -160,15 +188,12 @@ public class ImportProteinArrayData {
         }
     }
     
-    private void importPhosphoGene(String[] genes, String residue) throws DaoException {
+    private void importPhosphoGene(String[] genes, String residue, String arrayId) throws DaoException {
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
         String phosphoSymbol = StringUtils.join(genes, "/")+"_"+residue;
-        CanonicalGene existingGene = daoGene.getGene(phosphoSymbol);
-        if (existingGene!=null) {
-            return;
-        }
 
         Set<String> aliases = new HashSet<String>();
+        aliases.add(arrayId);
         aliases.add("rppa-phospho");
         aliases.add("phosphoprotein");
         for (String gene : genes) {
@@ -210,16 +235,15 @@ public class ImportProteinArrayData {
     
     private void addRPPAProfile(ArrayList<String> cases) throws DaoException {
         // add profile
-        DaoGeneticProfile daoGeneticProfile = new DaoGeneticProfile();
         DaoGeneticProfileCases daoGeneticProfileCases = new DaoGeneticProfileCases();
         String idProfProt = cancerStudyStableId+"_RPPA_protein_level";
-        if (daoGeneticProfile.getGeneticProfileByStableId(idProfProt)==null) {
+        if (DaoGeneticProfile.getGeneticProfileByStableId(idProfProt)==null) {
             GeneticProfile gpPro = new GeneticProfile(idProfProt, cancerStudyId,
                     GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL, "RPPA protein/phosphoprotein level",
-                    "Protein or phosphoprotein level measured by reverse phase protein array (RPPA)", true);
-            daoGeneticProfile.addGeneticProfile(gpPro);
+                    "Protein or phosphoprotein level (Z-scores) measured by reverse phase protein array (RPPA)", true);
+            DaoGeneticProfile.addGeneticProfile(gpPro);
             daoGeneticProfileCases.addGeneticProfileCases(
-                    daoGeneticProfile.getGeneticProfileByStableId(idProfProt).getGeneticProfileId(), cases);
+                    DaoGeneticProfile.getGeneticProfileByStableId(idProfProt).getGeneticProfileId(), cases);
         }
     }
     

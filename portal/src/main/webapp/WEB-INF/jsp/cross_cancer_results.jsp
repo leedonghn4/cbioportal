@@ -218,11 +218,8 @@
         $("#download_histogram").click(function(event) {
             event.preventDefault();
 
-            // Snip from http://bit.ly/NbPagq
-            var chartContainer = document.getElementById("chart_div" + shownHistogram);
-            var chartArea = chartContainer.getElementsByTagName('iframe')[0].
-                 contentDocument.getElementById('chartArea');
-            var svg = chartArea.innerHTML;
+            var chartContainer = $("#chart_div" + shownHistogram + " div div");
+            var svg = chartContainer.html();
 
             // Our custom form submission
             $("#histogram_svg_xml").val(svg);
@@ -423,7 +420,9 @@
                 position: 'bottom'
               },
               hAxis: {
+		slantedText: true,
                 slantedTextAngle: 45,
+		showTextEvery: 1,
                 maxTextLines: 2
               },
               vAxis: {
@@ -447,6 +446,8 @@
                 position: 'bottom'
               },
               hAxis: {
+		slantedText: true,
+		showTextEvery: 1,
                 slantedTextAngle: 45,
                 maxTextLines: 2
               },
@@ -476,6 +477,8 @@
                 easing: 'linear'
         	  },
               hAxis: {
+		slantedText: true,
+		showTextEvery: 1,
                  slantedTextAngle: 45,
                  maxTextLines: 2
                },
@@ -494,6 +497,8 @@
                 position: 'bottom'
               },
               hAxis: {
+		slantedText: true,
+		showTextEvery: 1,
                slantedTextAngle: 45,
                maxTextLines: 2
               },
@@ -619,8 +624,6 @@
                     var panelHasAlreadyBeenDrawn = {};
 
                     jQuery(document).ready(function() {
-                        $(".sortable").sortable({connectWith: '.sortable'});
-
                         $('#accordion .head').click(function() {
                             //  This toggles the next element, right after head,
                             //  which is the accordion ajax panel
@@ -640,7 +643,7 @@
 									eval("DrawOncoPrintBody(ONCOPRINT_" + this.id +
 										 ", LONGEST_LABEL_" + this.id + ".get('LONGEST_LABEL_" + this.id +
 										 "'), GENETIC_ALTERATIONS_SORTED_" + this.id +
-										 ".get('GENETIC_ALTERATIONS_SORTED_" + this.id + "'), false)");
+										 ".get('GENETIC_ALTERATIONS_SORTED_" + this.id + "'),'"+cancerStudyID+"')");
 								}
 							}
                             return false;
@@ -685,12 +688,12 @@
                     <h2 class="cross_cancer_header">Studies with Mutation Data</h2>
                     <% } %>
 
-                    <div class="sortable">
+                    <div>
                     <% outputCancerStudies(cancerStudiesWithMutations, out); %>
                     <% if( !cancerStudiesWithOutMutations.isEmpty() ) {
                     %>
                     </div>
-                    <div class="sortable">
+                    <div>
 
                             <% if(divideHistograms) { %>
                             <h2 class="cross_cancer_header">Studies without Mutation Data</h2>
@@ -753,8 +756,6 @@
             out.println("<span class='ui-icon ui-icon-triangle-1-s'"
                     + " style='float:left;display:none;'></span>");
             out.println(cancerStudy.getName());
-            out.println("<span class='ui-icon ui-icon-triangle-2-n-s movable-icon' style='float:right;'"
-                    + " title='You can drag this box and drop it to anywhere on the list.'></span>");
             out.println("<span class='percent_altered' id='percent_altered_" + cancerStudy.getCancerStudyStableId()
                     + "' style='float:right'><img src='images/ajax-loader2.gif'></span>");
             out.println("</h1>");

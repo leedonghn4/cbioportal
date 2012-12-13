@@ -1,3 +1,30 @@
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
+
 package org.mskcc.cbio.cgds.dao;
 
 import org.mskcc.cbio.cgds.model.CancerStudy;
@@ -5,6 +32,8 @@ import org.mskcc.cbio.cgds.model.TypeOfCancer;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Analogous to and replaces the old DaoCancerType. A CancerStudy has a NAME and
@@ -14,7 +43,41 @@ import java.util.ArrayList;
  * @author Ethan Cerami
  * @author Arthur Goldberg goldberg@cbio.mskcc.org
  */
-public class DaoCancerStudy {
+public final class DaoCancerStudy {
+    private DaoCancerStudy() {}
+    
+    private static final Map<String,CancerStudy> byStableId = new HashMap<String,CancerStudy>();
+    private static final Map<Integer,CancerStudy> byInternalId = new HashMap<Integer,CancerStudy>();
+    
+    static {
+       reCache();
+    }
+    
+    private static synchronized void reCache() {
+        byStableId.clear();
+        byInternalId.clear();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection();
+            pstmt = con.prepareStatement("SELECT * FROM cancer_study");
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                CancerStudy cancerStudy = extractCancerStudy(rs);
+                cacheCancerStudy(cancerStudy);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtil.closeAll(con, pstmt, rs);
+        }
+    }
+    
+    private static void cacheCancerStudy(CancerStudy study) {
+        byStableId.put(study.getCancerStudyStableId(), study);
+        byInternalId.put(study.getInternalId(), study);
+    }
 
     /**
      * Adds a cancer study to the Database.
@@ -44,21 +107,27 @@ public class DaoCancerStudy {
             if (cancerStudy.getCancerStudyStableId() != null) {
                 pstmt = con.prepareStatement("INSERT INTO cancer_study " +
                         "( `CANCER_STUDY_IDENTIFIER`, `NAME`, "
-                        + "`DESCRIPTION`, `PUBLIC`, `TYPE_OF_CANCER_ID` ) VALUES (?,?,?,?,?)",
+                        + "`DESCRIPTION`, `PUBLIC`, `TYPE_OF_CANCER_ID`, "
+                        + "`PMID`, `CITATION` ) VALUES (?,?,?,?,?,?,?)",
                         Statement.RETURN_GENERATED_KEYS);
                 pstmt.setString(1, cancerStudy.getCancerStudyStableId());
                 pstmt.setString(2, cancerStudy.getName());
                 pstmt.setString(3, cancerStudy.getDescription());
                 pstmt.setBoolean(4, cancerStudy.isPublicStudy());
                 pstmt.setString(5, cancerStudy.getTypeOfCancerId());
+                pstmt.setString(6, cancerStudy.getPmid());
+                pstmt.setString(7, cancerStudy.getCitation());
             } else {
                 pstmt = con.prepareStatement("INSERT INTO cancer_study ( `NAME`, "
-                        + "`DESCRIPTION`, `PUBLIC`, `TYPE_OF_CANCER_ID` ) VALUES (?,?,?,?)",
+                        + "`DESCRIPTION`, `PUBLIC`, `TYPE_OF_CANCER_ID`, "
+                        + "`PMID`, `CITATION` ) VALUES (?,?,?,?,?,?)",
                         Statement.RETURN_GENERATED_KEYS);
                 pstmt.setString(1, cancerStudy.getName());
                 pstmt.setString(2, cancerStudy.getDescription());
                 pstmt.setBoolean(3, cancerStudy.isPublicStudy());
                 pstmt.setString(4, cancerStudy.getTypeOfCancerId());
+                pstmt.setString(5, cancerStudy.getPmid());
+                pstmt.setString(6, cancerStudy.getCitation());
             }
             pstmt.executeUpdate();
             rs = pstmt.getGeneratedKeys();
@@ -72,6 +141,8 @@ public class DaoCancerStudy {
         } finally {
             JdbcUtil.closeAll(con, pstmt, rs);
         }
+        
+        reCache();
     }
 
     /**
@@ -79,27 +150,9 @@ public class DaoCancerStudy {
      *
      * @param cancerStudyID     Internal (int) Cancer Study ID.
      * @return Cancer Study Object, or null if there's no such study.
-     * @throws DaoException Database Error.
      */
-    public static CancerStudy getCancerStudyByInternalId(int cancerStudyID) throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection();
-            pstmt = con.prepareStatement("SELECT * FROM cancer_study WHERE CANCER_STUDY_ID = ?");
-            pstmt.setInt(1, cancerStudyID);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                CancerStudy cancerStudy = extractCancerStudy(rs);
-                return cancerStudy;
-            }
-            return null;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            JdbcUtil.closeAll(con, pstmt, rs);
-        }
+    public static CancerStudy getCancerStudyByInternalId(int cancerStudyID) {
+        return byInternalId.get(cancerStudyID);
     }
 
     /**
@@ -107,29 +160,9 @@ public class DaoCancerStudy {
      *
      * @param cancerStudyStableId Cancer Study Stable ID.
      * @return the CancerStudy, or null if there's no such study.
-     * @throws DaoException Database Error.
      */
-    public static CancerStudy getCancerStudyByStableId(String cancerStudyStableId)
-            throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection();
-            pstmt = con.prepareStatement("SELECT * FROM cancer_study " +
-                    "WHERE CANCER_STUDY_IDENTIFIER=?");
-            pstmt.setString(1, cancerStudyStableId);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                CancerStudy cancerStudy = extractCancerStudy(rs);
-                return cancerStudy;
-            }
-            return null;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            JdbcUtil.closeAll(con, pstmt, rs);
-        }
+    public static CancerStudy getCancerStudyByStableId(String cancerStudyStableId) {
+        return byStableId.get(cancerStudyStableId);
     }
 
     /**
@@ -137,12 +170,9 @@ public class DaoCancerStudy {
      *
      * @param cancerStudyStableId Cancer Study Stable ID.
      * @return true if the CancerStudy exists, otherwise false
-     * @throws DaoException Database Error.
      */
-    public static boolean doesCancerStudyExistByStableId(String cancerStudyStableId)
-            throws DaoException {
-        CancerStudy cancerStudy = getCancerStudyByStableId(cancerStudyStableId);
-        return (null != cancerStudy);
+    public static boolean doesCancerStudyExistByStableId(String cancerStudyStableId) {
+        return byStableId.containsKey(cancerStudyStableId);
     }
 
     /**
@@ -151,62 +181,26 @@ public class DaoCancerStudy {
      *
      * @param internalCancerStudyId Internal Cancer Study ID.
      * @return true if the CancerStudy exists, otherwise false
-     * @throws DaoException Database Error.
      */
-    public static boolean doesCancerStudyExistByInternalId(int internalCancerStudyId) throws DaoException {
-        CancerStudy cancerStudy = getCancerStudyByInternalId(internalCancerStudyId);
-        return (null != cancerStudy);
+    public static boolean doesCancerStudyExistByInternalId(int internalCancerStudyId) {
+        return byInternalId.containsKey(internalCancerStudyId);
     }
 
     /**
      * Returns all the cancerStudies.
      *
      * @return ArrayList of all CancerStudy Objects.
-     * @throws DaoException Database Error.
      */
-    public static ArrayList<CancerStudy> getAllCancerStudies() throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection();
-            pstmt = con.prepareStatement("SELECT * FROM cancer_study");
-            rs = pstmt.executeQuery();
-            ArrayList<CancerStudy> list = new ArrayList<CancerStudy>();
-            while (rs.next()) {
-                CancerStudy cancerStudy = extractCancerStudy(rs);
-                list.add(cancerStudy);
-            }
-            return list;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            JdbcUtil.closeAll(con, pstmt, rs);
-        }
+    public static ArrayList<CancerStudy> getAllCancerStudies() {
+        return new ArrayList<CancerStudy>(byStableId.values());
     }
 
     /**
      * Gets Number of Cancer Studies.
      * @return number of cancer studies.
-     * @throws DaoException Database Error.
      */
-    public static int getCount() throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection();
-            pstmt = con.prepareStatement("SELECT COUNT(*) FROM cancer_study");
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            JdbcUtil.closeAll(con, pstmt, rs);
-        }
+    public static int getCount() {
+        return byStableId.size();
     }
 
     /**
@@ -214,6 +208,8 @@ public class DaoCancerStudy {
      * @throws DaoException Database Error.
      */
     public static void deleteAllRecords() throws DaoException {
+        byStableId.clear();
+        byInternalId.clear();
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -248,6 +244,7 @@ public class DaoCancerStudy {
         } finally {
             JdbcUtil.closeAll(con, pstmt, rs);
         }
+        reCache();
     }
 
     /**
@@ -259,6 +256,8 @@ public class DaoCancerStudy {
                 rs.getString("CANCER_STUDY_IDENTIFIER"),
                 rs.getString("TYPE_OF_CANCER_ID"),
                 rs.getBoolean("PUBLIC"));
+        cancerStudy.setPmid(rs.getString("PMID"));
+        cancerStudy.setCitation(rs.getString("CITATION"));
 
         cancerStudy.setInternalId(rs.getInt("CANCER_STUDY_ID"));
         return cancerStudy;

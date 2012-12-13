@@ -1,3 +1,30 @@
+/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+**
+** This library is free software; you can redistribute it and/or modify it
+** under the terms of the GNU Lesser General Public License as published
+** by the Free Software Foundation; either version 2.1 of the License, or
+** any later version.
+**
+** This library is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+** documentation provided hereunder is on an "as is" basis, and
+** Memorial Sloan-Kettering Cancer Center 
+** has no obligations to provide maintenance, support,
+** updates, enhancements or modifications.  In no event shall
+** Memorial Sloan-Kettering Cancer Center
+** be liable to any party for direct, indirect, special,
+** incidental or consequential damages, including lost profits, arising
+** out of the use of this software and its documentation, even if
+** Memorial Sloan-Kettering Cancer Center 
+** has been advised of the possibility of such damage.  See
+** the GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this library; if not, write to the Free Software Foundation,
+** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+**/
+
 package org.mskcc.cbio.cgds.web_api;
 
 import org.mskcc.cbio.cgds.dao.*;
@@ -105,11 +132,10 @@ public class GetProfileData {
         this.matrix = WebFileConnect.parseMatrix(rawContent);
 
         //  Create the Profile Data Object
-        DaoGeneticProfile daoGeneticProfile = new DaoGeneticProfile();
         if (targetGeneticProfileIdList.size() == 1) {
             String geneticProfileId = targetGeneticProfileIdList.get(0);
             GeneticProfile geneticProfile =
-                    daoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+                    DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
             profileData = new ProfileData(geneticProfile, matrix);
         }
     }
@@ -131,10 +157,9 @@ public class GetProfileData {
         StringBuffer buf = new StringBuffer();
 
         //  Validate that all Genetic Profiles are valid Stable IDs.
-        DaoGeneticProfile daoGeneticProfile = new DaoGeneticProfile();
         for (String geneticProfileId:  targetGeneticProfileIdList) {
             GeneticProfile geneticProfile =
-                    daoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+                    DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
             if (geneticProfile == null) {
                 buf.append("No genetic profile available for " + WebService.GENETIC_PROFILE_ID + ":  ")
                         .append(geneticProfileId).append(".").append (WebApiUtil.NEW_LINE);
@@ -147,7 +172,7 @@ public class GetProfileData {
         //  In the second case, we have > 1 profiles and only 1 gene.
         if (targetGeneticProfileIdList.size() == 1) {
             String geneticProfileId = targetGeneticProfileIdList.get(0);
-            GeneticProfile geneticProfile = daoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+            GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
 
             //  Get the Gene List
             ArrayList<Gene> geneList = WebApiUtil.getGeneList(targetGeneList,
@@ -178,7 +203,7 @@ public class GetProfileData {
             ArrayList<GeneticProfile> profiles = new ArrayList<GeneticProfile>(targetGeneticProfileIdList.size());
             boolean includeRPPAProteinLevel = false;
             for (String gId:  targetGeneticProfileIdList) {
-                GeneticProfile profile = daoGeneticProfile.getGeneticProfileByStableId(gId);
+                GeneticProfile profile = DaoGeneticProfile.getGeneticProfileByStableId(gId);
                 profiles.add(profile);
                 if (profile.getGeneticAlterationType() == GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL) {
                     includeRPPAProteinLevel = true;
