@@ -112,7 +112,7 @@ function loadMetaData() {
     $('#load').fadeIn('slow');
 
     //  hide the main query form until all meta data is loaded and added to page
-    $('#main_query_form').hide('fast',loadContent);
+    $('#main_query_form').hide('fast', loadContent);
 
     function loadContent() {
         //  Get Portal JSON Meta Data via JQuery AJAX
