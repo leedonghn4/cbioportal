@@ -65,7 +65,7 @@
 </center>
 </div>
 
-<script type="text/javascript" src="js/nv.d3.min.js"></script>
+<script type="text/javascript" src="js/nv.d3.js"></script>
 <script type="text/javascript" src="js/crosscancer.js"></script>
 
 <jsp:include page="global/xdebug.jsp" flush="true"/>
