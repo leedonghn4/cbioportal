@@ -82,8 +82,6 @@ public class CrossCancerJSON extends HttpServlet {
     protected void doGet(HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse) throws ServletException,
             IOException {
-        XDebug xdebug = new XDebug(httpServletRequest);
-
         //  Cancer All Cancer Studies
         try {
             // Get priority settings
@@ -95,7 +93,6 @@ public class CrossCancerJSON extends HttpServlet {
             } catch (NumberFormatException e) {
                 dataTypePriority = 0;
             }
-            httpServletRequest.setAttribute(QueryBuilder.DATA_PRIORITY, dataTypePriority);
             List<CancerStudy> cancerStudiesList = accessControl.getCancerStudies();
 
             JSONArray rootMap =  new JSONArray();
@@ -107,7 +104,6 @@ public class CrossCancerJSON extends HttpServlet {
                 ArrayList<CaseList> caseSetList = GetCaseSets.getCaseSets(stableId);
                 AnnotatedCaseSets annotatedCaseSets = new AnnotatedCaseSets(caseSetList, dataTypePriority);
                 CaseList defaultCaseSet = annotatedCaseSets.getDefaultCaseList();
-                httpServletRequest.setAttribute(QueryBuilder.CASE_SET_ID, defaultCaseSet.getStableId());
 
                 //  Get the default genomic profiles
                 CategorizedGeneticProfileSet categorizedGeneticProfileSet
@@ -125,7 +121,12 @@ public class CrossCancerJSON extends HttpServlet {
                         defaultGeneticProfileSet = categorizedGeneticProfileSet.getDefaultMutationAndCopyNumberMap();
                 }
 
-                JSONArray jsonGenomicProfileList = new JSONArray();
+                String profilesStr = "";
+                for (String profile : defaultGeneticProfileSet.keySet()) {
+                    profilesStr += profile + " ";
+                }
+                if(!profilesStr.isEmpty()) profilesStr = profilesStr.substring(0, profilesStr.length()-2);
+
                 Map jsonCancerStudySubMap = new LinkedHashMap();
                 jsonCancerStudySubMap.put("id", stableId);
                 jsonCancerStudySubMap.put("name", cancerStudy.getName());
@@ -135,7 +136,8 @@ public class CrossCancerJSON extends HttpServlet {
                 jsonCancerStudySubMap.put("has_mutation_data", cancerStudy.hasMutationData(geneticProfiles));
                 jsonCancerStudySubMap.put("has_mutsig_data", cancerStudy.hasMutSigData());
                 jsonCancerStudySubMap.put("has_gistic_data", cancerStudy.hasGisticData());
-                jsonCancerStudySubMap.put("genetic_profile", defaultGeneticProfileSet);
+                jsonCancerStudySubMap.put("genetic_profiles", profilesStr);
+                jsonCancerStudySubMap.put("case_set", defaultCaseSet.getCancerStudyId());
 
                 rootMap.add(jsonCancerStudySubMap);
             }
