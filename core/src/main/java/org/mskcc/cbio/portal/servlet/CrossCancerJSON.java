@@ -137,13 +137,16 @@ public class CrossCancerJSON extends HttpServlet {
                 else profilesStr = null;
 
                 String cases = "";
+                String caseSetDescription = "";
                 if(defaultCaseSet == null) {
                     cases = null;
+                    caseSetDescription = null;
                 } else {
                     for (String aCase : defaultCaseSet.getCaseList()) {
                         cases += aCase + " ";
                     }
                     if(!cases.isEmpty()) cases = cases.substring(0, cases.length()-1);
+                    caseSetDescription = defaultCaseSet.getDescription();
                 }
 
                 Map jsonCancerStudySubMap = new LinkedHashMap();
@@ -157,6 +160,7 @@ public class CrossCancerJSON extends HttpServlet {
                 jsonCancerStudySubMap.put("has_gistic_data", cancerStudy.hasGisticData());
                 jsonCancerStudySubMap.put("genetic_profiles", profilesStr);
                 jsonCancerStudySubMap.put("case_set", cases);
+                jsonCancerStudySubMap.put("case_set_description", caseSetDescription);
                 rootMap.add(jsonCancerStudySubMap);
             }
 
