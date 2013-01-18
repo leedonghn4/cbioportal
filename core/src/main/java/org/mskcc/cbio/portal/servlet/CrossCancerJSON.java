@@ -30,9 +30,7 @@ package org.mskcc.cbio.portal.servlet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 import org.mskcc.cbio.cgds.dao.DaoException;
-import org.mskcc.cbio.cgds.model.CancerStudy;
-import org.mskcc.cbio.cgds.model.CaseList;
-import org.mskcc.cbio.cgds.model.GeneticProfile;
+import org.mskcc.cbio.cgds.model.*;
 import org.mskcc.cbio.cgds.util.AccessControl;
 import org.mskcc.cbio.cgds.web_api.ProtocolException;
 import org.mskcc.cbio.portal.model.GeneSet;
@@ -49,10 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This provides the cross cancer summary page with the
@@ -91,61 +86,58 @@ public class CrossCancerJSON extends HttpServlet {
 
         //  Cancer All Cancer Studies
         try {
+            // Get priority settings
+            //  Get priority settings
+            Integer dataTypePriority;
+            try {
+                dataTypePriority
+                        = Integer.parseInt(httpServletRequest.getParameter(QueryBuilder.DATA_PRIORITY).trim());
+            } catch (NumberFormatException e) {
+                dataTypePriority = 0;
+            }
+            httpServletRequest.setAttribute(QueryBuilder.DATA_PRIORITY, dataTypePriority);
             List<CancerStudy> cancerStudiesList = accessControl.getCancerStudies();
 
-            //  Get all Genomic Profiles and Case Sets for each Cancer Study
-            Map rootMap = new LinkedHashMap();
-            Map cancerStudyMap = new LinkedHashMap();
-            rootMap.put("cancer_studies", cancerStudyMap);
+            JSONArray rootMap =  new JSONArray();
             for (CancerStudy cancerStudy : cancerStudiesList) {
-                ArrayList<CaseList> caseSets = GetCaseSets.getCaseSets
-                        (cancerStudy.getCancerStudyStableId());
+                String stableId = cancerStudy.getCancerStudyStableId();
+                ArrayList<GeneticProfile> geneticProfiles = GetGeneticProfiles.getGeneticProfiles(stableId);
 
-                ArrayList<GeneticProfile> geneticProfiles =
-                        GetGeneticProfiles.getGeneticProfiles
-                                (cancerStudy.getCancerStudyStableId());
+                //  Get the default case set
+                ArrayList<CaseList> caseSetList = GetCaseSets.getCaseSets(stableId);
+                AnnotatedCaseSets annotatedCaseSets = new AnnotatedCaseSets(caseSetList, dataTypePriority);
+                CaseList defaultCaseSet = annotatedCaseSets.getDefaultCaseList();
+                httpServletRequest.setAttribute(QueryBuilder.CASE_SET_ID, defaultCaseSet.getStableId());
+
+                //  Get the default genomic profiles
+                CategorizedGeneticProfileSet categorizedGeneticProfileSet
+                        = new CategorizedGeneticProfileSet(geneticProfiles);
+                HashMap<String, GeneticProfile> defaultGeneticProfileSet = null;
+                switch (dataTypePriority) {
+                    case 2:
+                        defaultGeneticProfileSet = categorizedGeneticProfileSet.getDefaultCopyNumberMap();
+                        break;
+                    case 1:
+                        defaultGeneticProfileSet = categorizedGeneticProfileSet.getDefaultMutationMap();
+                        break;
+                    case 0:
+                    default:
+                        defaultGeneticProfileSet = categorizedGeneticProfileSet.getDefaultMutationAndCopyNumberMap();
+                }
+
                 JSONArray jsonGenomicProfileList = new JSONArray();
-                for (GeneticProfile geneticProfile : geneticProfiles) {
-                    Map map = new LinkedHashMap();
-                    map.put("id", geneticProfile.getStableId());
-                    map.put("alteration_type", geneticProfile.getGeneticAlterationType().toString());
-                    map.put("show_in_analysis_tab", geneticProfile.showProfileInAnalysisTab());
-                    map.put("name", geneticProfile.getProfileName());
-                    map.put("description", geneticProfile.getProfileDescription());
-                    jsonGenomicProfileList.add(map);
-                }
-
-                JSONArray jsonCaseList = new JSONArray();
-                for (CaseList caseSet : caseSets) {
-                    Map map = new LinkedHashMap();
-                    map.put("id", caseSet.getStableId());
-                    map.put("name", caseSet.getName());
-                    map.put("description", caseSet.getDescription());
-                    jsonCaseList.add(map);
-                }
                 Map jsonCancerStudySubMap = new LinkedHashMap();
+                jsonCancerStudySubMap.put("id", stableId);
                 jsonCancerStudySubMap.put("name", cancerStudy.getName());
                 jsonCancerStudySubMap.put("description", cancerStudy.getDescription());
                 jsonCancerStudySubMap.put("citation", cancerStudy.getCitation());
                 jsonCancerStudySubMap.put("pmid", cancerStudy.getPmid());
-                jsonCancerStudySubMap.put("genomic_profiles", jsonGenomicProfileList);
-                jsonCancerStudySubMap.put("case_sets", jsonCaseList);
                 jsonCancerStudySubMap.put("has_mutation_data", cancerStudy.hasMutationData(geneticProfiles));
                 jsonCancerStudySubMap.put("has_mutsig_data", cancerStudy.hasMutSigData());
                 jsonCancerStudySubMap.put("has_gistic_data", cancerStudy.hasGisticData());
-                cancerStudyMap.put(cancerStudy.getCancerStudyStableId(), jsonCancerStudySubMap);
-            }
+                jsonCancerStudySubMap.put("genetic_profile", defaultGeneticProfileSet);
 
-            //  Get all Gene Sets
-            GeneSetUtil geneSetUtil = GeneSetUtil.getInstance();
-            Map jsonGeneSetMap = new LinkedHashMap();
-            rootMap.put("gene_sets", jsonGeneSetMap);
-            ArrayList<GeneSet> geneSetList = geneSetUtil.getGeneSetList();
-            for (GeneSet geneSet : geneSetList) {
-                Map geneSetMap = new LinkedHashMap();
-                geneSetMap.put("name", geneSet.getName());
-                geneSetMap.put("gene_list", geneSet.getGeneList());
-                jsonGeneSetMap.put(geneSet.getId(), geneSetMap);
+                rootMap.add(jsonCancerStudySubMap);
             }
 
             httpServletResponse.setContentType("application/json");
