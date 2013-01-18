@@ -1,17 +1,10 @@
-<%@ page import="org.mskcc.cbio.cgds.model.CancerStudy" %>
-<%@ page import="org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities" %>
 <%@ page import="org.mskcc.cbio.portal.servlet.QueryBuilder" %>
 <%@ page import="org.mskcc.cbio.portal.servlet.ServletXssUtil" %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="org.mskcc.cbio.portal.util.SkinUtil" %>
-<%@ page import="java.io.IOException" %>
 
 <%
     String siteTitle = SkinUtil.getTitle();
     request.setAttribute(QueryBuilder.HTML_TITLE, siteTitle);
-    ArrayList<CancerStudy> cancerStudies = (ArrayList<CancerStudy>)
-            request.getAttribute(QueryBuilder.CANCER_TYPES_INTERNAL);
 
     // Get priority settings
     Integer dataPriority;
@@ -30,6 +23,7 @@
 
 <script type="text/javascript">
     var geneList = "<%=geneList%>";
+    var dataPriority = <%=dataPriority%>;
 </script>
 
 <table width="100%">
