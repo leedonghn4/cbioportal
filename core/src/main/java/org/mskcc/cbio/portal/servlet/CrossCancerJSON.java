@@ -27,6 +27,8 @@
 
 package org.mskcc.cbio.portal.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 import org.mskcc.cbio.cgds.dao.DaoException;
@@ -56,6 +58,7 @@ import java.util.*;
  * handled on the server side.
  */
 public class CrossCancerJSON extends HttpServlet {
+    private static final Log log = LogFactory.getLog(CrossCancerJSON.class);
     // class which process access control to cancer studies
     private AccessControl accessControl;
 
@@ -88,8 +91,11 @@ public class CrossCancerJSON extends HttpServlet {
             //  Get priority settings
             Integer dataTypePriority;
             try {
-                dataTypePriority
-                        = Integer.parseInt(httpServletRequest.getParameter(QueryBuilder.DATA_PRIORITY).trim());
+                String priority = httpServletRequest.getParameter(QueryBuilder.DATA_PRIORITY);
+                if(priority != null) {
+                    dataTypePriority = Integer.parseInt(priority.trim());
+                } else
+                    dataTypePriority = 0;
             } catch (NumberFormatException e) {
                 dataTypePriority = 0;
             }
@@ -97,6 +103,8 @@ public class CrossCancerJSON extends HttpServlet {
 
             JSONArray rootMap =  new JSONArray();
             for (CancerStudy cancerStudy : cancerStudiesList) {
+                if(cancerStudy.getCancerStudyStableId().equals("all")) continue;
+
                 String stableId = cancerStudy.getCancerStudyStableId();
                 ArrayList<GeneticProfile> geneticProfiles = GetGeneticProfiles.getGeneticProfiles(stableId);
 
@@ -125,7 +133,18 @@ public class CrossCancerJSON extends HttpServlet {
                 for (String profile : defaultGeneticProfileSet.keySet()) {
                     profilesStr += profile + " ";
                 }
-                if(!profilesStr.isEmpty()) profilesStr = profilesStr.substring(0, profilesStr.length()-2);
+                if(!profilesStr.isEmpty()) profilesStr = profilesStr.substring(0, profilesStr.length()-1);
+                else profilesStr = null;
+
+                String cases = "";
+                if(defaultCaseSet == null) {
+                    cases = null;
+                } else {
+                    for (String aCase : defaultCaseSet.getCaseList()) {
+                        cases += aCase + " ";
+                    }
+                    if(!cases.isEmpty()) cases = cases.substring(0, cases.length()-1);
+                }
 
                 Map jsonCancerStudySubMap = new LinkedHashMap();
                 jsonCancerStudySubMap.put("id", stableId);
@@ -137,8 +156,7 @@ public class CrossCancerJSON extends HttpServlet {
                 jsonCancerStudySubMap.put("has_mutsig_data", cancerStudy.hasMutSigData());
                 jsonCancerStudySubMap.put("has_gistic_data", cancerStudy.hasGisticData());
                 jsonCancerStudySubMap.put("genetic_profiles", profilesStr);
-                jsonCancerStudySubMap.put("case_set", defaultCaseSet.getCancerStudyId());
-
+                jsonCancerStudySubMap.put("case_set", cases);
                 rootMap.add(jsonCancerStudySubMap);
             }
 

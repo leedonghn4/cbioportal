@@ -219,6 +219,11 @@
         <servlet-name>GeneDataJSON</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.GeneDataJSON</servlet-class>
     </servlet>
+    
+    <servlet>
+        <servlet-name>CrossCancerJSON</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.CrossCancerJSON</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>webservice</servlet-name>
@@ -228,6 +233,11 @@
     <servlet-mapping>
         <servlet-name>query_builder</servlet-name>
         <url-pattern>/index.do</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>CrossCancerJSON</servlet-name>
+        <url-pattern>/cross_cancer.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
