@@ -62,8 +62,40 @@
 <!-- templates -->
 <script type="text/template" id="oncoprint_tmpl">
     <div id="oncoprint_body_{{id}}">
-        <img class="loader-img" src="images/ajax-loader.gif"/>
     </div>
+</script>
+
+<script type="text/template" id="histogram_control_divide_all_tmpl">
+    <option value="1">Show percent of altered cases (studies with mutation data)</option>
+    <option value="2">Show percent of altered cases (studies without mutation data)</option>
+    <option value="3">Show number of altered cases (studies with mutation data)</option>
+    <option value="4">Show number of altered cases (studies without mutation data)</option>
+</script>
+
+<script type="text/template" id="histogram_control_mut_tmpl">
+    <option value="1">Show percent of altered cases (studies with mutation data)</option>
+    <option value="3">Show number of altered cases (studies with mutation data)</option>
+</script>
+
+<script type="text/template" id="histogram_control_all_tmpl">
+    <option value="1">Show percent of altered cases</option>
+    <option value="3">Show number of altered cases</option>
+</script>
+
+
+<script type="text/template" id="histogram_tmpl">
+    <div id="historam_toggle" style="text-align: right; padding-right: 125px">
+        <select id="hist_toggle_box">
+        </select>
+        |
+        <a href="#" id="histogram_sort" title="Sorts/unsorts histograms by alteration in descending order">Sort</a>
+        |
+        <a href="#" id="download_histogram" title="Downloads the current histogram in SVG format.">Export</a>
+    </div>
+    <div id="chart_div1" style="width: 975px; height: 450px;"></div>
+    <div id="chart_div2" style="width: 975px; height: 450px;"></div>
+    <div id="chart_div3" style="width: 975px; height: 450px;"></div>
+    <div id="chart_div4" style="width: 975px; height: 450px;"></div>
 </script>
 
 <script type="text/template" id="oncoprint_key_tmpl">

@@ -72,11 +72,14 @@ AppRouter = Backbone.Router.extend({
         $.get("cross_cancer.json",
             { data_priority: dataPriority },
             function(data) {
-                var studiesLoadedView = new StudiesLoadedView({ model: data });
-                studiesLoadedView.render();
+                var histogramView = new HistogramView({ model: data });
+                histogramView.render();
+                // initiate the load chain
+                histogramView.updateStudy(0);
             }
         );
 
+        loadingView.destroy();
         return this;
     }
 
@@ -89,6 +92,10 @@ LoadingStudiesView = Backbone.View.extend({
     el: $("#results_container"),
     render: function() {
         return this;
+    },
+    destroy: function() {
+        $(this.el).html("");
+        return this;
     }
 });
 
@@ -97,30 +104,63 @@ StudiesLoadedView = Backbone.View.extend({
     render: function() {
         var studiesEl = this.el;
         $(studiesEl).html("");
-
-        var oncoPrintKeyView = new OncoPrintKeyView({ el: "#oncoprint_key_container" });
-        oncoPrintKeyView.render();
-
-        var i = 0;
-        _.each(this.model, function(aStudy) {
-            i++;
-            if(i < 5) {
-                var oncoprintView = new OncoprintView({ model: aStudy, el: studiesEl });
-                oncoprintView.render();
-            }
-        });
-
         return this;
     }
 });
 
-OncoprintView = Backbone.View.extend({
-    template: _.template($("#oncoprint_tmpl").html()),
+HistogramOptionsView = Backbone.View.extend({
+    el: $("#hist_toggle_box"),
     render: function() {
-        var studyData = this.model;
-        $(this.el).append(this.template(studyData));
+        var templateId;
 
-        // ** Oncoprint
+        if(this.divide && !this.onlyMutation) {
+            templateId = "#histogram_control_divide_all_tmpl";
+        } else if(this.onlyMutation) {
+            templateId = "#histogram_control_mut_tmpl";
+        } else {
+            templateId = "#histogram_control_all_tmpl";
+        }
+
+        $(this.el).append(_.template($(templateId).html(), {}));
+        return this;
+    },
+    divide: true,
+    onlyMutation: false
+});
+
+HistogramView = Backbone.View.extend({
+    template: _.template($("#histogram_tmpl").html()),
+    render: function() {
+        $(this.el).append(this.template( {
+            title: "Histogram title"
+        }));
+
+        var histogramOptionsView = new HistogramOptionsView();
+        if(dataPriority == 1) {
+            histogramOptionsView.onlyMutation = true;
+        }
+        histogramOptionsView.render();
+
+        google.load("visualization", "1", {packages:["corechart"]});
+        var genesQueried = "";
+        var shownHistogram = 1;
+        var multipleGenes = false;
+        var divideHistograms = histogramOptionsView.divide;
+        var onlyMutationData = histogramOptionsView.onlyMutation;
+        var maxAlterationPercent = 0;
+        var lastStudyLoaded = false;
+
+
+
+
+        return this;
+    },
+    updateStudy: function(idx) {
+        if(idx >= this.model.length) {
+            return; // done!
+        }
+
+        studyData = this.model[idx];
         var geneDataQuery = {
             genes: geneList,
             samples: studyData.case_set,
@@ -129,25 +169,50 @@ OncoprintView = Backbone.View.extend({
             rppa_score_threshold: 2.0
         };
 
-        var oncoprint;
+        var self = this;
         $.post(DataManagerFactory.getGeneDataJsonUrl(), geneDataQuery, function(data) {
-            var opElId = '#oncoprint_body_' + studyData.id;
-            $(opElId + ' .loader-img').hide();
+            console.log("Loaded study data #" + idx);
 
-            var oncoPrintParams = {
-                cancer_study_id: studyData.id,
-                case_set_str: studyData.case_set_description,
-                num_cases_affected: "0",
-                percent_cases_affected: "0%",
-                vis_key: false,
-                customize: false
-            };
+            var numOfSamples = data.samples.length;
+            var numOfGenes = data.gene_data.length;
+            var i;
 
-            oncoPrintParams['data'] = data;
+            for(i=0; i < numOfGenes; i++) {
 
-            oncoprint = Oncoprint($(opElId)[0], oncoPrintParams);
-            oncoprint.draw();
+            }
+
+            for(i=0; i < numOfSamples; i++) {
+
+            }
+
+            self.updateStudy(idx+1);
         });
+    }
+});
+
+// var oncoPrintKeyView = new OncoPrintKeyView({ el: "#oncoprint_key_container" });
+OncoprintView = Backbone.View.extend({
+    template: _.template($("#oncoprint_tmpl").html()),
+    render: function() {
+        var studyData = this.model.study;
+        var data = this.model.data;
+
+        $(this.el).append(this.template(studyData));
+
+
+        var oncoPrintParams = {
+            cancer_study_id: studyData.id,
+            case_set_str: studyData.case_set_description,
+            num_cases_affected: "0",
+            percent_cases_affected: "0%",
+            vis_key: false,
+            customize: false,
+            data: data
+        };
+
+        var opElId = '#oncoprint_body_' + studyData.id;
+        var oncoprint = Oncoprint($(opElId)[0], oncoPrintParams);
+        oncoprint.draw();
         // ** EOO
 
         return this;
