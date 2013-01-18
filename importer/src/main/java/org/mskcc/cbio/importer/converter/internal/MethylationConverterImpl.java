@@ -102,11 +102,12 @@ public class MethylationConverterImpl implements Converter {
 	 * Converts data for the given portal.
 	 *
      * @param portal String
+	 * @param runDate String
 	 * @param applyOverrides Boolean
 	 * @throws Exception
 	 */
     @Override
-	public void convertData(String portal, Boolean applyOverrides) throws Exception {
+	public void convertData(String portal, String runDate, Boolean applyOverrides) throws Exception {
 		throw new UnsupportedOperationException();
 	}
 
@@ -147,7 +148,10 @@ public class MethylationConverterImpl implements Converter {
 
 		// sanity check
 		if (dataMatrices.length != 2) {
-			throw new IllegalArgumentException("dataMatrices.length != 2, aborting...");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("createStagingFile(), dataMatrices.length != 2, aborting...");
+			}
+			return;
 		}
 
 		// determine which matrix is methylation data
@@ -278,6 +282,14 @@ public class MethylationConverterImpl implements Converter {
 		columnHeaders.remove(Converter.GENE_ID_COLUMN_HEADER_NAME);
 		columnHeaders.add(1, Converter.GENE_ID_COLUMN_HEADER_NAME);
 		dataMatrixMethylationData.setColumnOrder(columnHeaders);
+
+		// ignore rows with hugo symbol of NA
+		List<String> rows = dataMatrixMethylationData.getColumnData(Converter.GENE_SYMBOL_COLUMN_HEADER_NAME).get(0);
+		for (int lc = 0; lc < rows.size(); lc++) {
+			if (rows.get(lc).equals("NA")) {
+				dataMatrixMethylationData.ignoreRow(lc, true);
+			}
+		}
 		
 		if (LOG.isInfoEnabled()) {
 			//dataMatrixMethylationData.setGeneIDColumnHeading();
