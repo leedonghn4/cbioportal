@@ -117,6 +117,11 @@ public class QueryBuilder extends HttpServlet {
     public static final String INDEX_PAGE = "index.do";
     public static final String INTERNAL_EXTENDED_MUTATION_LIST = "INTERNAL_EXTENDED_MUTATION_LIST";
     public static final String DATA_PRIORITY = "data_priority";
+    public static final String CROSS_CANCER_STUDIES = "CROSS_CANCER_STUDIES";
+    public static final String CROSS_CANCER_CASESETS = "CROSS_CANCER_CASESETS";
+    public static final String CROSS_CANCER_PROFILES = "CROSS_CANCER_PROFILES";
+    public static final String CROSS_CANCER_MERGED_PROFILE_DATAS = "CROSS_CANCER_MERGED_PROFILE_DATAS";
+    public static final String CROSS_CANCER_GENES = "CROSS_CANCER_GENES";
 
     private ServletXssUtil servletXssUtil;
 

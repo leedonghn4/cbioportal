@@ -6,6 +6,17 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.mskcc.cbio.portal.util.SkinUtil" %>
 <%@ page import="java.io.IOException" %>
+<%@ page import="org.mskcc.cbio.cgds.model.ExtendedMutation" %>
+<%@ page import="org.mskcc.cbio.portal.model.ExtendedMutationMap" %>
+<%@ page import="org.mskcc.cbio.portal.util.MutationCounter" %>
+<%@ page import="org.codehaus.jackson.map.ObjectMapper" %>
+<%@ page import="java.io.StringWriter" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.mskcc.cbio.cgds.model.CaseList" %>
+<%@ page import="java.text.DecimalFormat" %>
+
+<script type="text/javascript" src="js/raphael/raphael.js"></script>
+<script type="text/javascript" src="js/mutation_diagram.js"></script>
 
 <%
     String siteTitle = SkinUtil.getTitle();
@@ -89,6 +100,20 @@
 
 %>
 
+<%
+    ArrayList<ExtendedMutation> extendedMutationList = (ArrayList<ExtendedMutation>)
+            request.getAttribute(QueryBuilder.INTERNAL_EXTENDED_MUTATION_LIST);
+
+    ArrayList<CaseList> allCaseLists
+            = (ArrayList<CaseList>) request.getAttribute(QueryBuilder.CROSS_CANCER_CASESETS);
+    ArrayList<String> caseListStrs = new ArrayList<String>();
+    for (CaseList aCaseList : allCaseLists) {
+        caseListStrs.add(aCaseList.getStableId());
+    }
+    ExtendedMutationMap mutationMap = new ExtendedMutationMap(extendedMutationList, caseListStrs);
+    ArrayList<String> genes = (ArrayList<String>) request.getAttribute(QueryBuilder.CROSS_CANCER_GENES);
+%>
+
 <jsp:include page="global/header.jsp" flush="true"/>
 
 <%
@@ -105,6 +130,14 @@
     studiesList = studiesList.substring(0, studiesList.length()-1);
     studiesNames = studiesNames.substring(0, studiesNames.length()-1);
 %>
+
+<style type="text/css">
+    #chart_div5 #mutation_details {
+        padding: 20px;
+        padding-left: 40px;
+
+    }
+</style>
 
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
@@ -124,16 +157,19 @@
         $("#chart_div2").toggle();
         $("#chart_div3").toggle();
         $("#chart_div4").toggle();
+        $("#chart_div5").toggle();
         function toggleHistograms() {
 	        var histIndex = $("#hist_toggle_box").val();
             $("#chart_div1").hide();
             $("#chart_div2").hide();
             $("#chart_div3").hide();
             $("#chart_div4").hide();
+            $("#chart_div5").hide();
 
-	        $("#chart_div" + histIndex).show();
+            $("#chart_div" + histIndex).show();
             shownHistogram = histIndex;
             drawChart();
+            reDrawMutDiagrams();
         }
         $("#hist_toggle_box").change( toggleHistograms );
 
@@ -605,11 +641,15 @@
                         <option value="2">Show percent of altered cases (studies without mutation data)</option>
                         <option value="3">Show number of altered cases (studies with mutation data)</option>
                         <option value="4">Show number of altered cases (studies without mutation data)</option>
+                        <option value="-1" disabled="true">--</option>
+                        <option value="5">Show combined mutation diagram(s)</option>
                         <%
                             } else if(onlyMutationData) {
                         %>
                         <option value="1">Show percent of altered cases (studies with mutation data)</option>
                         <option value="3">Show number of altered cases (studies with mutation data)</option>
+                        <option value="-1" disabled="true">--</option>
+                        <option value="5">Show combined mutation diagram(s)</option>
                         <%
                             } else {
                         %>
@@ -628,6 +668,26 @@
                 <div id="chart_div2" style="width: 975px; height: 450px;"></div>
                 <div id="chart_div3" style="width: 975px; height: 450px;"></div>
                 <div id="chart_div4" style="width: 975px; height: 450px;"></div>
+                <div id="chart_div5" style="width: 900px;">
+                    <div id='mutation_details'>
+
+                        <%
+                            if (mutationMap.getNumGenesWithExtendedMutations() > 0) {
+                                for (String gene: genes) {
+                                    MutationCounter mutationCounter = new MutationCounter(gene, mutationMap);
+
+                                    if (mutationMap.getNumExtendedMutations(gene) > 0)
+                                    {
+                                        outputHeader(out, gene, mutationCounter);
+                                    }
+                                }
+                            } else {
+                                outputNoMutationDetails(out);
+                            }
+                        %>
+
+                    </div>
+                </div>
                 <br/>
                 <br/>
 
@@ -777,6 +837,53 @@
 </table>
 </center>
 </div>
+
+<script type="text/javascript">
+
+    var mutationsDrawn = false;
+    //  Set up Mutation Diagrams
+    var reDrawMutDiagrams = function() {
+        if(mutationsDrawn) {
+            return; // do nothing
+        }
+        mutationsDrawn = true;
+
+        var geneSymbol;
+        var diagramMutations;
+        var tableMutations;
+
+<%
+
+if(dataPriority != 2) {
+    for (String gene: genes) {
+        if (mutationMap.getNumExtendedMutations(gene) > 0) {
+%>
+        geneSymbol = "<%= gene.toUpperCase() %>";
+        diagramMutations = "<%= outputMutationsJson(gene, mutationMap) %>";
+
+        $.ajax({ url: "mutation_diagram_data.json",
+            dataType: "json",
+            data: {
+                hugoGeneSymbol: geneSymbol,
+                mutations: diagramMutations
+            },
+            success: function(sequences) {
+                $(".cc-diagrams-loading").hide();
+                drawMutationDiagram(sequences);
+
+            },
+            type: "POST"
+        });
+
+<%
+        }
+    }
+}
+%>
+
+    };
+</script>
+
 <jsp:include page="global/xdebug.jsp" flush="true"/>
 
 </body>
@@ -796,7 +903,7 @@
                     + " style='float:left;display:none;'></span>");
             out.println(cancerStudy.getName());
             out.println("<span class='percent_altered' id='percent_altered_" + cancerStudy.getCancerStudyStableId()
-                    + "' style='float:right'><img src='images/ajax-loader2.gif'></span>");
+                    + "' style='float:right'><img  src='images/ajax-loader2.gif'></span>");
             out.println("</h1>");
             out.println("<div class='accordion_ajax' id=\"study_"
                     + cancerStudy.getCancerStudyStableId() + "\">");
@@ -805,3 +912,36 @@
         }
     }
 %>
+
+<%!
+    private String outputMutationsJson(String gene, final ExtendedMutationMap mutationMap) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        StringWriter stringWriter = new StringWriter();
+        List<ExtendedMutation> mutations = mutationMap.getExtendedMutations(gene);
+        try {
+            objectMapper.writeValue(stringWriter, mutations);
+        }
+        catch (Exception e) {
+            // ignore
+        }
+        return stringWriter.toString().replace("\"", "\\\"");
+    }
+
+    private void outputHeader(JspWriter out, String gene, MutationCounter mutationCounter) throws IOException {
+        DecimalFormat percentFormat = new DecimalFormat("###,###.#%");
+        out.print("<h4>" + gene.toUpperCase() + ": ");
+        out.println("[Mutation Rate: " + percentFormat.format(mutationCounter.getMutationRate()) + "]");
+        out.println("</h4>");
+        out.println("<div id='mutation_diagram_" + gene.toUpperCase() + "'></div>");
+        out.println("<div id='mutation_histogram_" + gene.toUpperCase() + "'></div>");
+        out.println("<div id='mutation_table_" + gene.toUpperCase() + "'>" +
+                "<img class='cc-diagrams-loading' src='images/ajax-loader.gif'/>" +
+                "</div>");
+    }
+
+    private void outputNoMutationDetails(JspWriter out) throws IOException {
+        out.println("<p>There are no mutation details available for the gene set entered.</p>");
+        out.println("<br><br>");
+    }
+%>
+
