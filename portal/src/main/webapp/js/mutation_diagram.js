@@ -8,7 +8,13 @@ window.log = function() {
   }
 };
 
+
 function drawMutationDiagram(sequences)
+{
+    drawMutationDiagramWithCustomTooltips(sequences, addMouseOver);
+}
+
+function drawMutationDiagramWithCustomTooltips(sequences, toolTipFunction)
 {
     var MAX_OFFSET = 4;
     var COSMIC_THRESHOLD = 5;
@@ -76,7 +82,7 @@ function drawMutationDiagram(sequences)
     _drawMutationScale(histogram, maxCount, x, per, c, scaleColors);
 
     // mutation lollipops
-    _drawMutationLollipops(paper, mutationDiagram, maxCount, MAX_OFFSET, id, x, l, w, c, per, scaleColors);
+    _drawMutationLollipops(paper, mutationDiagram, maxCount, MAX_OFFSET, id, x, l, w, c, per, scaleColors, toolTipFunction);
 
     // mutation histogram
     _drawHistogram(histogram, mutationDiagram, maxCount, MAX_OFFSET, COSMIC_THRESHOLD, x, l, w, c, per, scaleColors);
@@ -152,7 +158,7 @@ function _drawHistogram(paper, mutationDiagram, maxCount, maxOffset, cosmicThres
  * @param per
  * @param scaleColors       style colors
  */
-function _drawMutationLollipops(paper, mutationDiagram, maxCount, maxOffset, id, x, l, w, c, per, scaleColors)
+function _drawMutationLollipops(paper, mutationDiagram, maxCount, maxOffset, id, x, l, w, c, per, scaleColors, toolTipFunction)
 {
     var labelShown = false;
 
@@ -171,28 +177,17 @@ function _drawMutationLollipops(paper, mutationDiagram, maxCount, maxOffset, id,
             var lollipopFillColor = mutationDiagram.markups[i].colour[0];
             var lollipopStrokeColor = darken(lollipopFillColor);
             var markupLineColor = mutationDiagram.markups[i].lineColour;
-            var countText = "";
-
-            if (mutationDiagram.markups[i].metadata.count == 1) {
-                countText = "<b>" + mutationDiagram.markups[i].metadata.count + " mutation</b>";
-            }
-            else {
-                countText = "<b>" + mutationDiagram.markups[i].metadata.count + " mutations</b>";
-            }
-
-            var mutationTitle = countText + "<br/>Amino Acid Change:  " +
-                                mutationDiagram.markups[i].metadata.label + " ";
 
             var p = paper.path("M" + x1 + " " + (c - 5) + "L" + x2 + " " + y2)
                 .toBack()
                 .attr({"stroke": markupLineColor, "stroke-width": 1});
 
-            addMouseOver(p.node, mutationTitle, id);
+            toolTipFunction(p.node, mutationDiagram.markups[i].metadata, id);
 
             var lollipop = paper.circle(x2, y2, 3, 3)
                 .attr({"fill": lollipopFillColor, "stroke": lollipopStrokeColor, "stroke-width": 0.5});
 
-            addMouseOver(lollipop.node, mutationTitle, id);
+            toolTipFunction(lollipop.node, mutationDiagram.markups[i].metadata, id);
 
             // draws the label for the max count
             if (mutationDiagram.markups[i].metadata.label &&
@@ -438,7 +433,18 @@ function darken(color) {
   return Raphael.hsb(hsb.h, hsb.s, Math.max(0, hsb.b - (hsb.b * 0.20)));
 }
 
-function addMouseOver(node, txt, id){
+function addMouseOver(node, metadata, id){
+    var countText = "";
+
+    if (metadata.count == 1) {
+        countText = "<b>" + metadata.count + " mutation</b>";
+    }
+    else {
+        countText = "<b>" + metadata.count + " mutations</b>";
+    }
+
+    var txt = countText + "<br/>Amino Acid Change:  " + metadata.label + " ";
+
     $(node).qtip({
         content: {text: '<font size="2">'+txt+'</font>'},
         hide: { fixed: true, delay: 100 },

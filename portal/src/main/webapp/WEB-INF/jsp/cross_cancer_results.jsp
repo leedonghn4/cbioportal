@@ -848,9 +848,59 @@
         }
         mutationsDrawn = true;
 
+        function addMouseOverCustom(node, metadata, id){
+            var countText = "";
+
+            if (metadata.count == 1) {
+                countText = "<b>" + metadata.count + " mutation</b>";
+            }
+            else {
+                countText = "<b>" + metadata.count + " mutations</b>";
+            }
+
+            var txt = countText + "<br/>Amino Acid Change:  " + metadata.label + " ";
+
+            // add the potential histogram component
+            txt += "<br/><br/><div id='cc_hist_" + id + "_" + metadata.label + "'>"
+                    + "<img class='cc-histograms-loading' src='images/ajax-loader.gif'/>"
+                    + "</div>";
+
+            $(node).qtip({
+                content: {
+                    text: function(api) {
+
+                        $.getJSON("cross_cancer_mutation_histogram.json",
+                                {
+                                    gene: id,
+                                    mutation: metadata.label
+                                },
+                                function(data) {
+                                    var options = {
+                                        hAxis: {title: 'Cancer studies'},
+                                        yAxis: {title: 'Num. of Mutations'}
+                                    };
+
+                                    var chart = new google.visualization.ColumnChart(
+                                            document.getElementById("cc_hist_" + id + "_" + metadata.label)
+                                    );
+                                    chart.draw(data, options);
+                                }
+                        );
+
+                        return txt;
+                    }
+                },
+                hide: { fixed: true, delay: 100 },
+                style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
+                position: {my:'bottom center',at:'top center'}
+            });
+        }
+
         var geneSymbol;
         var diagramMutations;
         var tableMutations;
+
+
 
 <%
 
@@ -869,7 +919,7 @@ if(dataPriority != 2) {
             },
             success: function(sequences) {
                 $(".cc-diagrams-loading").hide();
-                drawMutationDiagram(sequences);
+                drawMutationDiagramWithCustomTooltips(sequences, addMouseOverCustom);
 
             },
             type: "POST"
@@ -929,9 +979,7 @@ if(dataPriority != 2) {
 
     private void outputHeader(JspWriter out, String gene, MutationCounter mutationCounter) throws IOException {
         DecimalFormat percentFormat = new DecimalFormat("###,###.#%");
-        out.print("<h4>" + gene.toUpperCase() + ": ");
-        out.println("[Mutation Rate: " + percentFormat.format(mutationCounter.getMutationRate()) + "]");
-        out.println("</h4>");
+        out.print("<h4>" + gene.toUpperCase() + "</h4>");
         out.println("<div id='mutation_diagram_" + gene.toUpperCase() + "'></div>");
         out.println("<div id='mutation_histogram_" + gene.toUpperCase() + "'></div>");
         out.println("<div id='mutation_table_" + gene.toUpperCase() + "'>" +
