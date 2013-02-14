@@ -360,6 +360,16 @@
         <servlet-name>GeneDataJSON</servlet-name>
         <url-pattern>/GeneData.json</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CrossCancerMutationHistogramJSON</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.CrossCancerMutationHistogramJSON</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CrossCancerMutationHistogramJSON</servlet-name>
+        <url-pattern>/cross_cancer_mutation_histogram.json</url-pattern>
+    </servlet-mapping>
      
      <!-- tumor map -->
     <servlet>

@@ -861,7 +861,7 @@
             var txt = countText + "<br/>Amino Acid Change:  " + metadata.label + " ";
 
             // add the potential histogram component
-            txt += "<br/><br/><div id='cc_hist_" + id + "_" + metadata.label + "' style='width: 400px; height: 400px;'>"
+            txt += "<br/><br/><div id='cc_hist_" + id + "_" + metadata.label + "'>"
                     + "<img class='cc-histograms-loading' src='images/ajax-loader.gif'/>"
                     + "</div>";
 
@@ -872,7 +872,8 @@
                         $.getJSON("cross_cancer_mutation_histogram.json",
                                 {
                                     gene: id,
-                                    mutation: metadata.label
+                                    mutation: metadata.label,
+                                    data_priority: <%=dataPriority%>
                                 },
                                 function(data) {
                                     var options = {
@@ -880,10 +881,13 @@
                                         yAxis: {title: 'Num. of Mutations'}
                                     };
 
-                                    var chart = new google.visualization.ColumnChart(
+                                    //var chart = new google.visualization.ColumnChart(
+                                    var chart = new google.visualization.PieChart(
                                             document.getElementById("cc_hist_" + id + "_" + metadata.label)
                                     );
-                                    chart.draw(data, options);
+
+                                    var gData = google.visualization.arrayToDataTable(data);
+                                    chart.draw(gData, options);
                                 }
                         );
 
@@ -979,7 +983,10 @@ if(dataPriority != 2) {
 
     private void outputHeader(JspWriter out, String gene, MutationCounter mutationCounter) throws IOException {
         DecimalFormat percentFormat = new DecimalFormat("###,###.#%");
-        out.print("<h4>" + gene.toUpperCase() + "</h4>");
+        out.print("<h4>"
+                + gene.toUpperCase()
+                + "</h4>"
+        );
         out.println("<div id='mutation_diagram_" + gene.toUpperCase() + "'></div>");
         out.println("<div id='mutation_histogram_" + gene.toUpperCase() + "'></div>");
         out.println("<div id='mutation_table_" + gene.toUpperCase() + "'>" +

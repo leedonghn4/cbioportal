@@ -27,14 +27,10 @@
 
 package org.mskcc.cbio.portal.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
-import org.mskcc.cbio.cgds.dao.DaoDrug;
-import org.mskcc.cbio.cgds.dao.DaoDrugInteraction;
 import org.mskcc.cbio.cgds.dao.DaoException;
-import org.mskcc.cbio.cgds.dao.DaoGeneOptimized;
 import org.mskcc.cbio.cgds.model.*;
 import org.mskcc.cbio.cgds.util.AccessControl;
 import org.mskcc.cbio.cgds.web_api.GetProfileData;
@@ -92,17 +88,23 @@ public class CrossCancerMutationHistogramJSON extends HttpServlet {
 
         String gene = request.getParameter("gene");
         String mutation = request.getParameter("mutation");
-        Integer dataTypePriority;
-        try {
-            dataTypePriority
-                    = Integer.parseInt(request.getParameter(QueryBuilder.DATA_PRIORITY).trim());
-        } catch (NumberFormatException e) {
-            dataTypePriority = 0;
+        Integer dataTypePriority = 0;
+        String dpParameter = request.getParameter(QueryBuilder.DATA_PRIORITY);
+
+        if(dpParameter != null) {
+            try {
+                dataTypePriority
+                        = Integer.parseInt(dpParameter.trim());
+            } catch (NumberFormatException e) {
+                dataTypePriority = 0;
+            }
         }
         request.setAttribute(QueryBuilder.DATA_PRIORITY, dataTypePriority);
 
-        JSONArray studies = new JSONArray();
-        JSONArray counts = new JSONArray();
+        JSONArray header = new JSONArray();
+        header.add("Cancer Study");
+        header.add("Number of mutations");
+        table.add(header);
 
         if(gene != null && mutation != null) {
             gene = gene.trim();
@@ -176,8 +178,10 @@ public class CrossCancerMutationHistogramJSON extends HttpServlet {
                     ProfileDataSummary dataSummary
                             = new ProfileDataSummary(mergedProfile, specification, zScore, rppaScore);
 
-                    studies.add(cancerStudy.getName());
-                    counts.add(dataSummary.getNumCasesAffected());
+                    JSONArray studyData = new JSONArray();
+                    studyData.add(cancerStudy.getName());
+                    studyData.add(dataSummary.getNumCasesAffected());
+                    table.add(studyData);
                 }
             } catch (DaoException e) {
                 e.printStackTrace();
@@ -185,9 +189,6 @@ public class CrossCancerMutationHistogramJSON extends HttpServlet {
                 e.printStackTrace();
             }
         }
-
-        table.add(studies);
-        table.add(counts);
 
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
