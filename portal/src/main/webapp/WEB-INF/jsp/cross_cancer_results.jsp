@@ -861,7 +861,7 @@
             var txt = countText + "<br/>Amino Acid Change:  " + metadata.label + " ";
 
             // add the potential histogram component
-            txt += "<br/><br/><div id='cc_hist_" + id + "_" + metadata.label + "'>"
+            txt += "<br/><br/><div id='cc_hist_" + id + "_" + metadata.label + "' style='width: 400px; height: 400px;'>"
                     + "<img class='cc-histograms-loading' src='images/ajax-loader.gif'/>"
                     + "</div>";
 
