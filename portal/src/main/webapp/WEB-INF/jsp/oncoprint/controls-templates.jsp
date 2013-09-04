@@ -22,9 +22,10 @@
             <tr>
                 <td>
                     <div id="disable_select_clinical_attributes" style="display: none; z-index: 1000; opacity: 0.7; background-color: grey; width: 22.5%; height: 6%; position: absolute;"></div>
-                    <select multiple data-placeholder="add clinical attribute track" id="select_clinical_attributes" style="width: 350px;">
-    <option value=""></option>
+                    <select multiple data-placeholder="add clinical attribute track" id="select_clinical_attributes" style="width: 350px; height:200px; ">
+                        <option value=""></option>
                     </select>
+                    <button id="submit_clinical_attributes" type="button">Go!</button>
                 </td>
                 <td>
                     <span>Sort by: </span>

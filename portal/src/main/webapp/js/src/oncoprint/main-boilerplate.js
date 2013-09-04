@@ -28,12 +28,14 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
         return zoom;
     };
 
+    var select_clinical_attributes_id = '#select_clinical_attributes';
+
     clinicalAttributes.fetch({
         type: 'POST',
         data: { case_list: window.PortalGlobals.getCases() },
         success: function(attrs) {
             utils.populate_clinical_attr_select(document.getElementById('select_clinical_attributes'), attrs.toJSON());
-            $(select_clinical_attributes_id).chosen({width: "240px", "font-size": "12px"});
+            $(select_clinical_attributes_id).chosen({width: "300px", "font-size": "12px"});
         }
     });
 
@@ -76,7 +78,6 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
         }
     });
 
-    var select_clinical_attributes_id = '#select_clinical_attributes';
     var oncoprintClinicals;
     var sortBy = $('#oncoprint_controls #sort_by');
     $('#oncoprint_controls #sort_by').chosen({width: "240px", disable_search: true });
@@ -144,7 +145,7 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
     }());
 
     // handler for when user selects a clinical attribute to visualization
-    var clinicalAttributeSelected = function() {
+    var clinicalAttributesSelected = function() {
         oncoprint.remove_oncoprint();
         inner_loader_img.show();
         toggleControls(false);
@@ -209,7 +210,8 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
         utils.make_mouseover(d3.selectAll('.sample rect'));        // hack =(
     }
 
-    $(select_clinical_attributes_id).change(clinicalAttributeSelected);
+    //$(select_clinical_attributes_id).change(clinicalAttributesSelected);
+    $('#submit_clinical_attributes').click(clinicalAttributesSelected);
 
     $(document).ready(function() {
         // bind away
