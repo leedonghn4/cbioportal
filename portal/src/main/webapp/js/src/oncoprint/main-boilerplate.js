@@ -36,19 +36,14 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
             case_list: window.PortalGlobals.getCases() },
         success: function(attrs) {
             utils.populate_clinical_attr_select(document.getElementById('select_clinical_attributes'), attrs.toJSON());
-            $(select_clinical_attributes_id).chosen({width: "300px", "font-size": "12px"});
+            $(select_clinical_attributes_id).chosen({width: "240px", "font-size": "12px", search_contains: true});
         }
     });
 
     var oncoprint;
 
     var cases = window.PortalGlobals.getCases();
-    var genes = window.PortalGlobals.getGeneList();
-    try {
-        genes = GeneSet(genes).getAllGenes().join(" ");
-    } catch (err) {
-        throw new Error(err);
-    }
+    var genes = window.PortalGlobals.getGeneListString().split(" ");
 
     var outer_loader_img = $('#oncoprint #outer_loader_img');
     var inner_loader_img = $('#oncoprint #inner_loader_img');
@@ -58,7 +53,7 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
         type: "POST",
         data: {
             cancer_study_id: cancer_study_id_selected,
-            genes: genes,
+            oql: $('#gene_list').val(),
             case_list: cases,
             geneticProfileIds: window.PortalGlobals.getGeneticProfiles(),
             z_score_threshold: window.PortalGlobals.getZscoreThreshold(),
@@ -67,7 +62,7 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
         success: function(data) {
             oncoprint = Oncoprint(document.getElementById('oncoprint_body'), {
                 geneData: data.toJSON(),
-                genes: genes.split(" "),
+                genes: genes,
                 legend: document.getElementById('oncoprint_legend')
             });
             outer_loader_img.hide();
@@ -162,7 +157,7 @@ requirejs(  [         'Oncoprint',    'OncoprintUtils'],
 
             oncoprint = Oncoprint(document.getElementById('oncoprint_body'), {
                 geneData: geneDataColl.toJSON(),
-                genes: genes.split(" "),
+                genes: genes,
                 legend: document.getElementById('oncoprint_legend')
             });
 
