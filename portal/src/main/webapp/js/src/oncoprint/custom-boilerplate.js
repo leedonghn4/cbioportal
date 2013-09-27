@@ -1,6 +1,8 @@
 // boilerplate for the "make your own oncoprint page"
 //
-// Gideon Dresdner July 2013
+// Gideon Dresdner <dresdnerg@cbio.mskcc.org>
+// September 2013
+//
 
 requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
     function(   Oncoprint,      OncoprintUtils, EchoedDataUtils) {
@@ -45,22 +47,28 @@ requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
             var params = { geneData: data_thresholded, genes:genes };
             params.legend =  document.getElementById("oncoprint_legend");
 
-            function main(params) {
-                $oncoprint_el.empty();    // clear out the div each time
-                oncoprint = Oncoprint(oncoprint_el, params);
-                oncoprint.memoSort(genes);
-            }
-
-            main(params);
-
             // remove text: "Copy number alterations are putative."
             $('#oncoprint_legend p').remove();
 
-            // set up the controls
-            var zoom = zoomSetup_once($('#oncoprint_controls #zoom'), oncoprint.zoom);
-
+            // set up the sort by dropdown
             var sortBy = $('#oncoprint_controls #sort_by');     // NB hard coded
             sortBy.chosen({width: "240px", disable_search: true });
+
+            // empty the div, create an oncoprint, sync all the controls,
+            // create mouseovers
+            var main = function(params) {
+                $oncoprint_el.empty();    // clear out the div each time
+                oncoprint = Oncoprint(oncoprint_el, params);
+                var zoom = zoomSetup_once($('#oncoprint_controls #zoom'), oncoprint.zoom);
+
+                oncoprint.zoom(zoom.slider("value"));
+                oncoprint.showUnalteredCases(!$('#toggle_unaltered_cases').is(":checked"));
+                oncoprint.toggleWhiteSpace(!$('#toggle_whitespace').is(":checked"));
+                oncoprint.sortBy(sortBy.val());
+                OncoprintUtils.make_mouseover(d3.selectAll('.sample rect'));        // hack =(
+            }
+
+            main(params);
 
             // *NB* to be the best of my knowledge,
             // the user-defined case list is going to depend on the cna file
@@ -71,7 +79,6 @@ requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
             $('#toggle_unaltered_cases').click(function() {
                 oncoprint.toggleUnalteredCases();
                 OncoprintUtils.make_mouseover(d3.selectAll('.sample rect'));     // hack =(
-//            oncoprint.sortBy(sortBy.val());
             });
 
             $('#toggle_whitespace').click(function() {
@@ -115,12 +122,6 @@ requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
 
             // sync controls with oncoprint
             update_oncoprint_cna_levels();
-            oncoprint.zoom(zoom.slider("value"));
-            oncoprint.showUnalteredCases(!$('#toggle_unaltered_cases').is(":checked"));
-            oncoprint.toggleWhiteSpace(!$('#toggle_whitespace').is(":checked"));
-            oncoprint.sortBy(sortBy.val());
-            OncoprintUtils.make_mouseover(d3.selectAll('.sample rect'));        // hack =(
-
             return false;
         };
 
@@ -156,7 +157,11 @@ requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
                     var rawCnaString = _.isEmpty(cnaResponse) ? cnaTextAreaString : cnaResponse.cna;
                     cna_data = EchoedDataUtils.munge_cna(rawCnaString);
 
-                    var data = mutation_data.concat(cna_data);
+                    var missing_cna_data = create_missing_cna_data(mutation_data, cna_data);
+
+                    var data = mutation_data
+                        .concat(cna_data)
+                        .concat(missing_cna_data);
 
                     cases = EchoedDataUtils.samples(data);
 
@@ -174,5 +179,43 @@ requirejs(  [   'Oncoprint',    'OncoprintUtils', 'EchoedDataUtils'],
                     }
                 });
             });
+
+            // if there is mutation datum without a corresponding cna datum
+            // for a particular gene, then create a datum for it that looks
+            // like this: {sample, gene}
+            function create_missing_cna_data(mutation_data, cna_data) {
+                var genes = _.chain(mutation_data).map(function(d) { return d.gene; }).uniq().value();      // defined elsewhere and so redundant and slow
+
+                // a map of sample id -> undefined,
+                // think of it as a set
+                var cna_sample_set = _.chain(cna_data)
+                    .map(function(d) { return [d.sample, undefined]; })
+                    .object()
+                    .value();
+
+                function make_cna_data_for_a_gene_helper(gene, mutation_data, cna_sample_set) {
+                    // make all variables local scope, and then reference the
+                    // global ones in the main function
+                    return _.chain(mutation_data).reduce(function(acc, next) {
+                        if (!_.has(cna_sample_set, next.sample)) {
+                            return acc.concat({
+                                sample: next.sample,
+                                gene: gene
+                            });
+                        }
+                        return acc;
+                    }, []).value();
+                }
+
+                function make_cna_data_for_a_gene(gene) {
+                    return make_cna_data_for_a_gene_helper(gene, mutation_data, cna_sample_set);
+                }
+
+                return _.chain(genes)
+                        .map(function(gene) { return make_cna_data_for_a_gene(gene); })
+                        .flatten()
+                        .value();
+            }
+
         });
-});
+    });

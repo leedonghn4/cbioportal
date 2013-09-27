@@ -40,7 +40,7 @@ define("EchoedDataUtils", function() {
     // *signature:* `list -> list`
     var samples = function(data) {
         return _.chain(data)
-            .map(function(d) { return d.sample_id; })
+            .map(function(d) { return d.sample; })
             .uniq()
             .value();
     };

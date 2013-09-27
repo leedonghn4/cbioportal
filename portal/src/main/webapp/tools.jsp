@@ -56,7 +56,7 @@
                 All other fields are ignored.
             </p>
 
-            <textarea id="mutation-file-example" rows=5 style="width:40%;"><jsp:include page="WEB-INF/jsp/oncoprint/mutation-file-example.txt"></jsp:include></textarea>
+            <textarea id="mutation-file-example" rows=5 style="width:45%;"><jsp:include page="WEB-INF/jsp/oncoprint/mutation-file-example.txt"></jsp:include></textarea>
 
             <form id="mutation-form" class="form-horizontal" enctype="multipart/form-data" method="post">
                 <div class="control-group">
