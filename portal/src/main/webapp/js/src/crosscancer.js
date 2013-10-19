@@ -59,13 +59,12 @@
             }
         };
 
-        var getStudyAbbr = function (study) {
-            return study.studyId
-                .toLocaleUpperCase()
-                .replace("_", " (")
-                .concat(")")
-                .replace(/_/g, " ")
-                ;
+        var getStudyAbbr = function(study, metaData) {
+            var tokens = study.studyId.split("_", 2);
+            var firstPart = metaData.short_names[tokens[0]];
+            var secondPart = " (" + tokens[1].toLocaleUpperCase().replace("_") + ")";
+
+            return firstPart + secondPart;
         };
 
         var calculateFrequency = function(d, i, type) {
@@ -304,6 +303,7 @@
                                 })
                                 .style("opacity",0)
                                 .style("stroke", "white")
+                                .style("cursor", "pointer")
                                 .style("stroke-width", "1")
                                 .attr("class", function(d, i) { return d.studyId + " alt-info" })
                                 .each(function(d, i) {
@@ -321,6 +321,17 @@
                                         content: container.html()
                                     });
                                     $(this).qtip(qOpts);
+
+                                    $(this).click(function(e) {
+                                        e.preventDefault();
+
+                                        var sLink = _.template($("#study-link-tmpl").html(), {
+                                            study: d,
+                                            genes: orgQuery
+                                        });
+
+                                        window.open($(sLink).attr("href"), "_blank");
+                                    });
                                 });
 
 
@@ -351,6 +362,8 @@
                                 .attr("cy", function(d, i) { return histBottom + verticalCirclePadding })
                                 .attr("r", circleTTR)
                                 .attr("class", function(d, i) { return d.studyId + " annotation-type" })
+                                .style("stroke", "lightgray")
+                                .style("stroke-width", "1")
                                 .each(function(d, i) {
                                     var qOpts = _.extend(defaultQTipOptions, {
                                         content: metaData.type_of_cancers[metaData.cancer_studies[d.studyId].type_of_cancer]
@@ -414,7 +427,7 @@
                                 .enter()
                                 .append("text")
                                 .text(function(d, i) {
-                                    return getStudyAbbr(d);
+                                    return getStudyAbbr(d, metaData);
                                 })
                                 .attr("font-family", fontFamily)
                                 .attr("font-size", function() { return Math.min((studyWidth * .65), 12) + "px"; })
@@ -740,12 +753,7 @@
                                     .transition()
                                     .duration(animationDuration)
                                     .text(function(d, i) {
-                                        return d.studyId
-                                            .toLocaleUpperCase()
-                                            .replace("_", " (")
-                                            .concat(")")
-                                            .replace(/_/g, " ")
-                                            ;
+                                        return getStudyAbbr(d, metaData);
                                     })
                                     .attr("font-size", function() { return Math.min((studyWidth * .65), 12) + "px"; })
                                     .attr("x", function(d, i) { return paddingLeft + i*studyLocIncrements + studyWidth*.5; })
@@ -854,7 +862,7 @@
 
                 var dtxt = "STUDY_ABBREVIATION\tSTUDY_NAME\tNUM_OF_CASES_ALTERED\tPERCENT_CASES_ALTERED\n";
                 _.each(studies, function(aStudy) {
-                    dtxt += getStudyAbbr(aStudy)
+                    dtxt += getStudyAbbr(aStudy, metaData)
                         + "\t" + metaData.cancer_studies[aStudy.studyId].name
                         + "\t" + aStudy.alterations.all
                         + "\t" + fixFloat(calculateFrequency(aStudy, 0, "all")*100, 1) + "%\n";
@@ -929,7 +937,7 @@
                     "bJQueryUI": true,
                     "bDestroy": true,
                     "aaSorting": [[ 1, "desc" ]],
-                    "aaColumns": [
+                    "aoColumns": [
                         { "bSortable": false },
                         { "bSortable": false }
                     ]
