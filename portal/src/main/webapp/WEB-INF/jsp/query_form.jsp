@@ -110,6 +110,7 @@
         &nbsp;<br/>
         <input id="main_submit" class="ui-button ui-widget ui-state-default ui-corner-all" style="height: 34px;"
                    type=submit name="<%= QueryBuilder.ACTION_NAME%>" value="<%= QueryBuilder.ACTION_SUBMIT %>"/>
+        <% conditionallyOutputGenomespaceOption(localTabIndex, out); %>
         </form>
     </div>
 </div>
@@ -120,6 +121,13 @@
             throws IOException {
         if (localTabIndex.equals(QueryBuilder.TAB_DOWNLOAD)) {
             outputTransposeMatrixOption(clientTranspose, out);
+        }
+    }
+
+    private void conditionallyOutputGenomespaceOption(String localTabIndex, JspWriter out)
+            throws IOException {
+        if (localTabIndex.equals(QueryBuilder.TAB_DOWNLOAD)) {
+            out.println("<a id=\"gs_submit\" href=\"#\" onclick=\"prepGSLaunch()\"><img src=\"images/send-to-gs.png\" alt=\"\"/></a>");
         }
     }
 
