@@ -47,8 +47,57 @@ function uploadUrlByGetToGS(dataURL, filename)
     return false;
 };
 
-function prepGSLaunch()
+function getDataFilenameByProfile(genomicProfile)
 {
-    var url = $('main_query_form').serialize();
-    alert (url);
+    if (genomicProfile == 'PROFILE_COPY_NUMBER_ALTERATION') {
+        return 'cbioportal.cna.txt';
+    }
+    else if (genomicProfile == 'PROFILE_MUTATION_EXTENDED') {
+        return 'cbioportal.mutations.txt';
+    }
+    else if (genomicProfile == 'PROFILE_MRNA_EXPRESSION') {
+        return 'cbioportal.mrna.txt';
+    }
+    else if (genomicProfile == 'PROFILE_METHYLATION') {
+        return 'cbioportal.methylation.txt';
+    }
+    else if (genomicProfile == 'PROFILE_RPPA') {
+        return 'cbioportal.rppa.txt';
+    }
+}
+
+function getDataFilename(genomicProfiles)
+{
+    var dataFilename = "";
+    $(genomicProfiles).find('input:radio').each(function() {
+        if ($(this).attr('checked')) {
+            dataFilename = getDataFilenameByProfile($(this).attr('class'));
+        }
+    });
+    return dataFilename;
+}
+
+function getOrigin()
+{
+    var location = new String(window.location);
+    return location.substring(0, location.indexOf("?")+1);
+}
+
+function getFormParametersString(downloadDataParameters)
+{
+    var parameters = "";
+    jQuery.each(downloadDataParameters, function(i, parameter) {
+        parameters += parameter.name + "=" + encodeURIComponent(parameter.value) + "&";
+    });
+    parameters += "Action=Submit";
+
+    return parameters;
+}
+
+function prepGSLaunch(form, genomicProfiles)
+{
+    var downloadDataParameters = $(form).serializeArray();
+    var urlToDownloadData = getOrigin() + getFormParametersString(downloadDataParameters);
+    var dataFilename = getDataFilename(genomicProfiles)
+    uploadUrlByGetToGS(urlToDownloadData, dataFilename);
 }

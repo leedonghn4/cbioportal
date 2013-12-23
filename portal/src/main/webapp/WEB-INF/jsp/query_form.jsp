@@ -127,7 +127,7 @@
     private void conditionallyOutputGenomespaceOption(String localTabIndex, JspWriter out)
             throws IOException {
         if (localTabIndex.equals(QueryBuilder.TAB_DOWNLOAD)) {
-            out.println("<a id=\"gs_submit\" href=\"#\" onclick=\"prepGSLaunch()\"><img src=\"images/send-to-gs.png\" alt=\"\"/></a>");
+            out.println("<a id=\"gs_submit\" href=\"#\" onclick=\"prepGSLaunch($('#main_form'), $('#genomic_profiles'));\"><img src=\"images/send-to-gs.png\" alt=\"\"/></a>");
         }
     }
 
