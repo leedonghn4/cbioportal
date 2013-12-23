@@ -94,10 +94,14 @@ function getFormParametersString(downloadDataParameters)
     return parameters;
 }
 
+
+
 function prepGSLaunch(form, genomicProfiles)
 {
     var downloadDataParameters = $(form).serializeArray();
-    var urlToDownloadData = getOrigin() + getFormParametersString(downloadDataParameters);
-    var dataFilename = getDataFilename(genomicProfiles)
-    uploadUrlByGetToGS(urlToDownloadData, dataFilename);
+    if (validDownloadDataForm(downloadDataParameters)) {
+        var urlToDownloadData = getOrigin() + getFormParametersString(downloadDataParameters);
+        var dataFilename = getDataFilename(genomicProfiles)
+        uploadUrlByGetToGS(urlToDownloadData, dataFilename);
+    }
 }
