@@ -109,7 +109,7 @@
         <% conditionallyOutputTransposeMatrixOption (localTabIndex, clientTranspose, out); %>
         &nbsp;<br/>
         <input id="main_submit" class="ui-button ui-widget ui-state-default ui-corner-all" style="height: 34px;"
-                   type=submit name="<%= QueryBuilder.ACTION_NAME%>" value="<%= QueryBuilder.ACTION_SUBMIT %>"/>
+                   type=submit title="Submit query to cBioPortal." name="<%= QueryBuilder.ACTION_NAME%>" value="<%= QueryBuilder.ACTION_SUBMIT %>"/>
         <% conditionallyOutputGenomespaceOption(localTabIndex, out); %>
         </form>
     </div>
@@ -127,7 +127,11 @@
     private void conditionallyOutputGenomespaceOption(String localTabIndex, JspWriter out)
             throws IOException {
         if (localTabIndex.equals(QueryBuilder.TAB_DOWNLOAD)) {
-            out.println("<a id=\"gs_submit\" href=\"#\" onclick=\"prepGSLaunch($('#main_form'), $('#genomic_profiles'));\"><img src=\"images/send-to-gs.png\" alt=\"\"/></a>");
+            out.println("<a id=\"gs_submit\" " +
+                        "class=\"ui-button ui-widget ui-state-default ui-corner-all\" " +
+                        "style=\"height: 34px;\" " +
+                        "title=\"Send data matrix to GenomeSpace.\" " +
+                        "href=\"#\" onclick=\"prepGSLaunch($('#main_form'), $('#genomic_profiles'));\"><img src=\"images/send-to-gs.png\" alt=\"\"/></a>");
         }
     }
 

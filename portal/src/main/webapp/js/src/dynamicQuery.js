@@ -113,6 +113,9 @@ $(document).ready(function(){
        event.preventDefault();
        userClickedMainTab("tab_download");
     });
+
+    $("#main_submit").tipTip({defaultPosition: "right", delay:"100", edgeOffset: 25});
+    $("#gs_submit").tipTip({defaultPosition: "right", delay:"100", edgeOffset: 25});
     
     // Set up custom case set related GUI & event handlers (step 3)
     initCustomCaseSetUI();
