@@ -66,12 +66,16 @@ var Plots = (function(){
             }
             genetic_profiles[gene] = _genetic_profile;
         }
+        initLayout();
+    }
 
+    function initLayout() {
+        //Init the views
         PlotsMenu.init();
         PlotsTwoGenesMenu.init();
         PlotsCustomMenu.init();
         PlotsView.init();
-
+        //Set event listener: (Start rendering only after click)
         $('#plots-menus').bind('tabsactivate', function(event, ui) {
 	        // note: ui.index is replaced with ui.newTab.index() after jQuery 1.9
 	        if (ui.newTab.index() === 0) {
@@ -169,6 +173,7 @@ var Plots = (function(){
 
     return {
         init: function() {
+            //Get all the available genetic profile for selected cancer study
             var paramsGetProfiles = {
                 cancer_study_id: cancer_study_id,
                 case_set_id: case_set_id,
@@ -201,7 +206,7 @@ var Plots = (function(){
         }
     };
 
-}());    //Closing Plots
+}());    //Closing PlotsTab
 
 // Takes the content in the plots svg element
 // and returns XML serialized *string*

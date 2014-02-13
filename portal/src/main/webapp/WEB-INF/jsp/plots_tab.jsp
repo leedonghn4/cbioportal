@@ -6,6 +6,7 @@
 <%@ page import="org.mskcc.cbio.portal.model.GeneticProfile" %>
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 
+<script type="text/javascript" src="js/src/PlotsTab.js"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_tab_model.js"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_tab.js"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_two_genes.js"></script>
