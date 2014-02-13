@@ -1,10 +1,10 @@
-<script type="text/javascript" src="js/src/coExpression.js"></script>
-<script type="text/javascript" src="js/src/plots-view/PlotsBoilerplate.js"></script>
-<script type="text/javascript" src="js/src/plots-view/data/CoexpPlotsProxy.js"></script>
-<script type="text/javascript" src="js/src/plots-view/view/CoexpPlotsView.js"></script>
-<script type="text/javascript" src="js/src/plots-view/CoexpPlots.js"></script>
-<script type="text/javascript" src="js/src/plots-view/component/ScatterPlots.js"></script>
-<script type="text/javascript" src="js/src/plots-view/component/PlotsHeader.js"></script>
+<script type="text/javascript" src="js/src/co-expression-tab/CoexpPlots.js"></script>
+<script type="text/javascript" src="js/src/co-expression-tab/CoexpPlotsProxy.js"></script>
+<script type="text/javascript" src="js/src/co-expression-tab/CoexpPlotsView.js"></script>
+<script type="text/javascript" src="js/src/co-expression-tab/coExpression.js"></script>
+<script type="text/javascript" src="js/lib/portal-plots/PlotsBoilerplate.js"></script>
+<script type="text/javascript" src="js/lib/portal-plots/PlotsHeader.js"></script>
+<script type="text/javascript" src="js/lib/portal-plots/ScatterPlots.js"></script>
 
 <style>
     #coexp .coexp-table-filter-custom {
