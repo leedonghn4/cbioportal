@@ -17,6 +17,9 @@ var PdbDataProxy = function(mutationUtil)
 	// map of <uniprot id, PdbCollection> pairs
 	var _pdbDataCache = {};
 
+	// map of <uniprot id, PdbChain[][]> pairs
+	var _pdbRowDataCache = {};
+
 	// map of <pdb id, pdb info> pairs
 	var _pdbInfoCache = {};
 
@@ -94,13 +97,22 @@ var PdbDataProxy = function(mutationUtil)
 				// re-map mutation ids with positions by using the raw position map
 				for(var i=0; i < mutations.length; i++)
 				{
-					var start = data.positionMap[mutations[i].proteinPosStart];
-					var end = data.positionMap[mutations[i].proteinPosEnd];
+					var start = data.positionMap[mutations[i].getProteinStartPos()];
+					var end = start;
+
+					var type = mutations[i].mutationType;
+
+					// ignore end position for mutation other than in frame del
+					if (type != null &&
+						type.toLowerCase() === "in_frame_del")
+					{
+						end = data.positionMap[mutations[i].proteinPosEnd] || end;
+					}
 
 					// if no start and end position found for this mutation,
 					// then it means this mutation position is not in this chain
-					if (start != undefined &&
-					    end != undefined)
+					if (start != null &&
+					    end != null)
 					{
 						positionMap[mutations[i].mutationId] =
 							{start: start, end: end};
@@ -160,6 +172,37 @@ var PdbDataProxy = function(mutationUtil)
 		{
 			// data is already cached, just forward it
 			callback(_pdbDataCache[uniprotId]);
+		}
+	}
+
+	/**
+	 * Retrieves the PDB data for the provided uniprot id, and creates
+	 * a 2D-array of pdb chains ranked by length and other criteria.
+	 *
+	 * Forwards the processed data to the given callback function
+	 * assuming that the callback function accepts a single parameter.
+	 *
+	 * @param uniprotId     uniprot id
+	 * @param callback      callback function to be invoked
+	 */
+	function getPdbRowData(uniprotId, callback)
+	{
+		// retrieve data if not cached yet
+		if (_pdbRowDataCache[uniprotId] == undefined)
+		{
+			getPdbData(uniprotId, function(pdbColl) {
+				// get the data & cache
+				var rowData = PdbDataUtil.allocateChainRows(pdbColl);
+				_pdbRowDataCache[uniprotId] = rowData;
+
+				// forward to the callback
+				callback(rowData);
+			});
+		}
+		else
+		{
+			// data is already cached, just forward it
+			callback(_pdbRowDataCache[uniprotId]);
 		}
 	}
 
@@ -256,6 +299,7 @@ var PdbDataProxy = function(mutationUtil)
 	return {
 		hasPdbData: hasPdbData,
 		getPdbData: getPdbData,
+		getPdbRowData: getPdbRowData,
 		getPdbInfo: getPdbInfo,
 		getPositionMap: getPositionMap
 	};

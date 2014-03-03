@@ -454,7 +454,7 @@
 			</a>
 		</td>
 		<td>
-			<a href='{{pdbLink}}' target='_blank'>
+			<a href='#' class="pdb-link" alt="{{pdbMatchId}}">
 				<span style="background-color:#88C;color:white">
 					&nbsp;3D&nbsp;
 				</span>
@@ -605,7 +605,7 @@
 <script type="text/template" id="mutation_details_pdb_chain_tip_template">
 	<span class='pdb-chain-tip'>
 		<b>PDB id:</b> {{pdbId}}<br>
-		<b>Chain:</b> {{chainId}} ({{from}} - {{to}})<br>
+		<b>Chain:</b> {{chainId}}<br>
 		{{pdbInfo}}
 	</span>
 </script>

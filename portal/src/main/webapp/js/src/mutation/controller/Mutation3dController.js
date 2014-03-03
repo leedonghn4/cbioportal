@@ -9,13 +9,16 @@
  * @param mut3dView             a Mutation3dView instance
  * @param mut3dVis              singleton Mutation3dVis instance
  * @param pdbProxy              proxy for pdb data
+ * @param mutationUtil          data utility class (having the related mutations)
  * @param mutationDiagram       a MutationDiagram instance
+ * @param tableView             a MutationDetailsTableView instance
  * @param geneSymbol            hugo gene symbol (string value)
  *
  * @author Selcuk Onur Sumer
  */
 var Mutation3dController = function (mutationDetailsView, mainMutationView,
-	mut3dVisView, mut3dView, mut3dVis, pdbProxy, mutationDiagram, geneSymbol)
+	mut3dVisView, mut3dView, mut3dVis, pdbProxy, mutationUtil,
+	mutationDiagram, tableView, geneSymbol)
 {
 	// we cannot get pdb panel view as a constructor parameter,
 	// since it is initialized after initializing this controller
@@ -44,6 +47,11 @@ var Mutation3dController = function (mutationDetailsView, mainMutationView,
 		mutationDiagram.dispatcher.on(
 			MutationDetailsEvents.DIAGRAM_PLOT_RESET,
 			diagramResetHandler);
+
+		// add listeners for the mutation table view
+		tableView.dispatcher.on(
+			MutationDetailsEvents.PDB_LINK_CLICKED,
+			pdbLinkHandler);
 
 		// add listeners for the mutation 3d view
 		mut3dView.addInitCallback(mut3dInitHandler);
@@ -176,6 +184,25 @@ var Mutation3dController = function (mutationDetailsView, mainMutationView,
 		}
 	}
 
+	function pdbLinkHandler(mutationId)
+	{
+		var mutationMap = mutationUtil.getMutationIdMap();
+		var mutation = mutationMap[mutationId];
+
+		if (mutation)
+		{
+			// TODO ideally diagram should be highlighted by MutationDiagramController,
+			// ...but we need to make sure that diagram is highlighted before refreshing the 3D view
+
+			// highlight the corresponding pileup (without filtering the table)
+			mutationDiagram.clearHighlights();
+			mutationDiagram.highlightMutation(mutation.mutationSid);
+
+			// reset the view with the selected chain
+			reset3dView(mutation.pdbMatch.pdbId, mutation.pdbMatch.chainId);
+		}
+	}
+
 	/**
 	 * Retrieves the pileup data from the selected mutation diagram
 	 * elements.
@@ -221,8 +248,11 @@ var Mutation3dController = function (mutationDetailsView, mainMutationView,
 	/**
 	 * Resets the 3D view to its initial state. This function also initializes
 	 * the PDB panel view if it is not initialized yet.
+	 *
+	 * @param pdbId     initial pdb structure to select
+	 * @param chainId   initial chain to select
 	 */
-	function reset3dView()
+	function reset3dView(pdbId, chainId)
 	{
 		var gene = geneSymbol;
 		var uniprotId = mut3dView.model.uniprotId; // TODO get this from somewhere else
@@ -240,14 +270,23 @@ var Mutation3dController = function (mutationDetailsView, mainMutationView,
 					chainSelectHandler);
 			}
 
-			// reload the visualizer content with the default pdb and chain
+			// reload the visualizer content with the given pdb and chain
 			if (mut3dVisView != null &&
 			    _pdbPanelView != null &&
 			    pdbColl.length > 0)
 			{
 				updateColorMapper();
 				_pdbPanelView.showView();
-				_pdbPanelView.selectDefaultChain();
+
+				if (pdbId && chainId)
+				{
+					_pdbPanelView.selectChain(pdbId, chainId);
+				}
+				else
+				{
+					// select default chain if none provided
+					_pdbPanelView.selectDefaultChain();
+				}
 			}
 		};
 

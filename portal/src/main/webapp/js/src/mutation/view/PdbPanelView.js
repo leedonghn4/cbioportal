@@ -15,6 +15,8 @@
 var PdbPanelView = Backbone.View.extend({
 	initialize : function (options) {
 		this.options = options || {};
+		this.collapseTimer = null;
+		this.expandTimer = null;
 	},
 	render: function()
 	{
@@ -59,6 +61,14 @@ var PdbPanelView = Backbone.View.extend({
 				self.pdbPanel.toggleHeight();
 			});
 		}
+
+		self.$el.mouseenter(function(evt) {
+			self.autoExpand();
+		});
+
+		self.$el.mouseleave(function(evt) {
+			self.autoCollapse();
+		});
 	},
 	hideView: function()
 	{
@@ -71,7 +81,7 @@ var PdbPanelView = Backbone.View.extend({
 		self.$el.slideDown();
 	},
 	/**
-	 * Selects the 3D visualizer for the default pdb and chain.
+	 * Selects the default pdb and chain for the 3D visualizer.
 	 * Default chain is one of the chains in the first row.
 	 */
 	selectDefaultChain: function()
@@ -80,8 +90,121 @@ var PdbPanelView = Backbone.View.extend({
 		var panel = self.pdbPanel;
 		var gChain = panel.getDefaultChainGroup();
 
-		// highlight the default chain
-		panel.highlight(gChain);
+		// clear previous timer
+		if (self.collapseTimer != null)
+		{
+			clearTimeout(self.collapseTimer);
+		}
+
+		// restore to full view
+		panel.restoreToFull(function() {
+			// highlight the default chain
+			panel.highlight(gChain);
+		});
+
+		// TODO call this in the controller?
+		// initiate auto-collapse
+		self.autoCollapse();
+	},
+	/**
+	 * Selects the given pdb and chain for the 3D visualizer.
+	 *
+	 * @param pdbId     pdb to be selected
+	 * @param chainId   chain to be selected
+	 */
+	selectChain: function(pdbId, chainId)
+	{
+		var self = this;
+		var panel = self.pdbPanel;
+
+		// clear previous timers
+		self.clearTimers();
+
+		// restore to original positions & highlight the chain
+		panel.restoreChainPositions(function() {
+			// expand the panel up to the level of the given chain
+			panel.expandToChainLevel(pdbId, chainId);
+
+			// get the chain group
+			var gChain = panel.getChainGroup(pdbId, chainId);
+
+			// highlight the chain group
+			if (gChain)
+			{
+				panel.highlight(gChain);
+			}
+
+			// TODO call this in the controller?
+			self.autoCollapse(0);
+			// minimize to selected
+			//panel.minimizeToHighlighted();
+		});
+	},
+	/**
+	 * Initializes the auto collapse process.
+	 *
+	 * @delay time to minimization
+	 */
+	autoCollapse: function(delay)
+	{
+		if (delay == null)
+		{
+			delay = 2000;
+		}
+
+		var self = this;
+		var expandButton = self.$el.find(".expand-collapse-pdb-panel");
+
+		// clear previous timers
+		self.clearTimers();
+
+		// set new timer
+		self.collapseTimer = setTimeout(function() {
+			self.pdbPanel.minimizeToHighlighted();
+			expandButton.slideUp();
+		}, delay);
+	},
+	/**
+	 * Initializes the auto expand process.
+	 *
+	 * @delay time to minimization
+	 */
+	autoExpand: function(delay)
+	{
+		if (delay == null)
+		{
+			delay = 400;
+		}
+
+		var self = this;
+		var expandButton = self.$el.find(".expand-collapse-pdb-panel");
+
+		// clear previous timers
+		self.clearTimers();
+
+		// set new timer
+		self.expandTimer = setTimeout(function() {
+			self.pdbPanel.restoreToFull();
+
+			if (self.pdbPanel.hasMoreChains())
+			{
+				expandButton.slideDown();
+			}
+		}, delay);
+	},
+	clearTimers: function()
+	{
+		var self = this;
+
+		if (self.collapseTimer != null)
+		{
+			clearTimeout(self.collapseTimer);
+		}
+
+		if (self.expandTimer != null)
+		{
+			clearTimeout(self.expandTimer);
+		}
 	},
 	/**
 	 * Initializes the PDB chain panel.
