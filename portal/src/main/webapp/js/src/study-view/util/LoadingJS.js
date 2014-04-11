@@ -2,8 +2,12 @@
 var LoadingJS = (function(){
     //Tmp include public libraries in here, will change JSarray to empty array
     //before merge study view to default branch
-    var JSPublic = ['dc','crossfilter','dataTables.fixedColumns','util/StudyViewBoilerplate'
-                    ];
+    var JSPublic = [
+                    'dc',
+                    'crossfilter',
+                    'dataTables.fixedColumns',
+                    'util/StudyViewBoilerplate',
+                    'd3.layout.cloud'];
     
     //As input for RequireJS
     var JSarray = [];
@@ -16,21 +20,41 @@ var LoadingJS = (function(){
         var _key;
         
         var _folder = {
-                component: ['ScatterPlots','PieChart', 'BarChart', 'DataTable','AddCharts'],
+                component: [
+                    'ScatterPlots',
+                    'PieChart', 
+                    'BarChart', 
+                    'DataTable',
+                    'AddCharts'
+                ],
                 data: ['StudyViewProxy'],
                 util: [
                     'DcRedrawAllDataTable', 
                     'FnGetColumnData',
-                    'FnColumnFilter'
+                    'FnColumnFilter',
+                    'FnSetFilteringDelay',
+                    'StudyViewOverallFunctions'
                 ],
                 view: [
-                        'StudyViewInitCharts', 
-                        'StudyViewInitDataTable',
-                        'StudyViewInitMiddleComponents',
-                        'StudyViewInitTopComponents',
-                        'StudyViewInitScatterPlot',
-                        'StudyViewInitIntroJS'],
-                controller: ['StudyViewControl']
+                    'StudyViewInitCharts', 
+                    'StudyViewInitDataTable',
+                    'StudyViewInitMiddleComponents',
+                    'StudyViewInitTopComponents',
+                    'StudyViewInitScatterPlot',
+                    'StudyViewInitIntroJS',
+                    'StudyViewInitWordCloud',
+                    'StudyViewWindowEvents',
+                    'StudyViewInitMutationsTab',
+                    'StudyViewInitCNATab',
+                    'StudyViewInitClinicalTab'
+                ],
+                controller: [
+                    'StudyViewMainController',
+                    'StudyViewSummaryTabController',
+                    'StudyViewMutationsTabController',
+                    'StudyViewCNATabController',
+                    'StudyViewClinicalTabController'
+                ]
             };
             
         for(_key in _folder){
@@ -52,7 +76,8 @@ var LoadingJS = (function(){
                  if(callbackFunc !== ''){
                      callbackFunc();
                  }else{
-                     console.log('Error... No Callback Function Initialized.');
+                     console.log('%c Error: No Callback Function Initialized.', 
+                                    "color:red");
                  }
             });
         });
