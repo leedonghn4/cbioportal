@@ -37,12 +37,13 @@ var LogRankTest = function() {
             variance: 0
         },
         mergedArr = [],
+        mergedArrLength = 0,
         callBackFunc = "";
     //os: DECEASED-->1, LIVING-->0; dfs: Recurred/Progressed --> 1, Disease Free-->0
     function mergeGrps(inputGrp1, inputGrp2) {
         var _ptr_1 = 0; //index indicator/pointer for group1
         var _ptr_2 = 0; //index indicator/pointer for group2
-
+        
         while(_ptr_1 < inputGrp1.length && _ptr_2 < inputGrp2.length) { //Stop when either pointer reach the end of the array
             if (inputGrp1[_ptr_1].time < inputGrp2[_ptr_2].time) {
                 var _datum = jQuery.extend(true, {}, datum);
@@ -90,17 +91,18 @@ var LogRankTest = function() {
             }
             mergedArr.push(_datum);
         }
+        mergedArrLength = mergedArr.length;
     }
 
     function calcExpection() {
-        for (var i in mergedArr) {
+        for (var i = 0; i < mergedArrLength; i++) {
             var _item = mergedArr[i];
             _item.expectation = (_item.num_at_risk_1 / (_item.num_at_risk_1 + _item.num_at_risk_2)) * (_item.num_of_failure_1 + _item.num_of_failure_2);
         }
     }
 
     function calcVariance() {
-        for (var i in mergedArr) {
+        for (var i = 0; i < mergedArrLength; i++) {
             var _item = mergedArr[i];
             var _num_of_failures = _item.num_of_failure_1 + _item.num_of_failure_2;
             var _num_at_risk = _item.num_at_risk_1 + _item.num_at_risk_2;
@@ -110,7 +112,7 @@ var LogRankTest = function() {
 
     function calcPval(_callBackFunc) {
         var O1 = 0, E1 = 0, V = 0;
-        for (var i in mergedArr) {
+        for (var i = 0; i < mergedArrLength; i++) {
             var _item = mergedArr[i];
             O1 += _item.num_of_failure_1;
             E1 += _item.expectation;
@@ -120,7 +122,7 @@ var LogRankTest = function() {
         $.post( "calcPval.do", { chi_square_score: chi_square_score })
             .done( function(_data) {
                 callBackFunc = _callBackFunc;
-                callBackFunc(_data);
+            callBackFunc(_data);
             });
     }
 

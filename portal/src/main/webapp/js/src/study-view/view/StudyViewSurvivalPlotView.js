@@ -616,8 +616,24 @@ var StudyViewSurvivalPlotView = (function() {
             }
         }
 
-        var inputArrLength = inputArr.length;
-        for (var i = 0; i < inputArrLength; i++) {
+        var _numOfCurves = curveInfo[_plotKey].length;
+        
+        console.log("");
+        
+        for(var i = 0; i < _numOfCurves; i++) {
+            for(var j = i+1; j < _numOfCurves; j++) {
+                var _callback = function(_data) {
+                    console.log(_key);
+                    console.log("p-value:" + parseFloat(_data).toFixed(6));
+                };
+                var _logRankTest = new LogRankTest();
+//                var _key = curveInfo[_plotKey][i].name + "-" + curveInfo[_plotKey][j].name;
+                _logRankTest.calc(curveInfo[_plotKey][i].data.data.getData(), curveInfo[_plotKey][j].data.data.getData(), _callback);
+            }
+        }
+        
+        
+        for (var i = 0; i < _numOfCurves; i++) {
             survivalPlot[_plotKey].addCurve(inputArr[i]);
         }
     }
@@ -631,7 +647,8 @@ var StudyViewSurvivalPlotView = (function() {
      */
     function initView(_casesInfo, _data, _plotKey) {
         var _color = "",
-                inputArr = [];
+            inputArr = [],
+            inputArrLength = 0;
         kmEstimator = new KmEstimator();
         logRankTest = new LogRankTest();
         //confidenceIntervals = new ConfidenceIntervals();   
@@ -673,7 +690,7 @@ var StudyViewSurvivalPlotView = (function() {
                 }
             }
         }
-
+        
         //We disabled pvalue calculation in here
         survivalPlot[_plotKey] = new SurvivalCurve();
         survivalPlot[_plotKey].init(inputArr, opts[_plotKey].plot);
