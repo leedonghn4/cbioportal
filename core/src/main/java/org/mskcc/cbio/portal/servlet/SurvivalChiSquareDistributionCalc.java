@@ -23,7 +23,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Calculate p-value from chi square score
@@ -62,12 +66,48 @@ public class SurvivalChiSquareDistributionCalc extends HttpServlet {
     protected void doPost(HttpServletRequest httpServletRequest,
                           HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        String chi_square_score = httpServletRequest.getParameter("chi_square_score");
-        ChiSquaredDistribution distribution;
-        distribution = new ChiSquaredDistribution(1);
-        double p_value = 1 - distribution.cumulativeProbability(Float.parseFloat(chi_square_score));
-        httpServletResponse.setContentType("text/plain");
-        PrintWriter out = httpServletResponse.getWriter();
-        out.write(Double.toString(p_value));
+        
+        
+        if(httpServletRequest.getParameterMap().containsKey("chi_square_score")) {
+            String chi_square_score = httpServletRequest.getParameter("chi_square_score");
+            ChiSquaredDistribution distribution;
+            distribution = new ChiSquaredDistribution(1);
+            double p_value = 1 - distribution.cumulativeProbability(Float.parseFloat(chi_square_score));
+            httpServletResponse.setContentType("text/plain");
+            PrintWriter out = httpServletResponse.getWriter();
+            out.write(Double.toString(p_value));
+        }else if(httpServletRequest.getParameterMap().containsKey("chi_square_score_list")) {
+            String scoreString = httpServletRequest.getParameter("chi_square_score_list");
+            String jobKey = httpServletRequest.getParameter("job_key");
+            Pattern p = Pattern.compile("[,\\s]+");
+            String scoreList[] = p.split(scoreString);
+            int scoreListLength = scoreList.length;
+            String pvalueList = "";
+            for (int i = 0; i < scoreListLength; i++) {
+                String selectedScore = scoreList[i];
+                selectedScore = selectedScore.trim();
+                float score = Float.parseFloat(selectedScore);
+                if(Float.isNaN(score)) {
+                    pvalueList += ",";
+                }else {
+                    ChiSquaredDistribution distribution = new ChiSquaredDistribution(1);
+                    double p_value = 1 - distribution.cumulativeProbability(score);
+                    pvalueList += Double.toString(p_value) + ",";
+                }
+            }
+            pvalueList = pvalueList.substring(0, pvalueList.length()-1);
+            
+            Map obj = new HashMap();
+            obj.put("jobKey", jobKey);
+            obj.put("pvalueList", pvalueList);
+            ObjectMapper mapper = new ObjectMapper();
+            httpServletResponse.setContentType("application/json");
+            PrintWriter out = httpServletResponse.getWriter();
+            out.write(mapper.writeValueAsString(obj));
+        }else {
+            httpServletResponse.setContentType("text/plain");
+            PrintWriter out = httpServletResponse.getWriter();
+            out.write("Didn't find related command function.");
+        }
     }
 }
