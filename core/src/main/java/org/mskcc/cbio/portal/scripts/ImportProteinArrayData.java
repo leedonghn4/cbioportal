@@ -206,8 +206,7 @@ public class ImportProteinArrayData {
     }
     
     private void addRPPACaseList(ArrayList<String> cases) throws DaoException {
-        DaoCaseList daoCaseList = new DaoCaseList();
-        if (daoCaseList.getCaseListByStableId(cancerStudyStableId+"_RPPA")!=null) {
+        if (DaoCaseList.getCaseListByStableId(cancerStudyStableId+"_RPPA")!=null) {
             return;
         }
         
@@ -217,7 +216,7 @@ public class ImportProteinArrayData {
                 "reverse phase protein array.");
         caseList.setCaseList(cases);
         
-        daoCaseList.addCaseList(caseList);
+        DaoCaseList.addCaseList(caseList);
     }
     
     private void addRPPAProfile(ArrayList<String> cases) throws DaoException {
@@ -267,11 +266,10 @@ public class ImportProteinArrayData {
         DaoProteinArrayInfo daoPAI = DaoProteinArrayInfo.getInstance();
         DaoProteinArrayTarget daoPAT = DaoProteinArrayTarget.getInstance();
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-        DaoCaseList daoCaseList = new DaoCaseList();
         ArrayList<CancerStudy> studies = DaoCancerStudy.getAllCancerStudies();
         for (CancerStudy study : studies) {
             int studyId = study.getInternalId();
-            CaseList caselist = daoCaseList.getCaseListByStableId(study.getCancerStudyStableId()+"_RPPA");
+            CaseList caselist = DaoCaseList.getCaseListByStableId(study.getCancerStudyStableId()+"_RPPA");
             if (caselist==null) continue;
             ArrayList<String> cases = caselist.getCaseList();
             ArrayList<ProteinArrayInfo> phosphoArrays = daoPAI.getProteinArrayInfoForType(

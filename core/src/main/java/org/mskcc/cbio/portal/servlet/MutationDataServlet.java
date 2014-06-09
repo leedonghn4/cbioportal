@@ -115,8 +115,6 @@ public class MutationDataServlet extends HttpServlet
 	 */
 	protected ArrayList<String> getCaseList(HttpServletRequest request) throws DaoException
 	{
-		DaoCaseList daoCaseList = new DaoCaseList();
-
 		String caseListStr = request.getParameter("caseList");
 		String caseSetId = request.getParameter("caseSetId");
 		String caseIdsKey = request.getParameter("caseIdsKey");
@@ -134,7 +132,7 @@ public class MutationDataServlet extends HttpServlet
 			// (this allows providing more than one caseSetId)
 			for (String id : this.parseValues(caseSetId))
 			{
-				CaseList list = daoCaseList.getCaseListByStableId(id);
+				CaseList list = DaoCaseList.getCaseListByStableId(id);
 
 				if (list != null)
 				{

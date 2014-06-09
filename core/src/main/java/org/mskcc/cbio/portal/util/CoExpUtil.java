@@ -11,7 +11,6 @@ public class CoExpUtil {
 
     public static ArrayList<String> getCaseIds(String caseSetId, String caseIdsKey) {
 		try {
-			DaoCaseList daoCaseList = new DaoCaseList();
             CaseList caseList;
             ArrayList<String> caseIdList = new ArrayList<String>();
             if (caseSetId.equals("-1")) {
@@ -21,7 +20,7 @@ public class CoExpUtil {
                     caseIdList.add(item);
                 }
             } else {
-                caseList = daoCaseList.getCaseListByStableId(caseSetId);
+                caseList = DaoCaseList.getCaseListByStableId(caseSetId);
                 caseIdList = caseList.getCaseList();
             }
 			return caseIdList;

@@ -30,7 +30,6 @@ public class TestDaoCaseList extends TestCase {
 
     public void testDaoCaseList() throws DaoException {
         ResetDatabase.resetDatabase();
-        DaoCaseList daoCaseList = new DaoCaseList();
 
         CaseList caseList = new CaseList();
         caseList.setName("Name0");
@@ -42,9 +41,9 @@ public class TestDaoCaseList extends TestCase {
         cases.add("TCGA-1");
         cases.add("TCGA-2");
         caseList.setCaseList(cases);
-        daoCaseList.addCaseList(caseList);
+        DaoCaseList.addCaseList(caseList);
         
-        CaseList caseListFromDb = daoCaseList.getCaseListByStableId("stable_0");
+        CaseList caseListFromDb = DaoCaseList.getCaseListByStableId("stable_0");
         assertEquals("Name0", caseListFromDb.getName());
         assertEquals("Description0", caseListFromDb.getDescription());
         assertEquals(CaseListCategory.ALL_CASES_WITH_CNA_DATA, caseListFromDb.getCaseListCategory());

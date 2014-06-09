@@ -32,8 +32,6 @@ public class CancerStudyView extends HttpServlet {
     public static final String MUTATION_PROFILE = "mutation_profile";
     public static final String CNA_PROFILE = "cna_profile";
     
-    private static final DaoCaseList daoCaseList = new DaoCaseList();
-
     // class which process access control to cancer studies
     private AccessControl accessControl;
 
@@ -114,7 +112,7 @@ public class CancerStudyView extends HttpServlet {
             request.setAttribute(QueryBuilder.CASE_SET_ID, caseListId);
         }
         
-        CaseList caseList = daoCaseList.getCaseListByStableId(caseListId);
+        CaseList caseList = DaoCaseList.getCaseListByStableId(caseListId);
         if (caseList==null) {
             request.setAttribute(ERROR,
                     "Could not find case list of '" + caseListId + "'. ");

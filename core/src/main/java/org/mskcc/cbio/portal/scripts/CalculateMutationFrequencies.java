@@ -46,8 +46,7 @@ public class CalculateMutationFrequencies {
         }
 
         String caseSetName = args[0];
-        DaoCaseList daoCaseList = new DaoCaseList();
-        CaseList caseSet = daoCaseList.getCaseListByStableId(caseSetName);
+        CaseList caseSet = DaoCaseList.getCaseListByStableId(caseSetName);
         HashSet <String> masterCaseSet = new HashSet<String>();
         masterCaseSet.addAll(caseSet.getCaseList());
 

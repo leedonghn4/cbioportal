@@ -29,8 +29,7 @@ public class DeleteAllCaseLists {
     public static void main(String[] args) throws Exception {
         ProgressMonitor pMonitor = new ProgressMonitor();
         pMonitor.setConsoleMode(true);
-        DaoCaseList daoCaseList = new DaoCaseList();
-        daoCaseList.deleteAllRecords();
+        DaoCaseList.deleteAllRecords();
         System.out.println ("\nAll Existing Case Lists Deleted.");
         ConsoleUtil.showWarnings(pMonitor);
     }

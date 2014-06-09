@@ -43,8 +43,7 @@ public class GetCaseLists {
             throws DaoException {
         CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyId);
         if (cancerStudy != null) {
-            DaoCaseList daoCaseList = new DaoCaseList();
-            ArrayList<CaseList> caseList = daoCaseList.getAllCaseLists(cancerStudy.getInternalId());
+            ArrayList<CaseList> caseList = DaoCaseList.getAllCaseLists(cancerStudy.getInternalId());
             return caseList;
         } else {
             ArrayList<CaseList> caseList = new ArrayList<CaseList>();
@@ -64,8 +63,7 @@ public class GetCaseLists {
         StringBuilder buf = new StringBuilder();
         if (cancerStudy != null) {
             int cancerStudyInternalId = cancerStudy.getInternalId();
-            DaoCaseList daoCaseList = new DaoCaseList();
-            ArrayList<CaseList> list = daoCaseList.getAllCaseLists(cancerStudyInternalId);
+            ArrayList<CaseList> list = DaoCaseList.getAllCaseLists(cancerStudyInternalId);
             if (list.size() > 0) {
                 buf.append("case_list_id\tcase_list_name\tcase_list_description\t"
                         + "cancer_study_id\t" + "case_ids\n");

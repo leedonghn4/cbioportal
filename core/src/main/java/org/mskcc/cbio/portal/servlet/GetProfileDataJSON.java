@@ -96,7 +96,6 @@ public class GetProfileDataJSON extends HttpServlet  {
         try {
 
             //Get Case case ID list
-            DaoCaseList daoCaseList = new DaoCaseList();
             CaseList caseList;
             ArrayList<String> caseIdList = new ArrayList<String>();
             if (caseSetId.equals("-1")) {
@@ -106,7 +105,7 @@ public class GetProfileDataJSON extends HttpServlet  {
                     caseIdList.add(item);
                 }
             } else {
-                caseList = daoCaseList.getCaseListByStableId(caseSetId);
+                caseList = DaoCaseList.getCaseListByStableId(caseSetId);
                 caseIdList = caseList.getCaseList();
             }
 

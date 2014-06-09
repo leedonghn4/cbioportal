@@ -52,8 +52,7 @@ public class ResetDatabase {
         daoMicroRnaAlteration.deleteAllRecords();
         DaoMutSig.deleteAllRecords();
         DaoGeneticProfile.deleteAllRecords();
-        DaoCaseList daoCaseList = new DaoCaseList();
-        daoCaseList.deleteAllRecords();
+        DaoCaseList.deleteAllRecords();
         DaoClinicalData.deleteAllRecords();
         DaoCopyNumberSegmentFile.deleteAllRecords();
         DaoMutation.deleteAllRecords();

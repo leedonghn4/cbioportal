@@ -196,20 +196,19 @@ public class TestWebService extends TestCase {
       studies = WebserviceParserUtils.getCancerStudyIDs(aNullHttpServletRequest);
       assertTrue(studies.isEmpty());
 
-      DaoCaseList aDaoCaseList = new DaoCaseList();
       String exampleCaseSetId = "exampleID";
       int thisIsNotACancerStudyId = 5;
       CaseList caseList = new CaseList( exampleCaseSetId, 0, thisIsNotACancerStudyId, "", CaseListCategory.OTHER);
       ArrayList<String> t = new ArrayList<String>();
       caseList.setCaseList( t );
-      aDaoCaseList.addCaseList(caseList);
+      DaoCaseList.addCaseList(caseList);
       aNullHttpServletRequest.setParameter(WebService.CASE_SET_ID, exampleCaseSetId );
       studies = WebserviceParserUtils.getCancerStudyIDs(aNullHttpServletRequest);
       assertTrue(studies.isEmpty());
 
-      aDaoCaseList.deleteAllRecords();
+      DaoCaseList.deleteAllRecords();
       caseList.setCancerStudyId( 1 ); // CancerStudyId inserted by setUpDBMS()
-      aDaoCaseList.addCaseList(caseList);
+      DaoCaseList.addCaseList(caseList);
       studies = WebserviceParserUtils.getCancerStudyIDs(aNullHttpServletRequest);
       assertEquals( 1, studies.size() );
       assertTrue( studies.contains("study1"));
