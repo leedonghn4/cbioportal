@@ -84,7 +84,6 @@ public class GetSurvivalDataJSON extends HttpServlet {
             int cancerStudyId = cancerStudy.getInternalId();
 
             //Get Case case ID list
-            DaoCaseList daoCaseList = new DaoCaseList();
             CaseList caseList;
             ArrayList<String> caseIdList = new ArrayList<String>();
             if (caseSetId.equals("-1") && caseIdsKey.length() != 0) {
@@ -94,7 +93,7 @@ public class GetSurvivalDataJSON extends HttpServlet {
                     caseIdList.add(item);
                 }
             } else {
-                caseList = daoCaseList.getCaseListByStableId(caseSetId);
+                caseList = DaoCaseList.getCaseListByStableId(caseSetId);
                 caseIdList = caseList.getCaseList();
             }
 

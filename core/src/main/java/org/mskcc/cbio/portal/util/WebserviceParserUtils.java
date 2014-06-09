@@ -68,8 +68,7 @@ public final class WebserviceParserUtils {
 
         ArrayList<String> caseList = new ArrayList<String>();
         if (caseSetId != null) {
-            DaoCaseList dao = new DaoCaseList();
-            CaseList selectedCaseList = dao.getCaseListByStableId(caseSetId);
+            CaseList selectedCaseList = DaoCaseList.getCaseListByStableId(caseSetId);
             if (selectedCaseList == null) {
                 throw new ProtocolException("Invalid " + WebService.CASE_SET_ID + ":  " + caseSetId + ".");
             }
@@ -142,8 +141,7 @@ public final class WebserviceParserUtils {
         // a case_set_id is explicitly provided, as in getProfileData, getMutationData, getClinicalData, etc.
         String caseSetId = request.getParameter(WebService.CASE_SET_ID);
         if (caseSetId != null) {
-            DaoCaseList aDaoCaseList = new DaoCaseList();
-            CaseList aCaseList = aDaoCaseList.getCaseListByStableId(caseSetId);
+            CaseList aCaseList = DaoCaseList.getCaseListByStableId(caseSetId);
             
             if (aCaseList != null && DaoCancerStudy.doesCancerStudyExistByInternalId(aCaseList.getCancerStudyId())) {
                 cancerStudies.add(DaoCancerStudy.getCancerStudyByInternalId

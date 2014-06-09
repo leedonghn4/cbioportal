@@ -82,8 +82,7 @@ public class ImportCaseList {
          caseIDsList.add(caseId);
       }
 
-      DaoCaseList daoCaseList = new DaoCaseList();
-      CaseList caseList = daoCaseList.getCaseListByStableId(stableId);
+      CaseList caseList = DaoCaseList.getCaseListByStableId(stableId);
       if (caseList != null) {
          throw new IllegalArgumentException("Case list with this stable Id already exists:  " + stableId);
       }
@@ -96,9 +95,9 @@ public class ImportCaseList {
       caseList.setName(caseListName);
       caseList.setDescription(caseListDescription);
       caseList.setCaseList(caseIDsList);
-      daoCaseList.addCaseList(caseList);
+      DaoCaseList.addCaseList(caseList);
 
-      caseList = daoCaseList.getCaseListByStableId(stableId);
+      caseList = DaoCaseList.getCaseListByStableId(stableId);
 
       pMonitor.setCurrentMessage(" --> stable ID:  " + caseList.getStableId());
       pMonitor.setCurrentMessage(" --> case list name:  " + caseList.getName());

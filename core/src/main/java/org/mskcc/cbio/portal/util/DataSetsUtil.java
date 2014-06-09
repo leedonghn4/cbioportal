@@ -51,16 +51,12 @@ public class DataSetsUtil {
 	// ref to our list of cancer study stats & total num of samples
 	private List<CancerStudyStats> cancerStudyStats;
 
-	// ref to case list DAO
-	private DaoCaseList daoCaseList;
-
 	/**
 	 * Constructor (private).
 	 */
 	public DataSetsUtil() {
 
 		try {
-			daoCaseList = new DaoCaseList();
 			// totalNumberOfSamples will be set while computing stats
 			totalNumberOfSamples = 0;
 			cancerStudyStats = computeCancerStudyStats();
@@ -148,7 +144,7 @@ public class DataSetsUtil {
 	private int getCount(CancerStudy cancerStudy, String caseListSuffix) throws DaoException {
 		
 		String caseListID = cancerStudy.getCancerStudyStableId() + caseListSuffix;
-		CaseList desiredCaseList = daoCaseList.getCaseListByStableId(caseListID);
+		CaseList desiredCaseList = DaoCaseList.getCaseListByStableId(caseListID);
 		
 		// outta here
 		return (desiredCaseList != null) ? desiredCaseList.getCaseList().size() : 0;
