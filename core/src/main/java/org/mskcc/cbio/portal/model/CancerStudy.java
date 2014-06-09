@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
+import org.mskcc.cbio.portal.dao.DaoCaseList;
 import org.mskcc.cbio.portal.dao.DaoCaseProfile;
 import org.mskcc.cbio.portal.dao.DaoClinicalData;
 import org.mskcc.cbio.portal.dao.DaoCopyNumberSegment;
@@ -220,6 +221,11 @@ public class CancerStudy {
     
     public GeneticProfile getMutationProfile() throws DaoException {
         return getMutationProfile(null);
+    }
+    
+    public CaseList getSequencedCaseList() throws DaoException {
+        String caseListId = getCancerStudyStableId()+"_sequenced";
+        return DaoCaseList.getCaseListByStableId(caseListId);
     }
     
     /**
