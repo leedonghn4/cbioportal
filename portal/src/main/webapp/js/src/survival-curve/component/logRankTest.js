@@ -109,30 +109,60 @@ var LogRankTest = function() {
             _item.variance = ( _num_of_failures * (_num_at_risk - _num_of_failures) * _item.num_at_risk_1 * _item.num_at_risk_2) / ((_num_at_risk * _num_at_risk) * (_num_at_risk - 1));
         }
     }
-
-    function calcPval(_callBackFunc) {
-        var O1 = 0, E1 = 0, V = 0;
+    
+    function calcChi2() {
+        var O1 = 0, E1 = 0, V = 0, _chi_square_score = 0;
         for (var i = 0; i < mergedArrLength; i++) {
             var _item = mergedArr[i];
             O1 += _item.num_of_failure_1;
             E1 += _item.expectation;
             V += _item.variance;
         }
-        var chi_square_score = (O1 - E1) * (O1 - E1) / V;
-        $.post( "calcPval.do", { chi_square_score: chi_square_score })
+        _chi_square_score = (O1 - E1) * (O1 - E1) / V;
+        return _chi_square_score;
+    }
+    
+    function calcPval(_chi_square_score, _callBackFunc) {
+        $.post( "calcPval.do", { chi_square_score: _chi_square_score })
             .done( function(_data) {
                 callBackFunc = _callBackFunc;
             callBackFunc(_data);
             });
     }
-
+    
+    function calcPvalList(_jobKey, _chi_square_score_list, _callBackFunc) {
+         $.post( "calcPval.do", { chi_square_score_list: _chi_square_score_list,
+         job_key: _jobKey})
+            .done( function(_data) {
+                callBackFunc = _callBackFunc;
+            callBackFunc(_data);
+            });
+    }
+    
     return {
         calc: function(inputGrp1, inputGrp2, _callBackFunc) {
             mergedArr.length = 0;
             mergeGrps(inputGrp1, inputGrp2);
             calcExpection();
             calcVariance();
-            calcPval(_callBackFunc);
+            calcPval(calcChi2(), _callBackFunc);
+        },
+        calcList: function(_jobKey, input, _callBackFunc) {
+            var _inputLength = input.length,
+                _chi_square_score_list = [];
+        
+            for(var i = 0; i< _inputLength; i++) {
+                var _inputDatumGrp1 = input[i][0],
+                    _inputDatumGrp2 = input[i][1];
+                
+                mergedArr.length = 0;
+                mergeGrps(_inputDatumGrp1, _inputDatumGrp2);
+                calcExpection();
+                calcVariance();
+                _chi_square_score_list.push(calcChi2());
+            }
+            
+            calcPvalList(_jobKey, _chi_square_score_list.join(","), _callBackFunc);
         }
-    }
+    };
 };
