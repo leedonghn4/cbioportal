@@ -3,6 +3,7 @@ app.name=gdac-portal
 app.version=0.1
 
 # Database Settings
+db.tomcat_resource_name=cgds_gdac
 db.user=
 db.password=
 db.host=localhost
@@ -53,6 +54,7 @@ r_installed=true
 authenticate=true
 authorization=true
 include_networks=true
+google_analytics_profile_id=
 
 faq=faq_tcga.html
 about=about_us.html
@@ -106,6 +108,7 @@ encryption.key=
 
 # broad BAM file url
 broad.bam.url=
+broad.bam.checking.url=
 
 # temp dir
 temporary_dir=/tmp

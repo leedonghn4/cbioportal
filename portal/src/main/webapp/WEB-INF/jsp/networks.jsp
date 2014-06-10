@@ -5,14 +5,16 @@
 
 <%
     String genes4Network = StringUtils.join((List)request.getAttribute(QueryBuilder.GENE_LIST)," ");
-    String geneticProfileIds4Network = StringUtils.join(geneticProfileIdSet," ");
-    String cancerTypeId4Network = (String)request.getAttribute(QueryBuilder.CANCER_STUDY_ID);
+    String geneticProfileIds4Network = xssUtil.getCleanerInput(StringUtils.join(geneticProfileIdSet," "));
+    String cancerTypeId4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CANCER_STUDY_ID));
 // 	String caseIds4Network = ((String)request.getAttribute(QueryBuilder.CASE_IDS)).
 // 			replaceAll("\\s", " ").trim(); // convert white spaces to space (to prevent network tab to crash)
-	String caseIdsKey4Network = (String)request.getAttribute(QueryBuilder.CASE_IDS_KEY);
-    String caseSetId4Network = (String)request.getAttribute(QueryBuilder.CASE_SET_ID);
-    String zScoreThesholdStr4Network = request.getAttribute(QueryBuilder.Z_SCORE_THRESHOLD).toString();
-    String useXDebug = request.getParameter("xdebug");
+	String caseIdsKey4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CASE_IDS_KEY));
+    String caseSetId4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CASE_SET_ID));
+    String zScoreThesholdStr4Network =
+		    xssUtil.getCleanerInput(request.getAttribute(QueryBuilder.Z_SCORE_THRESHOLD).toString());
+    //String useXDebug = xssUtil.getCleanInput(request, "xdebug");
+	String useXDebug = request.getParameter("xdebug");
     if (useXDebug==null)
         useXDebug = "0";
     String netSrc = request.getParameter("netsrc");
@@ -29,18 +31,18 @@
         diffusion = "0";
 %>
 
-<link href="css/network/network_ui.css" type="text/css" rel="stylesheet"/>
+<link href="css/network/network_ui.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet"/>
 
-<script type="text/javascript" src="js/lib/json2.js"></script>
-<script type="text/javascript" src="js/lib/cytoscape_web/AC_OETags.min.js"></script>
-<script type="text/javascript" src="js/lib/cytoscape_web/cytoscapeweb.min.js"></script>
+<script type="text/javascript" src="js/lib/json2.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/lib/cytoscape_web/AC_OETags.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/lib/cytoscape_web/cytoscapeweb.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
-<!-- <script type="text/javascript" src="js/src/network/network-ui.js"></script> -->
-<script type="text/javascript" src="js/src/network/network-visualization.js"></script>
-<script type="text/javascript" src="js/src/network/network-viz.js"></script>
+<!-- <script type="text/javascript" src="js/src/network/network-ui.js?<%=GlobalProperties.getAppVersion()%>"></script> -->
+<script type="text/javascript" src="js/src/network/network-visualization.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/network/network-viz.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <!-- for genomic data post request -->
-<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/d3.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <script type="text/javascript">
 
@@ -82,7 +84,7 @@
                 }
             }
             
-            window.onload = function() {
+            var showNetwork = function() {
                 var networkParams = {<%=QueryBuilder.GENE_LIST%>:'<%=genes4Network%>',
                      <%=QueryBuilder.GENETIC_PROFILE_IDS%>:'<%=geneticProfileIds4Network%>',
                      <%=QueryBuilder.CANCER_STUDY_ID%>:'<%=cancerTypeId4Network%>',
@@ -113,6 +115,10 @@
                     }
                 );
             }
+            
+            $(document).ready(function() {
+                showNetwork();
+            });
         </script>
 
 <jsp:include page="network_views.jsp"/>

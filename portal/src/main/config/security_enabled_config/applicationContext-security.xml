@@ -38,17 +38,21 @@
 -->
 	<http use-expressions="true">
 	  <intercept-url pattern="/login.jsp*" access="permitAll"/>
+	  <intercept-url pattern="/monitoring*" access="isAuthenticated()"/>
       <intercept-url pattern="/video.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/news.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/faq.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/data_sets.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/about_us.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/web_api.jsp" access="isAuthenticated()"/>
+      <intercept-url pattern="/jobs.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/cgds_r.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/networks.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/protein_exp.jsp" access="isAuthenticated()"/>
+      <intercept-url pattern="/co_expression.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/tutorial.jsp" access="isAuthenticated()"/>
       <intercept-url pattern="/onco_query_lang_desc.jsp" access="isAuthenticated()"/>
+      <intercept-url pattern="/visualize_your_data.jsp" access="isAuthenticated()"/>
 	  <intercept-url pattern="/index.do*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/cross_cancer.do*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/cross_cancer_summary.do*" access="isAuthenticated()"/>
@@ -57,13 +61,11 @@
 	  <intercept-url pattern="/mutation_table_data.json*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/getMutationData.json*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/getPfamSequence.json*" access="isAuthenticated()"/>
+	  <intercept-url pattern="/get3dPdb.json*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/ClinicalFreeForm.json*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/CheckGeneSymbol.json*" access="isAuthenticated()"/>
-	  <intercept-url pattern="/survival_plot.pdf" access="isAuthenticated()"/>
 	  <intercept-url pattern="/show_data.do*" access="isAuthenticated()"/>
-	  <intercept-url pattern="/plot.do*" access="isAuthenticated()"/>
       <intercept-url pattern="/svgtopdf.do*" access="isAuthenticated()"/>
-	  <intercept-url pattern="/plot.pdf*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/generatePlots.do*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/plot-test.do*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/network.do*" access="isAuthenticated()"/>
@@ -71,12 +73,9 @@
 	  <intercept-url pattern="/bioGeneQuery.do*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/ProteinArraySignificanceTest.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/omaRedirect.do*" access="isAuthenticated()"/>
-      <intercept-url pattern="/boxplot.do*" access="isAuthenticated()"/>
-	  <intercept-url pattern="/boxplot.pdf*" access="isAuthenticated()"/>
-      <intercept-url pattern="/scatterplot.do*" access="isAuthenticated()"/>
-	  <intercept-url pattern="/scatterplot.pdf*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/swf/*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/link.do*" access="isAuthenticated()"/>
+	  <intercept-url pattern="/ln*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/oncoprint_converter.svg*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/histogram_converter.svg*" access="isAuthenticated()"/>
 	  <intercept-url pattern="/MutSig.json*" access="isAuthenticated()"/>
@@ -94,8 +93,11 @@
       <intercept-url pattern="/clinicaltrials.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/similar_patients.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/GeneData.json*" access="isAuthenticated()"/>
+      <intercept-url pattern="/crosscancerquery.json*" access="isAuthenticated()"/>
+      <intercept-url pattern="/crosscancermutation.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/clinical.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/clinicalAttributes.json*" access="isAuthenticated()"/>
+      <intercept-url pattern="/clinical_timeline_data.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/tools.jsp*" access="isAuthenticated()"/>
       <intercept-url pattern="/echofile*" access="isAuthenticated()"/>
       <intercept-url pattern="/getGeneticProfile.json*" access="isAuthenticated()"/>
@@ -104,8 +106,15 @@
       <intercept-url pattern="/getSurvivalData.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/igvlinking.json*" access="isAuthenticated()"/>
       <intercept-url pattern="/calcPval.do*" access="isAuthenticated()"/>
+      <intercept-url pattern="/pancancerMutations.json*" access="isAuthenticated()"/>
+      <intercept-url pattern="/jsmol_frame.jsp*" access="isAuthenticated()"/>
+	  <intercept-url pattern="/file_download_frame.jsp*" access="isAuthenticated()"/>
+      <intercept-url pattern="/getCoExp.do*" access="isAuthenticated()"/>
+      <intercept-url pattern="/getAlterationData.json" access="isAuthenticated()"/>
+	  <intercept-url pattern="/downloadfile.do*" access="isAuthenticated()"/>
+	  <intercept-url pattern="/standalone_mutation.jsp*" access="isAuthenticated()"/>
 
-      <!-- everything else locked down by default -->
+        <!-- everything else locked down by default -->
 	  <intercept-url pattern="/**" access="denyAll"/>
 	  <openid-login login-page="/login.jsp" default-target-url="/index.do" user-service-ref="customUserService" authentication-failure-url="/login.jsp?login_error=true">
 		<attribute-exchange identifier-match="https://www.google.com/.*">

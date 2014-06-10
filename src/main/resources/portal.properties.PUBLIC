@@ -3,6 +3,7 @@ app.name=public-portal
 app.version=0.1
 
 # Database Settings
+db.tomcat_resource_name=cgds_public
 db.user=
 db.password=
 db.host=localhost
@@ -68,6 +69,9 @@ authorization=false
 # Indicates whether to include networks
 include_networks=true
 
+# Analytics profile Web Property ID, e.g. UA-1234567-1
+google_analytics_profile_id=
+
 # Manager webapp username and password
 manager.username=tomcat
 manager.password=tomcat
@@ -120,6 +124,7 @@ encryption.key=
 
 # broad BAM file url
 broad.bam.url=
+broad.bam.checking.url=
 
 # temp dir
 temporary_dir=/tmp

@@ -6,7 +6,7 @@
         </h4>
 
         <span>
-            <form id="pdf-form" style="display:inline;" action="svgtopdf.do" method="post">
+            <form id="pdf-form" style="display:inline;" action="svgtopdf.do" method="post" target="_blank">
                 <input type="hidden" name="svgelement">
                 <input type="hidden" name="filetype" value="pdf">
                 <input type="hidden" name="filename" value="oncoprint.pdf">
@@ -36,6 +36,6 @@
         <div id="oncoprint_legend"></div>
         <%@ include file="legend-template.jsp" %>
 
-        <script data-main="js/src/oncoprint/main-boilerplate.js" type="text/javascript" src="js/require.js"></script>
+        <script data-main="js/src/oncoprint/main-boilerplate.js?<%=GlobalProperties.getAppVersion()%>" type="text/javascript" src="js/require.js?<%=GlobalProperties.getAppVersion()%>"></script>
     </div>
 </div>

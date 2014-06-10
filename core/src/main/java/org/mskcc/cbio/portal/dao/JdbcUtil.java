@@ -1,38 +1,35 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.dao;
+
+import org.mskcc.cbio.portal.util.DatabaseProperties;
+import org.mskcc.cbio.portal.util.GlobalProperties;
+
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp.DelegatingPreparedStatement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.dbcp.DelegatingPreparedStatement;
-import org.mskcc.cbio.portal.util.DatabaseProperties;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 
 /**
  * Connection Utility for JDBC.
@@ -40,14 +37,15 @@ import org.mskcc.cbio.portal.util.DatabaseProperties;
  * @author Ethan Cerami
  */
 public class JdbcUtil {
-    private static BasicDataSource ds;
-    private static int MAX_JDBC_CONNECTIONS = 100;
+    private static DataSource ds;
+    private static final int MAX_JDBC_CONNECTIONS = 100;
     private static Map<String,Integer> activeConnectionCount; // keep track of the number of active connection per class/requester
+    private static final Log LOG = LogFactory.getLog(JdbcUtil.class);
 
     /**
      * Gets Connection to the Database.
      * 
-     * @param requester class
+     * @param clazz class
      * @return Live Connection to Database.
      * @throws java.sql.SQLException Error Connecting to Database.
      */
@@ -62,48 +60,100 @@ public class JdbcUtil {
      * @return Live Connection to Database.
      * @throws java.sql.SQLException Error Connecting to Database.
      */
-    public static Connection getDbConnection(String requester) throws SQLException {
+    private static Connection getDbConnection(String requester) throws SQLException {
+        // this method should be syncronized
+        // but may slow the speed?
+        
         if (ds == null) {
-            initDataSource();
-        } else if (ds.getNumActive()>=MAX_JDBC_CONNECTIONS) {
-            ds.close();
-            initDataSource();
-            System.err.println("Reach the maximum number of database connections: "+MAX_JDBC_CONNECTIONS
-                    + "\n" + activeConnectionCount.toString());
+            ds = initDataSource();
         }
-        
-        Connection con = ds.getConnection();
-        
+
+        Connection con;
+        try {
+            con = ds.getConnection();
+        }
+        catch (Exception e) {
+            logMessage(e.getMessage());
+            throw new SQLException(e);
+        }
+
         if (requester!=null) {
             Integer count = activeConnectionCount.get(requester);
             activeConnectionCount.put(requester, count==null ? 1 : (count+1));
         }
         
-        if (ds.getNumActive() >= MAX_JDBC_CONNECTIONS/2) {
-            System.err.println("Opened a MySQL connection. Active connections: "+ds.getNumActive()
-                        + "\n" + activeConnectionCount.toString());
-        }
         return con;
+    }
+
+    private static DataSource initDataSource() {
+
+        DataSource ds = initDataSourceTomcat();
+
+        try {
+            if (ds!=null) {
+                ds.getConnection();
+            }
+        }
+        catch (Exception e) {
+            ds = null;
+        }
+
+        if (ds == null) {
+            ds = initDataSourceDirect();
+        }
+
+        activeConnectionCount = new HashMap<String,Integer>();
+
+        return ds;
+    }
+
+    private static DataSource initDataSourceTomcat() {
+        String tomcatResourceName = GlobalProperties.getProperty("db.tomcat_resource_name");
+        if (null == tomcatResourceName || tomcatResourceName.isEmpty()) {
+            return null;
+        }
+        
+
+        DataSource ds = null;
+        activeConnectionCount = new HashMap<String,Integer>();
+       
+        try {
+            InitialContext cxt = new InitialContext();
+            if (cxt == null) {
+                throw new Exception("Context for creating data source not found!");
+            }
+            ds = (DataSource)cxt.lookup( "java:/comp/env/" + GlobalProperties.getProperty("db.tomcat_resource_name") );
+            if (ds == null) {
+                throw new Exception("Data source not found!");
+            }
+        }
+        catch (Exception e) {
+            logMessage(e.getMessage());
+        }
+
+        return ds;
     }
 
     /**
      * Initializes Data Source.
      */
-    private static void initDataSource() {
+    private static DataSource initDataSourceDirect() {
+
         DatabaseProperties dbProperties = DatabaseProperties.getInstance();
         String host = dbProperties.getDbHost();
         String userName = dbProperties.getDbUser();
         String password = dbProperties.getDbPassword();
         String database = dbProperties.getDbName();
+        String driverClassname = dbProperties.getDbDriverClassName();
 
         String url =
-                new String("jdbc:mysql://" + host + "/" + database
+                "jdbc:mysql://" + host + "/" + database
                         + "?user=" + userName + "&password=" + password
-                        + "&zeroDateTimeBehavior=convertToNull");
+                        + "&zeroDateTimeBehavior=convertToNull";
         
         //  Set up poolable data source
-        ds = new BasicDataSource();
-        ds.setDriverClassName("com.mysql.jdbc.Driver");
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName(driverClassname);
         ds.setUsername(userName);
         ds.setPassword(password);
         ds.setUrl(url);
@@ -111,8 +161,8 @@ public class JdbcUtil {
         //  By pooling/reusing PreparedStatements, we get a major performance gain
         ds.setPoolPreparedStatements(true);
         ds.setMaxActive(MAX_JDBC_CONNECTIONS);
-        
-        activeConnectionCount = new HashMap<String,Integer>();
+
+        return ds;
     }
 
     /**
@@ -124,28 +174,23 @@ public class JdbcUtil {
         closeConnection(clazz.getName(), con);
     }
     
-    public static void closeConnection(String requester, Connection con) {
+    private static void closeConnection(String requester, Connection con) {
         try {
             if (con != null && !con.isClosed()) {
                 con.close();
                 
                 if (requester!=null) {
                     int count = activeConnectionCount.get(requester)-1;
-                    if (count==0) {
-                        activeConnectionCount.remove(requester);
-                    } else {
-                        activeConnectionCount.put(requester, count);
+                    if (count<0) {
+                        // since adding connection is not synchronized, the count may not be the real one
+                        count = 0;
                     }
-                }
-                
-                if (ds.getNumActive() >= MAX_JDBC_CONNECTIONS/2) {
-                    System.err.println("Closed a MySQL connection. Active connections: "+ds.getNumActive()
-                        + "\n" + activeConnectionCount.toString());
+                    
+                    activeConnectionCount.put(requester, count);
                 }
             }
-        } catch (SQLException e) {
-            System.err.println("Problem Closed a MySQL connection from "+requester+".\nActive connections: "+ds.getNumActive()
-                        + "\n" + activeConnectionCount.toString());
+        } catch (Exception e) {
+            logMessage("Problem Closed a MySQL connection from " + requester + ": " + activeConnectionCount.toString());
             e.printStackTrace();
         }
     }
@@ -153,11 +198,10 @@ public class JdbcUtil {
     /**
      * Frees PreparedStatement and ResultSet.
      *
-     * @param ps  Prepared Statement Object.
      * @param rs  ResultSet Object.
      */
-    public static void closeAll(PreparedStatement ps, ResultSet rs) {
-                JdbcUtil.closeAll((String)null, null, ps, rs);
+    public static void closeAll(ResultSet rs) {
+                JdbcUtil.closeAll((String)null, null, rs);
         }
 
     /**
@@ -169,18 +213,17 @@ public class JdbcUtil {
      */
     public static void closeAll(Class clazz, Connection con, PreparedStatement ps,
             ResultSet rs) {
-        closeAll(clazz.getName(), con, ps, rs);
+        closeAll(clazz.getName(), con, rs);
     }
 
     /**
      * Frees Database Connection.
      *
      * @param con Connection Object.
-     * @param ps  Prepared Statement Object.
      * @param rs  ResultSet Object.
      */
-    public static void closeAll(String requester, Connection con, PreparedStatement ps,
-            ResultSet rs) {
+    private static void closeAll(String requester, Connection con,
+                                 ResultSet rs) {
         closeConnection(requester, con);
         if (rs != null) {
             try {
@@ -233,5 +276,28 @@ public class JdbcUtil {
         } else {
             return pstmt.toString();
         }
+    }
+
+    private static void logMessage(String message) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info(message);
+        }
+        System.err.println(message);
+    }
+    
+    // is it good to put the two methods below here?
+    static Integer readIntegerFromResultSet(ResultSet rs, String column) throws SQLException {
+        int i = rs.getInt(column);
+        return rs.wasNull() ? null : i;
+    }
+    
+    static Long readLongFromResultSet(ResultSet rs, String column) throws SQLException {
+        long l = rs.getInt(column);
+        return rs.wasNull() ? null : l;
+    }
+    
+    static Double readDoubleFromResultSet(ResultSet rs, String column) throws SQLException {
+        double d = rs.getDouble(column);
+        return rs.wasNull() ? null : d;
     }
 }

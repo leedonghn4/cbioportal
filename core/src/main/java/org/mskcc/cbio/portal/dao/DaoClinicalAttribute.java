@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
- **
- ** This library is free software; you can redistribute it and/or modify it
- ** under the terms of the GNU Lesser General Public License as published
- ** by the Free Software Foundation; either version 2.1 of the License, or
- ** any later version.
- **
- ** This library is distributed in the hope that it will be useful, but
- ** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
- ** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
- ** documentation provided hereunder is on an "as is" basis, and
- ** Memorial Sloan-Kettering Cancer Center
- ** has no obligations to provide maintenance, support,
- ** updates, enhancements or modifications.  In no event shall
- ** Memorial Sloan-Kettering Cancer Center
- ** be liable to any party for direct, indirect, special,
- ** incidental or consequential damages, including lost profits, arising
- ** out of the use of this software and its documentation, even if
- ** Memorial Sloan-Kettering Cancer Center
- ** has been advised of the possibility of such damage.  See
- ** the GNU Lesser General Public License for more details.
- **
- ** You should have received a copy of the GNU Lesser General Public License
- ** along with this library; if not, write to the Free Software Foundation,
- ** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
- **/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.dao;
 
@@ -59,9 +49,7 @@ public class DaoClinicalAttribute {
             pstmt.setString(2, attr.getDisplayName());
             pstmt.setString(3, attr.getDescription());
             pstmt.setString(4, attr.getDatatype());
-
-            int rows = pstmt.executeUpdate();
-            return rows;
+            return pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -69,7 +57,7 @@ public class DaoClinicalAttribute {
         }
     }
 
-    public static ClinicalAttribute unpack(ResultSet rs) throws SQLException {
+    private static ClinicalAttribute unpack(ResultSet rs) throws SQLException {
         return new ClinicalAttribute(rs.getString("ATTR_ID"),
                 rs.getString("DISPLAY_NAME"),
                 rs.getString("DESCRIPTION"),
@@ -120,8 +108,7 @@ public class DaoClinicalAttribute {
      * @throws DaoException
      */
     public static List<ClinicalAttribute> getDataBySamples(int cancerStudyId, Set<String> sampleIdSet) throws DaoException {
-        List<ClinicalAttribute> toReturn = new ArrayList<ClinicalAttribute>();
-
+        
         Connection con = null;
         ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -151,7 +138,7 @@ public class DaoClinicalAttribute {
         return getDatum(attrIds);
     }
 
-    public static Collection<ClinicalAttribute> getAll() throws DaoException {
+    private static Collection<ClinicalAttribute> getAll() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;

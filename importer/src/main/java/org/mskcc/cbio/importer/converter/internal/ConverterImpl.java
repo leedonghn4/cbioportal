@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 // package
 package org.mskcc.cbio.importer.converter.internal;
@@ -129,8 +119,8 @@ class ConverterImpl implements Converter {
 		// iterate over all cancer studies
 		for (CancerStudyMetadata cancerStudyMetadata : config.getCancerStudyMetadata(portalMetadata.getName())) {
 
-			// short circuit if this is a published study
-			if (cancerStudyMetadata.toString().endsWith(CancerStudyMetadata.PUBLISHED_TCGA_STUDY_SUFFIX)) {
+			// short circuit if this is a published study// short circuit if this is a published study
+			if (!cancerStudyMetadata.isConverted()) {
 				if (LOG.isInfoEnabled()) {
 					LOG.info("convertData(), skipping conversion of published study: " + cancerStudyMetadata);
 				}
@@ -246,16 +236,18 @@ class ConverterImpl implements Converter {
 				if (excludeDatatypes.contains(datatypeMetadata.getDatatype())) continue;
 				// apply staging override
 				String stagingFilename = datatypeMetadata.getStagingFilename().replaceAll(DatatypeMetadata.CANCER_STUDY_TAG, cancerStudyMetadata.toString());
-				fileUtils.applyOverride(portalMetadata, cancerStudyMetadata, stagingFilename, stagingFilename);
+				fileUtils.applyOverride(portalMetadata.getOverrideDirectory(), portalMetadata.getStagingDirectory(),
+                                        cancerStudyMetadata, stagingFilename, stagingFilename);
 				// apply metadata override
 				if (datatypeMetadata.requiresMetafile()) {
-					fileUtils.applyOverride(portalMetadata, cancerStudyMetadata,
-											datatypeMetadata.getMetaFilename(), datatypeMetadata.getMetaFilename());
+					fileUtils.applyOverride(portalMetadata.getOverrideDirectory(), portalMetadata.getStagingDirectory(),
+                                            cancerStudyMetadata, datatypeMetadata.getMetaFilename(), datatypeMetadata.getMetaFilename());
 				}
 			}
 			// case lists
 			if (applyCaseLists) {
-				fileUtils.applyOverride(portalMetadata, cancerStudyMetadata, "case_lists", "case_lists");
+				fileUtils.applyOverride(portalMetadata.getOverrideDirectory(), portalMetadata.getStagingDirectory(),
+                                        cancerStudyMetadata, "case_lists", "case_lists");
 			}
 		}
 	}

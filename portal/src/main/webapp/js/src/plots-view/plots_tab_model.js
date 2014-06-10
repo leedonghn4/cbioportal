@@ -42,7 +42,8 @@ var Plots = (function(){
             genetic_profile_rppa : [],
             genetic_profile_dna_methylation : []
         },
-        genetic_profiles = {};
+        genetic_profiles = {}
+        log_scale_threshold = 0.17677669529;  // 2 to the -2.5
 
     function getGeneticProfileCallback(result) {
         for (var gene in result) {
@@ -71,12 +72,13 @@ var Plots = (function(){
         PlotsCustomMenu.init();
         PlotsView.init();
 
-        $('#plots-menus').bind('tabsshow', function(event, ui) {
-            if (ui.index === 0) {
+        $('#plots-menus').bind('tabsactivate', function(event, ui) {
+	        // note: ui.index is replaced with ui.newTab.index() after jQuery 1.9
+	        if (ui.newTab.index() === 0) {
                 PlotsView.init();
-            } else if (ui.index === 1) {
+            } else if (ui.newTab.index() === 1) {
                 PlotsTwoGenesView.init();
-            } else if (ui.index === 2) {
+            } else if (ui.newTab.index() === 2) {
                 PlotsCustomView.init();
             } else {
                 //TODO: error handle
@@ -85,7 +87,7 @@ var Plots = (function(){
 
     }
 
-    function addAxisHelp(svg, axisGroupSvg, xTitle, yTitle, xTitleClass, yTitleClass, xText, yText) {  //Append description for selected genetic profile
+    function addxAxisHelp(svg, axisGroupSvg, xTitle, xTitleClass, xText) {
         axisGroupSvg.append("svg:image")
             .attr("xlink:href", "images/help.png")
             .attr("class", xTitleClass)
@@ -93,6 +95,22 @@ var Plots = (function(){
             .attr("y", 567)
             .attr("width", "16")
             .attr("height", "16");
+        svg.select("." + xTitleClass).each(
+            function() {
+                $(this).qtip(
+                    {
+                        content: {text: "<font size=2>" + xText + "</font>" },
+                        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
+                        show: {event: "mouseover"},
+                        hide: {fixed:true, delay: 100, event: "mouseout"},
+                        position: {my:'left bottom',at:'top right', viewport: $(window)}
+                    }
+                );
+            }
+        );
+    }
+
+    function addyAxisHelp(svg, axisGroupSvg, yTitle, yTitleClass, yText) {
         axisGroupSvg.append("svg:image")
             .attr("xlink:href", "images/help.png")
             .attr("class", yTitleClass)
@@ -100,49 +118,49 @@ var Plots = (function(){
             .attr("y", 255 - yTitle.length / 2 * 8)
             .attr("width", "16")
             .attr("height", "16");
-        svg.select("." + xTitleClass).each(
-            function() {
-                $(this).qtip(
-                    {
-                        content: {text: "<font size=2>" + xText + "</font>" },
-                        style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
-                        show: {event: "mouseover"},
-                        hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {my:'left bottom',at:'top right'}
-                    }
-                );
-            }
-        );
         svg.select("." + yTitleClass).each(
             function() {
                 $(this).qtip(
                     {
                         content: {text: "<font size=2>" + yText + "</font>"},
-                        style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
+                        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
                         show: {event: "mouseover"},
                         hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {my:'right bottom',at:'top left'}
+                        position: {my:'right bottom',at:'top left', viewport: $(window)}
                     }
                 );
             }
         );
     }
 
-    function searchPlots() {
-        var searchToken = document.getElementById("search_plots").value;
+    function searchPlots(viewIdentifier) {
+        var searchToken = "";
+        if (viewIdentifier === "one_gene") {
+            searchToken = document.getElementById("search_plots_one_gene").value;
+        } else if (viewIdentifier === "two_genes") {
+            searchToken = document.getElementById("search_plots_two_genes").value;
+        } else if (viewIdentifier === "custom") {
+            searchToken = document.getElementById("search_plots_custom").value;
+        }
         d3.select("#plots_box").selectAll("path").each(
             function() {
                 var _attr = $(this).attr("class");
                 if (typeof _attr !== 'undefined' && _attr !== false && _attr !== "domain") {
-                    if ( searchToken.length >= 1) {
-                        _d = $(this).attr("stroke-width");
-                        if ( $(this).attr("class").indexOf(searchToken) !== -1) {
-                            $(this).attr("stroke-width", 20);
+                    if ( searchToken.length >= 4 ) {
+                        if ( $(this).attr("class").toUpperCase().indexOf(searchToken.toUpperCase()) !== -1 &&
+                            (searchToken.toUpperCase()) !== "TCGA" && (searchToken.toUpperCase()) !== "TCGA-") {
+                            $(this).attr("d", d3.svg.symbol()
+                                .size(d3.select(this).attr("size") + 5)
+                                .type(d3.select(this).attr("symbol")));
                         } else {
-                            $(this).attr("stroke-width", 1.1);
+                            $(this).attr("d", d3.svg.symbol()
+                                .size(d3.select(this).attr("size"))
+                                .type(d3.select(this).attr("symbol")));
                         }
                     } else {
-                        $(this).attr("stroke-width", 1.1);
+                        $(this).attr("d", d3.svg.symbol()
+                            .size(d3.select(this).attr("size"))
+                            .type(d3.select(this).attr("symbol")));
                     }
                 }
             }
@@ -172,16 +190,15 @@ var Plots = (function(){
             $.post("getProfileData.json", paramsGetProfileData, callback_func, "json");
         },
         getMutationType: function(gene, genetic_profile_id, case_set_id, case_ids_key, callback_func) {
-            var paramsGetMutationType = {
-                geneList: gene,
-                geneticProfiles: genetic_profile_id,  //Here is simply cancer_study_id + "_mutations"
-                caseSetId: case_set_id,
-                caseIdsKey: case_ids_key
-            };
-            $.post("getMutationData.json", paramsGetMutationType, callback_func, "json");
+            var proxy = DataProxyFactory.getDefaultMutationDataProxy();
+            proxy.getMutationData(gene, callback_func);
         },
-        addAxisHelp: addAxisHelp,
-        searchPlots: searchPlots
+        addxAxisHelp: addxAxisHelp,
+        addyAxisHelp: addyAxisHelp,
+        searchPlots: searchPlots,
+        getLogScaleThreshold: function() {
+            return log_scale_threshold;
+        }
     };
 
 }());    //Closing Plots
@@ -189,49 +206,33 @@ var Plots = (function(){
 // Takes the content in the plots svg element
 // and returns XML serialized *string*
 function loadPlotsSVG() {
-    var shiftValueOnX = 8;
-    var shiftValueOnY = 3;
-    var mySVG = d3.select("#plots_box");
-    //Remove Help Icon (cause exception)
+    //Remove the help icons
     var elemXHelpTxt = $(".x-title-help").qtip('api').options.content.text;
     var elemYHelpTxt = $(".y-title-help").qtip('api').options.content.text;
     var elemXHelp = $(".x-title-help").remove();
     var elemYHelp = $(".y-title-help").remove();
-
-    var xAxisGrp = mySVG.select(".plots-x-axis-class");
-    var yAxisGrp = mySVG.select(".plots-y-axis-class");
-    cbio.util.alterAxesAttrForPDFConverter(xAxisGrp, shiftValueOnX, yAxisGrp, shiftValueOnY, false);
-    var docSVG = document.getElementById("plots_box");
-    var svgDoc = docSVG.getElementsByTagName("svg");
-    var xmlSerializer = new XMLSerializer();
-    var xmlString = xmlSerializer.serializeToString(svgDoc[0]);
-    cbio.util.alterAxesAttrForPDFConverter(xAxisGrp, shiftValueOnX, yAxisGrp, shiftValueOnY, true);
-
+    //Extract SVG
+    var result = $("#plots_box").html();
+    //Add the help icons back on
     $(".axis").append(elemXHelp);
     $(".axis").append(elemYHelp);
-    $(".x-title-help").qtip(
-        {
-            content: {text: elemXHelpTxt },
-            style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
-            show: {event: "mouseover"},
-            hide: {fixed:true, delay: 100, event: "mouseout"},
-            position: {my:'left bottom',at:'top right'}
-        }
-    );
-    $(".y-title-help").qtip(
-        {
-            content: {text: elemYHelpTxt },
-            style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
-            show: {event: "mouseover"},
-            hide: {fixed:true, delay: 100, event: "mouseout"},
-            position: {my:'right bottom',at:'top left'}
-        }
-    );
+    $(".x-title-help").qtip({
+        content: {text: elemXHelpTxt },
+        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
+        show: {event: "mouseover"},
+        hide: {fixed:true, delay: 100, event: "mouseout"},
+        position: {my:'left bottom',at:'top right'}
+    });
+    $(".y-title-help").qtip({
+        content: {text: elemYHelpTxt },
+        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
+        show: {event: "mouseover"},
+        hide: {fixed:true, delay: 100, event: "mouseout"},
+        position: {my:'right bottom',at:'top left', viewport: $(window)}
+    });
 
-    return xmlString;
+    return result;
 }
-
-
 
 
 

@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.servlet;
 
@@ -104,8 +94,15 @@ public class PortalMetaDataJSON extends HttpServlet {
             });
             Map<String, String> typeOfCancerMap = new HashMap<String, String>();
             Map<String, String> visibleTypeOfCancerMap = new HashMap<String, String>();
-            for (TypeOfCancer typeOfCancer : allTypesOfCancer)
+            Map<String, String> cancerColors = new HashMap<String, String>();
+            Map<String, String> visibleCancerColors = new HashMap<String, String>();
+            Map<String, String> shortNames = new HashMap<String, String>();
+            Map<String, String> visibleShortNames = new HashMap<String, String>();
+            for (TypeOfCancer typeOfCancer : allTypesOfCancer) {
                 typeOfCancerMap.put(typeOfCancer.getTypeOfCancerId(), typeOfCancer.getName());
+                cancerColors.put(typeOfCancer.getTypeOfCancerId(), typeOfCancer.getDedicatedColor());
+                shortNames.put(typeOfCancer.getTypeOfCancerId(), typeOfCancer.getShortName());
+            }
 
             //  Cancer All Cancer Studies
             List<CancerStudy> cancerStudiesList = accessControl.getCancerStudies();
@@ -113,12 +110,11 @@ public class PortalMetaDataJSON extends HttpServlet {
             //  Get all Genomic Profiles and Case Sets for each Cancer Study
             rootMap.put("cancer_studies", cancerStudyMap);
             for (CancerStudy cancerStudy : cancerStudiesList) {
-                ArrayList<CaseList> caseSets = GetCaseLists.getCaseLists
-                        (cancerStudy.getCancerStudyStableId());
+                ArrayList<CaseList> caseSets = GetCaseLists.getCaseLists(cancerStudy.getCancerStudyStableId());
 
                 ArrayList<GeneticProfile> geneticProfiles =
-                        GetGeneticProfiles.getGeneticProfiles
-                                (cancerStudy.getCancerStudyStableId());
+                        GetGeneticProfiles.getGeneticProfiles(cancerStudy.getCancerStudyStableId());
+
                 JSONArray jsonGenomicProfileList = new JSONArray();
                 for (GeneticProfile geneticProfile : geneticProfiles) {
                     Map map = new LinkedHashMap();
@@ -142,12 +138,14 @@ public class PortalMetaDataJSON extends HttpServlet {
                 }
                 Map jsonCancerStudySubMap = new LinkedHashMap();
                 jsonCancerStudySubMap.put("name", cancerStudy.getName());
+                jsonCancerStudySubMap.put("short_name", cancerStudy.getShortName());
                 jsonCancerStudySubMap.put("description", cancerStudy.getDescription());
                 jsonCancerStudySubMap.put("citation", cancerStudy.getCitation());
                 jsonCancerStudySubMap.put("pmid", cancerStudy.getPmid());
                 jsonCancerStudySubMap.put("genomic_profiles", jsonGenomicProfileList);
                 jsonCancerStudySubMap.put("case_sets", jsonCaseList);
                 jsonCancerStudySubMap.put("has_mutation_data", cancerStudy.hasMutationData(geneticProfiles));
+                jsonCancerStudySubMap.put("has_cna_data", cancerStudy.hasCnaData());
                 jsonCancerStudySubMap.put("has_mutsig_data", cancerStudy.hasMutSigData());
                 jsonCancerStudySubMap.put("has_gistic_data", cancerStudy.hasGisticData());
                 cancerStudyMap.put(cancerStudy.getCancerStudyStableId(), jsonCancerStudySubMap);
@@ -155,10 +153,14 @@ public class PortalMetaDataJSON extends HttpServlet {
                 String typeOfCancerId = cancerStudy.getTypeOfCancerId();
                 jsonCancerStudySubMap.put("type_of_cancer", typeOfCancerId);
                 visibleTypeOfCancerMap.put(typeOfCancerId, typeOfCancerMap.get(typeOfCancerId));
+                visibleCancerColors.put(typeOfCancerId, cancerColors.get(typeOfCancerId));
+                visibleShortNames.put(typeOfCancerId, shortNames.get(typeOfCancerId));
             }
 
             // Only put visible ones
             rootMap.put("type_of_cancers", visibleTypeOfCancerMap);
+            rootMap.put("cancer_colors", visibleCancerColors);
+            rootMap.put("short_names", visibleShortNames);
 
             //  Get all Gene Sets
             GeneSetUtil geneSetUtil = GeneSetUtil.getInstance();

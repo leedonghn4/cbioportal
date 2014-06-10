@@ -3,10 +3,11 @@ app.name=su2c-portal
 app.version=0.1
 
 # Database Settings
+db.tomcat_resource_name=cgds_gdac
 db.user=
 db.password=
 db.host=localhost
-db.portal_db_name=cgds_su2c
+db.portal_db_name=cgds_gdac
 # props used by importer
 db.importer_db_name=cgds_importer
 db.driver=com.mysql.jdbc.Driver
@@ -51,6 +52,7 @@ ucsc_cancer_genomics.url=https://genome-cancer.ucsc.edu/hgHeatmap/#?
 segfile.url=http://cbio.mskcc.org/cancergenomics/su2c-portal/seg/
 r_installed=true
 include_networks=true
+google_analytics_profile_id=
 about=about_us_su2c.html
 news=news_su2c.html
 examples_right_column=examples_su2c.html
@@ -115,6 +117,7 @@ encryption.key=
 
 # broad BAM file url
 broad.bam.url=
+broad.bam.checking.url=
 
 # temp dir
 temporary_dir=/tmp

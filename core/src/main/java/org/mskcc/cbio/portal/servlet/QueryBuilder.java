@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.servlet;
 
@@ -40,7 +30,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
+import org.mskcc.cbio.portal.dao.DaoClinicalData;
 
 import org.mskcc.cbio.portal.model.*;
 import org.springframework.context.ApplicationContext;
@@ -49,7 +42,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.mskcc.cbio.portal.model.Patient;
 import org.mskcc.cbio.portal.oncoPrintSpecLanguage.ParserOutput;
 import org.mskcc.cbio.portal.util.*;
-import org.mskcc.cbio.portal.r_bridge.SurvivalPlot;
 import org.mskcc.cbio.portal.validate.gene.GeneValidator;
 import org.mskcc.cbio.portal.validate.gene.GeneValidationException;
 import org.mskcc.cbio.portal.dao.DaoException;
@@ -66,7 +58,7 @@ public class QueryBuilder extends HttpServlet {
     public static final String PROFILE_LIST_INTERNAL = "profile_list";
     public static final String CASE_SETS_INTERNAL = "case_sets";
     public static final String CANCER_STUDY_ID = "cancer_study_id";
-    public static final String CLINICAL_DATA_LIST = "clinical_data_list";
+    public static final String HAS_SURVIVAL_DATA = "has_survival_data";
     public static final String GENETIC_PROFILE_IDS = "genetic_profile_ids";
     public static final String GENE_SET_CHOICE = "gene_set_choice";
     public static final String CASE_SET_ID = "case_set_id";
@@ -103,13 +95,15 @@ public class QueryBuilder extends HttpServlet {
     public static final String RPPA_SCORE_THRESHOLD = "RPPA_SCORE_THRESHOLD";
     public static final String MRNA_PROFILES_SELECTED = "MRNA_PROFILES_SELECTED";
     public static final String COMPUTE_LOG_ODDS_RATIO = "COMPUTE_LOG_ODDS_RATIO";
-    public static final int MUTATION_DETAIL_LIMIT = 20;
+    public static final int MUTATION_DETAIL_LIMIT = 100;
     public static final String MUTATION_DETAIL_LIMIT_REACHED = "MUTATION_DETAIL_LIMIT_REACHED";
     public static final String XDEBUG_OBJECT = "xdebug_object";
     public static final String ONCO_PRINT_HTML = "oncoprint_html";
     public static final String INDEX_PAGE = "index.do";
     public static final String INTERNAL_EXTENDED_MUTATION_LIST = "INTERNAL_EXTENDED_MUTATION_LIST";
     public static final String DATA_PRIORITY = "data_priority";
+    private static final String DB_CONNECT_ERROR = ("An error occurred while trying to connect to the database." +
+                                                    "  This could happen if the database does not contain any cancer studies.");
 
     private ServletXssUtil servletXssUtil;
 
@@ -169,16 +163,24 @@ public class QueryBuilder extends HttpServlet {
         }
 
         //  Get User Selected Action
-        String action = servletXssUtil.getCleanInput (httpServletRequest, ACTION_NAME);
+        String action = httpServletRequest.getParameter(ACTION_NAME);
 
         //  Get User Selected Cancer Type
-        String cancerTypeId = servletXssUtil.getCleanInput(httpServletRequest, CANCER_STUDY_ID);
+        String cancerTypeId = httpServletRequest.getParameter(CANCER_STUDY_ID);
 
         //  Get User Selected Genetic Profiles
         HashSet<String> geneticProfileIdSet = getGeneticProfileIds(httpServletRequest, xdebug);
 
         //  Get User Defined Gene List
-        String geneList = servletXssUtil.getCleanInput (httpServletRequest, GENE_LIST);
+	    // we need the raw gene list...
+	    String geneList = httpServletRequest.getParameter(GENE_LIST);
+
+	    if (httpServletRequest instanceof XssRequestWrapper)
+	    {
+		    geneList = ((XssRequestWrapper)httpServletRequest).getRawParameter(GENE_LIST);
+	    }
+
+        geneList = servletXssUtil.getCleanInput(geneList);
 
         // save the raw gene string as it was entered for other things to work on
         httpServletRequest.setAttribute(RAW_GENE_STR, geneList);
@@ -213,7 +215,7 @@ public class QueryBuilder extends HttpServlet {
             httpServletRequest.setAttribute(CASE_SETS_INTERNAL, caseSets);
 
             //  Get User Selected Case Set
-            String caseSetId = servletXssUtil.getCleanInput(httpServletRequest, CASE_SET_ID);
+            String caseSetId = httpServletRequest.getParameter(CASE_SET_ID);
             if (caseSetId != null) {
                 httpServletRequest.setAttribute(CASE_SET_ID, caseSetId);
             } else {
@@ -222,7 +224,12 @@ public class QueryBuilder extends HttpServlet {
                     httpServletRequest.setAttribute(CASE_SET_ID, zeroSet.getStableId());
                 }
             }
-            String caseIds = servletXssUtil.getCleanInput(httpServletRequest, CASE_IDS);
+            String caseIds = httpServletRequest.getParameter(CASE_IDS);
+	        // TODO allowing only new line and tab chars, getRawParameter may be vulnerable here...
+	        if (caseIds != null)
+	        {
+		        caseIds = caseIds.replaceAll("\\\\n", "\n").replaceAll("\\\\t", "\t");
+	        }
 
             httpServletRequest.setAttribute(XDEBUG_OBJECT, xdebug);
 
@@ -245,15 +252,15 @@ public class QueryBuilder extends HttpServlet {
         } catch (RemoteException e) {
             xdebug.logMsg(this, "Got Remote Exception:  " + e.getMessage());
             forwardToErrorPage(httpServletRequest, httpServletResponse,
-                               "An error occurred while trying to connect to the database.", xdebug);
+                               DB_CONNECT_ERROR, xdebug);
         } catch (DaoException e) {
             xdebug.logMsg(this, "Got Database Exception:  " + e.getMessage());
             forwardToErrorPage(httpServletRequest, httpServletResponse,
-                               "An error occurred while trying to connect to the database.", xdebug);
+                               DB_CONNECT_ERROR, xdebug);
         } catch (ProtocolException e) {
             xdebug.logMsg(this, "Got Protocol Exception:  " + e.getMessage());
             forwardToErrorPage(httpServletRequest, httpServletResponse,
-                               "An error occurred while trying to connect to the database.", xdebug);
+                               DB_CONNECT_ERROR, xdebug);
         }
     }
 
@@ -281,11 +288,10 @@ public class QueryBuilder extends HttpServlet {
             if (currentName.startsWith(GENETIC_PROFILE_IDS)) {
                 String geneticProfileIds[] = httpServletRequest.getParameterValues(currentName);
                 if (geneticProfileIds != null && geneticProfileIds.length > 0) {
-                    for (String geneticProfileIdDirty : geneticProfileIds) {
-                        String geneticProfileIdClean = servletXssUtil.getCleanInput(geneticProfileIdDirty);
+                    for (String geneticProfileId : geneticProfileIds) {
                         xdebug.logMsg (this, "Received Genetic Profile ID:  "
-                                + currentName + ":  " + geneticProfileIdClean);
-                        geneticProfileIdSet.add(geneticProfileIdClean);
+                                + currentName + ":  " + geneticProfileId);
+                        geneticProfileIdSet.add(geneticProfileId);
                     }
                 }
             }
@@ -337,7 +343,7 @@ public class QueryBuilder extends HttpServlet {
         if (caseSetId.equals("-1") &&
         	caseIds == null)
         {
-        	caseIdsKey = servletXssUtil.getCleanInput(request, CASE_IDS_KEY);
+        	caseIdsKey = request.getParameter(CASE_IDS_KEY);
         	
         	if (caseIdsKey != null)
         	{
@@ -440,20 +446,11 @@ public class QueryBuilder extends HttpServlet {
         // Store download links in session (for possible future retrieval).
         request.getSession().setAttribute(DOWNLOAD_LINKS, downloadLinkSet);
 
-        String tabIndex = servletXssUtil.getCleanInput(request, QueryBuilder.TAB_INDEX);
+        String tabIndex = request.getParameter(QueryBuilder.TAB_INDEX);
         if (tabIndex != null && tabIndex.equals(QueryBuilder.TAB_VISUALIZE)) {
             xdebug.logMsg(this, "Merging Profile Data");
             ProfileMerger merger = new ProfileMerger(profileDataList);
             ProfileData mergedProfile = merger.getMergedProfile();
-
-            //  Get Clinical Data
-            xdebug.logMsg(this, "Getting Clinical Data:");
-            List <Patient> clinicalDataList =
-                    GetClinicalData.getClinicalData(DaoCancerStudy
-                    .getCancerStudyByStableId(cancerTypeId).getInternalId(),setOfCaseIds);
-            xdebug.logMsg(this, "Got Clinical Data for:  " + clinicalDataList.size()
-                +  " cases.");
-            request.setAttribute(CLINICAL_DATA_LIST, clinicalDataList);
 
             xdebug.logMsg(this, "Merged Profile, Number of genes:  "
                     + mergedProfile.getGeneList().size());
@@ -466,8 +463,8 @@ public class QueryBuilder extends HttpServlet {
             request.setAttribute(MERGED_PROFILE_DATA_INTERNAL, mergedProfile);
             request.setAttribute(WARNING_UNION, warningUnion);
 
-            String output = servletXssUtil.getCleanInput(request, OUTPUT);
-            String format = servletXssUtil.getCleanInput(request, FORMAT);
+            String output = request.getParameter(OUTPUT);
+            String format = request.getParameter(FORMAT);
             double zScoreThreshold = ZScoreUtil.getZScore(geneticProfileIdSet, profileList, request);
             double rppaScoreThreshold = ZScoreUtil.getRPPAScore(request);
             request.setAttribute(Z_SCORE_THRESHOLD, zScoreThreshold);
@@ -477,13 +474,6 @@ public class QueryBuilder extends HttpServlet {
 				if (output.equals("text")) {
                     outputPlainText(response, mergedProfile, theOncoPrintSpecParserOutput,
                             zScoreThreshold, rppaScoreThreshold);
-                } else if (output.equals(OS_SURVIVAL_PLOT)) {
-                    outputOsSurvivalPlot(mergedProfile, theOncoPrintSpecParserOutput,
-                            zScoreThreshold, rppaScoreThreshold, clinicalDataList, format, response);
-                } else if (output.equals(DFS_SURVIVAL_PLOT)) {
-                    outputDfsSurvivalPlot(mergedProfile, theOncoPrintSpecParserOutput,
-                            zScoreThreshold, rppaScoreThreshold, clinicalDataList, format, response);
-				// (via LinkOut servlet - report=oncoprint_html arg)
                 }
             } else {
 
@@ -497,26 +487,6 @@ public class QueryBuilder extends HttpServlet {
             ShowData.showDataAtSpecifiedIndex(servletContext, request,
                     response, 0, xdebug);
         }
-    }
-
-    private void outputDfsSurvivalPlot(ProfileData mergedProfile,
-            ParserOutput theOncoPrintSpecParserOutput, double zScoreThreshold, double rppaScoreThreshold,
-            List<Patient> clinicalDataList, String format,
-            HttpServletResponse response) throws IOException {
-        ProfileDataSummary dataSummary = new ProfileDataSummary( mergedProfile,
-                theOncoPrintSpecParserOutput.getTheOncoPrintSpecification(), zScoreThreshold, rppaScoreThreshold );
-        SurvivalPlot survivalPlot = new SurvivalPlot(SurvivalPlot.SurvivalPlotType.DFS,
-                clinicalDataList, dataSummary, format, response);
-    }
-
-    private void outputOsSurvivalPlot(ProfileData mergedProfile,
-            ParserOutput theOncoPrintSpecParserOutput, double zScoreThreshold, double rppaScoreThreshold,
-            List<Patient> clinicalDataList, String format,
-            HttpServletResponse response) throws IOException {
-        ProfileDataSummary dataSummary = new ProfileDataSummary( mergedProfile,
-                theOncoPrintSpecParserOutput.getTheOncoPrintSpecification(), zScoreThreshold, rppaScoreThreshold );
-        SurvivalPlot survivalPlot = new SurvivalPlot(SurvivalPlot.SurvivalPlotType.OS,
-                clinicalDataList, dataSummary, format, response);
     }
 
     private void outputPlainText(HttpServletResponse response, ProfileData mergedProfile,
@@ -539,12 +509,14 @@ public class QueryBuilder extends HttpServlet {
                                  String geneList, String caseSetId, String caseIds,
                                  HttpServletRequest httpServletRequest) throws DaoException {
         boolean errorsExist = false;
-        String tabIndex = servletXssUtil.getCleanInput(httpServletRequest, QueryBuilder.TAB_INDEX);
+        String tabIndex = httpServletRequest.getParameter(QueryBuilder.TAB_INDEX);
         if (action != null) {
             if (action.equals(ACTION_SUBMIT)) {
 				// is user authorized for the study
 				String cancerStudyIdentifier = (String)httpServletRequest.getAttribute(CANCER_STUDY_ID);
-				if (accessControl.isAccessibleCancerStudy(cancerStudyIdentifier).size() != 1) {
+	            cancerStudyIdentifier = StringEscapeUtils.escapeJavaScript(cancerStudyIdentifier);
+
+	            if (accessControl.isAccessibleCancerStudy(cancerStudyIdentifier).size() != 1) {
                     httpServletRequest.setAttribute(STEP1_ERROR_MSG,
 													"You are not authorized to view the cancer study with id: '" +
 													cancerStudyIdentifier + "'. ");
@@ -604,7 +576,7 @@ public class QueryBuilder extends HttpServlet {
                 //  Additional validation rules
                 //  If we have selected mRNA Expression Data Check Box, but failed to
                 //  select an mRNA profile, this is an error.
-                String mRNAProfileSelected = servletXssUtil.getCleanInput(httpServletRequest,
+                String mRNAProfileSelected = httpServletRequest.getParameter(
                         QueryBuilder.MRNA_PROFILES_SELECTED);
                 if (mRNAProfileSelected != null && mRNAProfileSelected.equalsIgnoreCase("on")) {
 

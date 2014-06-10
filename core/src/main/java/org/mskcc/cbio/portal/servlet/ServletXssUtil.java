@@ -1,32 +1,23 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.servlet;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.owasp.validator.html.Policy;
 import org.owasp.validator.html.AntiSamy;
 import org.owasp.validator.html.PolicyException;
@@ -50,7 +41,7 @@ public class ServletXssUtil {
      * @throws PolicyException Policy Error.
      */
     private ServletXssUtil() throws PolicyException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/antisamy.xml");
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("antisamy.xml");
         policy = Policy.getInstance(inputStream);
         as = new AntiSamy();
     }
@@ -108,4 +99,58 @@ public class ServletXssUtil {
             return null;
         }
     }
+
+	/**
+	 * Gets Cleaner XSS User Input. In addition to applying antisamy rules,
+	 * this method also escapes JavaScript characters.
+	 *
+	 * @param dirty Dirty User Input.
+	 * @return Clean User Input.
+	 */
+	public String getCleanerInput(String dirty)
+	{
+		String clean = this.getCleanInput(dirty);
+
+		if (clean != null)
+		{
+			clean = this.getJavascriptFreeInput(clean);
+		}
+
+		return clean;
+	}
+
+	/**
+	 * /**
+	 * Gets Cleaner XSS User Input. In addition to applying antisamy rules,
+	 * this method also escapes JavaScript characters.
+	 *
+	 * @param request   HTTP servlet request
+	 * @param parameter name of the parameter
+	 * @return  cleaned and escaped user input
+	 */
+	public String getCleanerInput(HttpServletRequest request, String parameter)
+	{
+		String dirty = request.getParameter(parameter);
+
+		return this.getCleanerInput(dirty);
+	}
+
+	/**
+	 * Escapes JavaScript characters for the given string. Also strips all
+	 * occurrences of the word "javascript" from the string.
+	 *
+	 * @param dirty unescaped input string
+	 * @return  JavaScript escaped string
+	 */
+	public String getJavascriptFreeInput(String dirty)
+	{
+		String clean = null;
+
+		if (dirty != null)
+		{
+			clean = StringEscapeUtils.escapeJavaScript(dirty).replaceAll("(?i)javascript", "");
+		}
+
+		return clean;
+	}
 }

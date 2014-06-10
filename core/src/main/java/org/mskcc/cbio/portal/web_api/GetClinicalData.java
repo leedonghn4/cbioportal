@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.web_api;
 
@@ -249,6 +239,23 @@ public class GetClinicalData {
         return generateJson(clinicals);
     }
 
+    
+    
+
+    private static final Map<String, Integer> clinicalAttributeRank = new HashMap<String, Integer>();
+    static {
+        clinicalAttributeRank.put(null, -1);
+        clinicalAttributeRank.put("CASE_ID", -1); // EXCLUDE
+        clinicalAttributeRank.put("PATIENT_ID", 1);
+    }
+    private static int getClinicalAttributeRank(String attrId) {
+        Integer r = clinicalAttributeRank.get(attrId);
+        if (r==null) {
+            return 1000;
+        }
+        return r;
+    }
+    
     /**
      * Takes a list of clinicals and turns them into a tab-delimited, new-line ended string.
      *
@@ -260,10 +267,25 @@ public class GetClinicalData {
      */
     public static String getTxt(String cancerStudyId, List<String> caseIds) throws DaoException {
         List<ClinicalData> allClinicals = DaoClinicalData.getData(cancerStudyId, caseIds);
-
-        TreeSet<String> headers = new TreeSet<String>();
+        
+        TreeSet<String> headers = new TreeSet<String>(new Comparator<String>() {
+                @Override
+                public int compare(String str1, String str2) {
+                    Integer r1 = getClinicalAttributeRank(str1);
+                    Integer r2 = getClinicalAttributeRank(str2);
+                    if (r1.equals(r2)) {
+                        return str1.compareTo(str2);
+                    }
+                    
+                    return r1.compareTo(r2);
+                }
+        });
         Map<String, Map<String,ClinicalData>> caseId2Clinical = new HashMap<String, Map<String,ClinicalData>>();
         for (ClinicalData c : allClinicals) {
+            if (getClinicalAttributeRank(c.getAttrId())<0) {
+                continue;
+            }
+            
             Map<String,ClinicalData> got = caseId2Clinical.get(c.getCaseId());
 
             if (got == null) {

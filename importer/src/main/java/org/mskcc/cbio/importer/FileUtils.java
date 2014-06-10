@@ -1,48 +1,32 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 // package
 package org.mskcc.cbio.importer;
 
 // imports
 import org.mskcc.cbio.importer.CaseIDs;
-import org.mskcc.cbio.importer.model.ImportDataRecord;
-import org.mskcc.cbio.importer.model.PortalMetadata;
-import org.mskcc.cbio.importer.model.DataMatrix;
-import org.mskcc.cbio.importer.model.DatatypeMetadata;
-import org.mskcc.cbio.importer.model.DataSourcesMetadata;
-import org.mskcc.cbio.importer.model.CaseListMetadata;
-import org.mskcc.cbio.importer.model.CancerStudyMetadata;
+import org.mskcc.cbio.importer.model.*;
 
 import org.apache.commons.io.LineIterator;
 
+import java.util.*;
 import java.io.File;
-import java.util.List;
-import java.util.Collection;
+import java.net.URL;
 
 /**
  * Interface used to access some common file utils.
@@ -228,58 +212,60 @@ public interface FileUtils {
 	 * @throws Exception
 	 */
 	void writeMetadataFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata, DatatypeMetadata datatypeMetadata, int numCases) throws Exception;
+	void writeCopyNumberSegmentMetadataFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
+								   DatatypeMetadata datatypeMetadata, DataMatrix dataMatrix) throws Exception;
 
 	/**
 	 * Method which writes a metadata file for the
 	 * given DatatypeMetadata.  DataMatrix may be null.
 	 *
-     * @param portalMetadata PortalMetadata
+     * @param stagingDirectory String
 	 * @param cancerStudyMetadata CancerStudyMetadata
 	 * @param datatypeMetadata DatatypeMetadata
 	 * @param dataMatrix DataMatrix
 	 * @throws Exception
 	 *
 	 */
-	void writeMetadataFile(PortalMetadata portalMetadata, CancerStudyMetadata cancerStudyMetadata,
+	void writeMetadataFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
 						   DatatypeMetadata datatypeMetadata, DataMatrix dataMatrix) throws Exception;
 
 	/**
 	 * Creates a staging file (and meta file) with contents from the given DataMatrix.
 	 *
-     * @param portalMetadata PortalMetadata
+     * @param stagingDirectory String
 	 * @param cancerStudyMetadata CancerStudyMetadata
 	 * @param datatypeMetadata DatatypeMetadata
 	 * @param dataMatrix DataMatrix
 	 * @throws Exception
 	 */
-	void writeStagingFile(PortalMetadata portalMetadata, CancerStudyMetadata cancerStudyMetadata,
+	void writeStagingFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
 						  DatatypeMetadata datatypeMetadata, DataMatrix dataMatrix) throws Exception;
 
 	/**
 	 * Creates a staging file for mutation data (and meta file) with contents from the given DataMatrix.
 	 * This is called when the mutation file needs to be run through the Oncotator and Mutation Assessor Tools.
 	 *
-     * @param portalMetadata PortalMetadata
+     * @param stagingDirectory String
 	 * @param cancerStudy CancerStudyMetadata
 	 * @param datatypeMetadata DatatypeMetadata
 	 * @param dataMatrix DataMatrix
 	 * @throws Exception
 	 */
-	void writeMutationStagingFile(PortalMetadata portalMetadata, CancerStudyMetadata cancerStudyMetadata,
+	void writeMutationStagingFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
 								  DatatypeMetadata datatypeMetadata, DataMatrix dataMatrix) throws Exception;
 
 	/**
 	 * Creates a z-score staging file from the given dependencies.  It assumes that the
 	 * dependency - staging files have already been created.
 	 *
-     * @param portalMetadata PortalMetadata
+     * @param stagingDirectory String
 	 * @param cancerStudyMetadata CancerStudyMetadata
 	 * @param datatypeMetadata DatatypeMetadata
 	 * @param dependencies DatatypeMetadata[]
 	 * @throws Exception
 	 */
-	void writeZScoresStagingFile(PortalMetadata portalMetadata, CancerStudyMetadata cancerStudyMetadata,
-								 DatatypeMetadata datatypeMetadata, DatatypeMetadata[] dependencies) throws Exception;
+	boolean writeZScoresStagingFile(String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
+                                    DatatypeMetadata datatypeMetadata, DatatypeMetadata[] dependencies) throws Exception;
 
 	/**
 	 * Returns an override file (if it exists) for the given portal & cancer study.  The override in this case
@@ -301,13 +287,14 @@ public interface FileUtils {
 	 *
 	 * Note, filename can be the name of a file or directory (like case_lists)
 	 *
-	 * @param portalMetadata PortalMetadata
+	 * @param overrideDirectory String
+     * @param stagingDirectory String
 	 * @param cancerStudyMetadata CancerStudyMetadata
 	 * @param overrideFilename String
 	 * @param stagingFilename String
 	 * @throws Exception
 	 */
-	void applyOverride(PortalMetadata portalMetadata, CancerStudyMetadata cancerStudyMetadata,
+	void applyOverride(String overrideDirectory, String stagingDirectory, CancerStudyMetadata cancerStudyMetadata,
 					   String overrideFilename, String stagingFilename) throws Exception;
 
 	/**

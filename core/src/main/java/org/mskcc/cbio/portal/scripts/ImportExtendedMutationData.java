@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.scripts;
 
@@ -68,20 +58,6 @@ public class ImportExtendedMutationData{
 	private File mutationFile;
 	private int geneticProfileId;
 	private MutationFilter myMutationFilter;
-	private static final List<String> validChrValues;
-	static {
-		validChrValues = new ArrayList<String>();
-		for (int lc = 1; lc<24; lc++) {
-			validChrValues.add(Integer.toString(lc));
-			validChrValues.add("CHR" + Integer.toString(lc));
-		}
-		validChrValues.add("X");
-		validChrValues.add("CHRX");
-		validChrValues.add("Y");
-		validChrValues.add("CHRY");
-		validChrValues.add("NA");
-		validChrValues.add("MT"); // mitochondria
-	}
 
 	/**
 	 * construct an ImportExtendedMutationData with no white lists.
@@ -133,6 +109,10 @@ public class ImportExtendedMutationData{
 
 		//  The MAF File Changes fairly frequently, and we cannot use column index constants.
 		String line = buf.readLine();
+                while (line.startsWith("#")) {
+                    line = buf.readLine(); // skip comments/meta info
+                }
+                
 		line = line.trim();
 
 		MafUtil mafUtil = new MafUtil(line);
@@ -182,11 +162,13 @@ public class ImportExtendedMutationData{
 					continue;
 				}
 
-				if (!validChrValues.contains(record.getChr().toUpperCase())) {
+				String chr = DaoGeneOptimized.normalizeChr(record.getChr().toUpperCase());
+				if (chr==null) {
 					pMonitor.logWarning("Skipping entry with chromosome value: " + record.getChr());
 					line = buf.readLine();
 					continue;
 				}
+				record.setChr(chr);
 
 				if (record.getStartPosition() < 0)
 					record.setStartPosition(0);
@@ -303,7 +285,7 @@ public class ImportExtendedMutationData{
 
 				if(gene == null) {
 					// If Entrez Gene ID Fails, try Symbol.
-					gene = daoGene.getNonAmbiguousGene(geneSymbol);
+					gene = daoGene.getNonAmbiguousGene(geneSymbol, chr);
 				}
 
 				if(gene == null) {
@@ -408,7 +390,11 @@ public class ImportExtendedMutationData{
 		if( MySQLbulkLoader.isBulkLoad()) {
 			MySQLbulkLoader.flushAll();
 		}
-		pMonitor.setCurrentMessage(myMutationFilter.getStatistics() );
+                
+                // calculate mutation count for every sample
+                DaoMutation.calculateMutationCount(geneticProfileId);
+		
+                pMonitor.setCurrentMessage(myMutationFilter.getStatistics() );
 
 	}
 

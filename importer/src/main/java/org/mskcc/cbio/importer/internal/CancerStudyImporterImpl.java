@@ -1,29 +1,20 @@
-/** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+/*
+ * Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 package org.mskcc.cbio.importer.internal;
 
 import org.mskcc.cbio.importer.model.*;
@@ -56,9 +47,10 @@ class CancerStudyImporterImpl implements Importer, Validator {
     private static final String DATA_FILE_PREFIX = "data_";
     private static final String META_FILE_PREFIX = "meta_";
     private static final String CASE_LIST_DIRECTORY_NAME = "case_lists";
-    private static final String CASE_LIST_PREFIX = "cases_";
+    private static final String CASE_LIST_WILDCARD = "*.txt";
     private static final String CANCER_STUDY_FILENAME = "meta_study.txt";
     private static final String CANCER_TYPE_FILENAME = "cancer_type.txt";
+    private static final int NUM_FIELDS_CANCER_TYPE_RECORD = 5;
 	private static final Log LOG = LogFactory.getLog(CancerStudyImporterImpl.class);
 
     private static enum MetadataProperties
@@ -83,7 +75,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
         STABLE_ID("stable_id"),
         CASE_LIST_NAME("case_list_name"),
         CASE_LIST_DESCRIPTION("case_list_description"),
-        CASE_LIST_CATEGORY("case_list_category"),
+        //CASE_LIST_CATEGORY("case_list_category"),
         CASE_LIST_IDS("case_list_ids");
 
         private String propertyName;
@@ -116,7 +108,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
         public String[] getImporterClassArgs()
         {
             return ((requiresMetadataFile) ?
-                    new String[] { "--returnFromMain", "--data", stagingFilename, "--meta", metadataFilename, "--loadMode", "bulkLoad" } :
+                    new String[] { "--data", stagingFilename, "--meta", metadataFilename, "--loadMode", "bulkLoad" } :
                     new String[] { stagingFilename, cancerStudy.getCancerStudyStableId() });
         }
     }
@@ -139,6 +131,17 @@ class CancerStudyImporterImpl implements Importer, Validator {
 	public void importReferenceData(ReferenceMetadata referenceMetadata) throws Exception
     {
 		throw new UnsupportedOperationException();
+    }
+        
+    @Override
+        public void importTypesOfCancer() throws Exception
+    {
+		throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void importCaseLists(String portal) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -188,7 +191,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
 
     private void processCancerStudy(File metaStudyFile, boolean skip, boolean force) throws Exception
     {
-        CancerStudy cancerStudy = CancerStudyReader.loadCancerStudy(metaStudyFile, false, false);
+        CancerStudy cancerStudy = CancerStudyReader.loadCancerStudy(metaStudyFile, false, false); // validates metaStudyFile content
         if (continueIfStudyExists(cancerStudy, skip, force)) {
             String cancerStudyDirectoryName = metaStudyFile.getParent();
             if (validateCancerStudy(cancerStudyDirectoryName)) {
@@ -197,7 +200,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
                 importCancerStudyCaseLists(cancerStudyDirectoryName);
             }
             else {
-                logMessage("Invalid cancer study found in directory, see log file for details: " + cancerStudyDirectoryName);
+                logMessage("Invalid cancer study found in directory: " + cancerStudyDirectoryName);
             }
         }
     }
@@ -205,8 +208,15 @@ class CancerStudyImporterImpl implements Importer, Validator {
     private boolean continueIfStudyExists(CancerStudy cancerStudy, boolean skip, boolean force) throws Exception
     {
         if (DaoCancerStudy.doesCancerStudyExistByStableId(cancerStudy.getCancerStudyStableId())) {
-            if (skip) return false; // don't even ask me
-            return (force || getForceFromUser(cancerStudy));  // don't ask or ask
+            if (skip) {
+                logMessage("Cancer study exists, skip is set, skipping...");
+                return false; // don't even ask me, just skip
+            }
+            if (force) { // don't ask
+                logMessage("Cancer study exists, force is set, replacing study...");
+                return true;
+            }
+            return (getForceFromUser(cancerStudy));  // ask
         }
         return true;
     }
@@ -272,6 +282,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
         ArrayList<CancerStudyData> cancerStudyDataList = new ArrayList<CancerStudyData>();
 
         for (File metadataFile : listFiles(cancerStudyDirectoryName, FileFilterUtils.prefixFileFilter(META_FILE_PREFIX))) {
+            if (metadataFile.getName().equals(CANCER_STUDY_FILENAME)) continue;
             File dataFile = getDataFile(metadataFile.getCanonicalPath());
             if (dataFile == null) {
                 logMessage("Cannot find matching data file, skipping import: " + metadataFile.getCanonicalPath());                 
@@ -317,35 +328,19 @@ class CancerStudyImporterImpl implements Importer, Validator {
     private String getGeneticAlterationType(File metadataFile) throws Exception
     {
         Properties properties = getProperties(metadataFile);
-        String property = properties.getProperty(MetadataProperties.GENETIC_ALTERATION_TYPE.toString());
-        if (property == null) {
-            throw new IllegalArgumentException("Cannot find " + MetadataProperties.GENETIC_ALTERATION_TYPE + 
-                                               " in file, skipping import: " + metadataFile.getCanonicalPath());
-        }
-
-        return property;
+        return properties.getProperty(MetadataProperties.GENETIC_ALTERATION_TYPE.toString());
     }
 
-    private String getImporterClassName(String geneticAlterationType) throws Exception
+    private String getImporterClassName(String geneticAlterationType)
     {
-        if (importerClassMap.containsKey(geneticAlterationType)) {
-            return importerClassMap.get(geneticAlterationType);
-        }
-        else {
-            throw new IllegalArgumentException("Unknown " + MetadataProperties.GENETIC_ALTERATION_TYPE +
-                                               ", skipping import: " + geneticAlterationType);
-        }
+        return (importerClassMap.containsKey(geneticAlterationType)) ?
+            importerClassMap.get(geneticAlterationType) : null;
     }
 
     private String getRequiresMetadataFile(String importerClassName)
     {
-        if (importerClassArgsMap.containsKey(importerClassName)) {
-            return importerClassArgsMap.get(importerClassName);
-        }
-        else {
-            throw new IllegalArgumentException("Unknown importer class name" +
-                                               ", skipping import: " + importerClassName);
-        }
+        return (importerClassArgsMap.containsKey(importerClassName)) ?
+            importerClassArgsMap.get(importerClassName) : null;
     }
 
     private void importCancerStudyCaseLists(String cancerStudyDirectoryName) throws Exception
@@ -379,7 +374,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
         File cancerTypeFile = FileUtils.getFile(cancerStudyDirectoryName, CANCER_TYPE_FILENAME);
         if (cancerTypeFile.exists()) {
             String[] cancerTypeRecord = getCancerTypeRecord(cancerTypeFile);
-            if (cancerTypeRecord == null || cancerTypeRecord.length != 3) {
+            if (cancerTypeRecord == null || cancerTypeRecord.length != NUM_FIELDS_CANCER_TYPE_RECORD) {
                 logMessage("Missing or corrupt record in " + CANCER_TYPE_FILENAME + ": " +
                            cancerTypeFile.getCanonicalPath());
                 status = setStatus(status, false);
@@ -395,7 +390,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
             }
         }
         else {
-            logMessage("Cannot find cancer type file: " + cancerTypeFile.getCanonicalPath());
+            logMessage("Unknown cancer type and a cancer type file cannot be found: " + cancerTypeFile.getCanonicalPath());
             status = setStatus(status, false);
         }
 
@@ -443,7 +438,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
         File caseListDirectory = FileUtils.getFile(cancerStudyDirectoryName, CASE_LIST_DIRECTORY_NAME);
         if (caseListDirectory.exists()) {
             logMessage("Validating case list files found in: " + caseListDirectory.getCanonicalPath());
-            Collection<File> caseListFiles = listFiles(cancerStudyDirectoryName, FileFilterUtils.prefixFileFilter(CASE_LIST_PREFIX));
+            Collection<File> caseListFiles = listFiles(caseListDirectory.getCanonicalPath(), new WildcardFileFilter(CASE_LIST_WILDCARD));
             if (caseListFiles.isEmpty()) {
                 logMessage("Caselist directory is empty: " + caseListDirectory.getCanonicalPath());
                 status = setStatus(status, false);
@@ -640,7 +635,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
                    "\t'" + cancerStudyStableIdFound +
                    "' found in: " + metadataFilename);
     }
-    
+
     private void logMessage(String message)
     {
         if (LOG.isInfoEnabled()) {

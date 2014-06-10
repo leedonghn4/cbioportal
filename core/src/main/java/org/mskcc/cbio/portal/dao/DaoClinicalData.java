@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
- **
- ** This library is free software; you can redistribute it and/or modify it
- ** under the terms of the GNU Lesser General Public License as published
- ** by the Free Software Foundation; either version 2.1 of the License, or
- ** any later version.
- **
- ** This library is distributed in the hope that it will be useful, but
- ** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
- ** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
- ** documentation provided hereunder is on an "as is" basis, and
- ** Memorial Sloan-Kettering Cancer Center
- ** has no obligations to provide maintenance, support,
- ** updates, enhancements or modifications.  In no event shall
- ** Memorial Sloan-Kettering Cancer Center
- ** be liable to any party for direct, indirect, special,
- ** incidental or consequential damages, including lost profits, arising
- ** out of the use of this software and its documentation, even if
- ** Memorial Sloan-Kettering Cancer Center
- ** has been advised of the possibility of such damage.  See
- ** the GNU Lesser General Public License for more details.
- **
- ** You should have received a copy of the GNU Lesser General Public License
- ** along with this library; if not, write to the Free Software Foundation,
- ** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
- **/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.dao;
 
@@ -46,8 +36,10 @@ import java.util.*;
  */
 public final class DaoClinicalData {
     private DaoClinicalData() {}
-
-    private static Log log = LogFactory.getLog(DaoClinicalData.class);
+    
+    public static int addDatum(ClinicalData cd) throws DaoException {
+        return addDatum(cd.getCancerStudyId(), cd.getCaseId(), cd.getAttrId(), cd.getAttrVal());
+    }
 
     /**
      * add a new clinical datum
@@ -89,8 +81,7 @@ public final class DaoClinicalData {
             pstmt.setString(3, attrId);
             pstmt.setString(4, attrVal);
 
-            int rows = pstmt.executeUpdate();
-            return rows;
+            return pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -128,8 +119,7 @@ public final class DaoClinicalData {
             if (rs.next()) {
                 return extract(rs);
             } else {
-                throw new DaoException(String.format("clincial not found for (%d, %s, %s)",
-                        cancerStudyId, caseId, attrId));
+                return null;
             }
 
         } catch (SQLException e) {
@@ -328,8 +318,7 @@ public final class DaoClinicalData {
      * @return
      */
     private static String generateCaseIdsSql(Collection<String> caseIds) {
-        String caseIdsSql = "'" + StringUtils.join(caseIds, "','") + "'";
-        return caseIdsSql;
+        return "'" + StringUtils.join(caseIds, "','") + "'";
     }
 
     /**

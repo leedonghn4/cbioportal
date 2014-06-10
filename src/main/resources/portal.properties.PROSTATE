@@ -3,10 +3,11 @@ app.name=prostate-portal
 app.version=0.1
 
 # Database Settinbuildgs
+db.tomcat_resource_name=cgds_gdac
 db.user=
 db.password=
 db.host=localhost
-db.portal_db_name=cgds_prostate
+db.portal_db_name=cgds_gdac
 # props used by importer
 db.importer_db_name=cgds_importer
 db.driver=com.mysql.jdbc.Driver
@@ -54,6 +55,7 @@ r_installed=true
 authenticate=true
 authorization=true
 include_networks=true
+google_analytics_profile_id=
 
 faq=faq_prostate.html
 about=about_us_prostate.html
@@ -107,6 +109,7 @@ encryption.key=
 
 # broad BAM file url
 broad.bam.url=
+broad.bam.checking.url=
 
 # temp dir
 temporary_dir=/tmp

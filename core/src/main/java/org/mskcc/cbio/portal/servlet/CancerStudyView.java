@@ -31,7 +31,6 @@ public class CancerStudyView extends HttpServlet {
     public static final String CANCER_STUDY = "cancer_study";
     public static final String MUTATION_PROFILE = "mutation_profile";
     public static final String CNA_PROFILE = "cna_profile";
-    private ServletXssUtil servletXssUtil;
     
     private static final DaoCaseList daoCaseList = new DaoCaseList();
 
@@ -46,14 +45,10 @@ public class CancerStudyView extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        try {
-            servletXssUtil = ServletXssUtil.getInstance();
-			ApplicationContext context = 
-				new ClassPathXmlApplicationContext("classpath:applicationContext-security.xml");
-			accessControl = (AccessControl)context.getBean("accessControl");
-        } catch (PolicyException e) {
-            throw new ServletException (e);
-        }
+
+		ApplicationContext context =
+			new ClassPathXmlApplicationContext("classpath:applicationContext-security.xml");
+		accessControl = (AccessControl)context.getBean("accessControl");
     }
     
     /** 
@@ -73,9 +68,13 @@ public class CancerStudyView extends HttpServlet {
                 setGeneticProfiles(request);
             }
             
-            RequestDispatcher dispatcher =
-                    getServletContext().getRequestDispatcher("/WEB-INF/jsp/tumormap/cancer_study_view/cancer_study_view.jsp");
-            dispatcher.forward(request, response);
+            if (request.getAttribute(ERROR)!=null) {
+                forwardToErrorPage(request, response, (String)request.getAttribute(ERROR), xdebug);
+            } else {
+                RequestDispatcher dispatcher =
+                        getServletContext().getRequestDispatcher("/WEB-INF/jsp/study_view/cancer_study_view.jsp");
+                dispatcher.forward(request, response);
+            }
         
         } catch (DaoException e) {
             xdebug.logMsg(this, "Got Database Exception:  " + e.getMessage());
@@ -85,7 +84,7 @@ public class CancerStudyView extends HttpServlet {
     }
     
     private boolean validate(HttpServletRequest request) throws DaoException {
-        String cancerStudyID = servletXssUtil.getCleanInput (request, QueryBuilder.CANCER_STUDY_ID);
+        String cancerStudyID = request.getParameter(QueryBuilder.CANCER_STUDY_ID);
         
         CancerStudy cancerStudy = DaoCancerStudy
                 .getCancerStudyByStableId(cancerStudyID);
