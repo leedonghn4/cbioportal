@@ -19,46 +19,25 @@
 package org.mskcc.cbio.importer.fetcher.internal;
 
 // imports
-import org.mskcc.cbio.importer.Config;
-import org.mskcc.cbio.importer.Fetcher;
-import org.mskcc.cbio.importer.FileUtils;
-import org.mskcc.cbio.importer.Converter;
-import org.mskcc.cbio.importer.DatabaseUtils;
-import org.mskcc.cbio.importer.model.CancerStudyMetadata;
-import org.mskcc.cbio.importer.model.DatatypeMetadata;
-import org.mskcc.cbio.importer.model.ReferenceMetadata;
-import org.mskcc.cbio.importer.model.DataSourcesMetadata;
-import org.mskcc.cbio.importer.dao.ImportDataRecordDAO;
+import org.mskcc.cbio.importer.*;
+import org.mskcc.cbio.importer.model.*;
+import org.mskcc.cbio.importer.util.*;
 import org.mskcc.cbio.importer.util.soap.*;
+import org.mskcc.cbio.importer.dao.ImportDataRecordDAO;
+import org.mskcc.cbio.maf.*;
+import org.mskcc.cbio.portal.scripts.ImportClinicalData;
 
+import org.w3c.dom.*;
+import org.xml.sax.*;
 import org.foundation.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.apache.commons.logging.*;
 import com.sun.xml.ws.fault.ServerSOAPFaultException;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.mskcc.cbio.maf.FusionFileUtil;
-import org.mskcc.cbio.maf.MafUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-/**
- * Class which implements the fetcher interface.
- */
+import java.io.*;
+import java.util.*;
+import javax.xml.parsers.*;
+
 class FoundationFetcherImpl implements Fetcher
 {
 	public static final String CANCER_STUDY = "prad/mskcc/foundation";
@@ -74,39 +53,23 @@ class FoundationFetcherImpl implements Fetcher
 	public static final String IN_FRAME = "in-frame";
 	public static final String OUT_OF_FRAME = "out of frame";
 
-
-	// our logger
+	private static final String FOUNDATION_FILE_EXTENSION = ".xml";
 	private static final Log LOG = LogFactory.getLog(FoundationFetcherImpl.class);
 
-	// foundation data file extension
-	private static final String FOUNDATION_FILE_EXTENSION = ".xml";
+    private static final List<String> patientClinicalAttributes = initializePatientClinicalAttributes();
+    private static List<String> initializePatientClinicalAttributes()
+    {
+        String[] attributes = { "PATIENT_ID", "GENDER", "SAMPLE_ID", "FMI_CASE_ID", "PIPELINE_VER",
+        						"TUMOR_NUCLEI_PERCENT", "MEDIAN_COV", "COV>100X", "ERROR_PERCENT" };
+        return Arrays.asList(attributes);
+    }
 
-	// not all fields in ImportDataRecord will be used
-	private static final String UNUSED_IMPORT_DATA_FIELD = "NA";
-
-	// ref to configuration
 	private Config config;
-
-	// ref to file utils
 	private FileUtils fileUtils;
-
-	// ref to import data
 	private ImportDataRecordDAO importDataRecordDAO;
-
-	// ref to database utils
 	private DatabaseUtils databaseUtils;
-
-	// download directories
 	private DataSourcesMetadata dataSourceMetadata;
 
-	/**
-	 * Constructor.
-     *
-     * @param config Config
-	 * @param fileUtils FileUtils
-	 * @param databaseUtils DatabaseUtils
-	 * @param importDataRecordDAO ImportDataRecordDAO;
-	 */
 	public FoundationFetcherImpl(Config config, FileUtils fileUtils,
 								 DatabaseUtils databaseUtils, ImportDataRecordDAO importDataRecordDAO) {
 
@@ -164,7 +127,7 @@ class FoundationFetcherImpl implements Fetcher
 		NodeList cases = this.fetchCaseList(foundationService);
 
 		// clinical data content
-		StringBuilder dataClinicalContent = new StringBuilder();
+		StringBuilder dataPatientClinicalContent = new StringBuilder();
 
 		// mutation data content
 		StringBuilder dataMutationsContent = new StringBuilder();
@@ -193,7 +156,7 @@ class FoundationFetcherImpl implements Fetcher
 				Document doc = dBuilder.parse(new InputSource(
 						new StringReader(caseRecord)));
 
-				this.addClinicalData(doc, dataClinicalContent);
+				this.addClinicalData(doc, dataPatientClinicalContent);
 				this.addMutationData(doc, dataMutationsContent);
 				this.addFusionData(doc, dataFusionsContent);
 				this.addCNAData(doc, valueMap, caseSet, geneSet);
@@ -204,7 +167,7 @@ class FoundationFetcherImpl implements Fetcher
 		}
 
 		// generate data files
-		this.generateClinicalDataFile(dataClinicalContent);
+		this.generateClinicalDataFile(dataPatientClinicalContent, patientClinicalAttributes, DatatypeMetadata.CLINICAL_FILENAME);
 		this.generateMutationDataFile(dataMutationsContent);
 		this.generateFusionDataFile(dataFusionsContent);
 		this.generateCNADataFile(valueMap, caseSet, geneSet);
@@ -253,20 +216,17 @@ class FoundationFetcherImpl implements Fetcher
 		return caseFile;
 	}
 
-	protected File generateClinicalDataFile(StringBuilder content) throws Exception
+	protected File generateClinicalDataFile(StringBuilder content, List<String> clinicalAttributes, String filename) throws Exception
 	{
-		String header = FileUtils.CASE_ID + "\t" +
-		                FileUtils.GENDER + "\t" +
-		                FileUtils.FMI_CASE_ID + "\t" +
-		                FileUtils.PIPELINE_VER + "\t" +
-		                FileUtils.TUMOR_NUCLEI_PERCENT + "\t" +
-		                FileUtils.MEDIAN_COV + "\t" +
-		                FileUtils.COV_100X + "\t" +
-		                FileUtils.ERROR_PERCENT + "\n";
+		StringBuilder headerBuilder = new StringBuilder();
+        headerBuilder.append(MetadataUtils.getClinicalMetadataHeaders(config, clinicalAttributes));
+        for (String attribute : clinicalAttributes) {
+            headerBuilder.append(attribute.toUpperCase() + ImportClinicalData.DELIMITER);
+        }
+        String header = headerBuilder.toString().trim() + "\n";
 
 		File clinicalFile = fileUtils.createFileWithContents(
-			dataSourceMetadata.getDownloadDirectory() + File.separator +
-				DatatypeMetadata.CLINICAL_STAGING_FILENAME,
+			dataSourceMetadata.getDownloadDirectory() + File.separator + filename,
 			header + content.toString());
 
 		return clinicalFile;
@@ -412,7 +372,7 @@ class FoundationFetcherImpl implements Fetcher
 			numCases);
 	}
 
-	protected void addClinicalData(Document caseDoc, StringBuilder content)
+	protected void addClinicalData(Document caseDoc, StringBuilder patientContent)
 	{
 		String fmiCaseID = "";
 		String caseID = "";
@@ -475,23 +435,24 @@ class FoundationFetcherImpl implements Fetcher
 			}
 		}
 
-		// append the data as a single line
-		content.append(caseID);
-		content.append("\t");
-		content.append(gender);
-		content.append("\t");
-		content.append(fmiCaseID);
-		content.append("\t");
-		content.append(pipelineVer);
-		content.append("\t");
-		content.append(percentTumorNuclei);
-		content.append("\t");
-		content.append(medianCov);
-		content.append("\t");
-		content.append(covGreaterThan100x);
-		content.append("\t");
-		content.append(errorPercent);
-		content.append("\n");
+        patientContent.append(caseID);
+		patientContent.append("\t");
+        patientContent.append(gender);
+		patientContent.append("\t");
+        patientContent.append(caseID);
+		patientContent.append("\t");
+		patientContent.append(fmiCaseID);
+		patientContent.append("\t");
+		patientContent.append(pipelineVer);
+		patientContent.append("\t");
+		patientContent.append(percentTumorNuclei);
+		patientContent.append("\t");
+		patientContent.append(medianCov);
+		patientContent.append("\t");
+		patientContent.append(covGreaterThan100x);
+		patientContent.append("\t");
+		patientContent.append(errorPercent);
+		patientContent.append("\n");
 	}
 
 	protected void addFusionData(Document caseDoc, StringBuilder content)

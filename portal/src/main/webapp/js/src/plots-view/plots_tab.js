@@ -600,11 +600,12 @@ var PlotsView = (function () {
                 min_x: 0,
                 max_x: 0,
                 min_y: 0,
-                max_y: 0
+                max_y: 0,
+                pearson: 0,
+                spearman: 0
             };
 
         function fetchPlotsData(profileDataResult) {
-
             var resultObj = profileDataResult[userSelection.gene];
             for (var key in resultObj) {  //key is case id
                 caseSetLength += 1;
@@ -697,7 +698,6 @@ var PlotsView = (function () {
                         }
                     });
                     dot.mutationType = _primaryMutation;
-
                 }
             });
         }
@@ -740,6 +740,38 @@ var PlotsView = (function () {
             attr.max_x = Math.max.apply(Math, tmp_xData);
             attr.min_y = Math.min.apply(Math, tmp_yData);
             attr.max_y = Math.max.apply(Math, tmp_yData);
+
+            //Calculate the co-express/correlation scores
+            //(When data is discretized)
+            if (!Util.plotsIsDiscretized()) {
+                var tmpGeneXcoExpStr = "",
+                    tmpGeneYcoExpStr = "";
+                $.each(PlotsData.getDotsGroup(), function(index, obj) {
+                    tmpGeneXcoExpStr += obj.xVal + " ";
+                    tmpGeneYcoExpStr += obj.yVal + " ";
+                });
+                var paramsCalcCoexp = {
+                    gene_x : tmpGeneXcoExpStr,
+                    gene_y : tmpGeneYcoExpStr
+                };
+                $.post("calcCoExp.do", paramsCalcCoexp, getCalcCoExpCallBack, "json");
+            } else {
+                $('#view_title').show();
+                $('#plots_box').show();
+                $('#loading-image').hide();
+                View.init();                
+            }
+        }
+
+        function getCalcCoExpCallBack(result) {
+            //Parse the coexp scoring result
+            var tmpArrCoexpScores = result.split(" ");
+            attr.pearson = parseFloat(tmpArrCoexpScores[0]).toFixed(3);
+            attr.spearman = parseFloat(tmpArrCoexpScores[1]).toFixed(3);
+            $('#view_title').show();
+            $('#plots_box').show();
+            $('#loading-image').hide();
+            View.init();
         }
 
         return {
@@ -771,7 +803,7 @@ var PlotsView = (function () {
                 boxPlots: ""
             },   //DOM elements
             settings = {
-                canvas_width: 700,
+                canvas_width: 750,
                 canvas_height: 600
             },   //basic d3 canvas settings
             attr = {
@@ -1081,7 +1113,7 @@ var PlotsView = (function () {
                     addXaxisTitle(axisTitleGroup, xTitle);
                     addYaxisTitle(axisTitleGroup, yTitle);
                     addxAxisHelp(axisTitleGroup, xTitle);
-                    addyAxisHelp(axisTitleGroup, yTitle);
+                    addyAxisHelp(axisTitleGroup, yTitle);  
                 },
                 getXHelp: function() {
                     return xTitleHelp;
@@ -1166,8 +1198,6 @@ var PlotsView = (function () {
                     drawContinuousAxisMainY();
                 }
             };
-
-
         }());
 
         var Qtips = (function() {
@@ -1181,8 +1211,9 @@ var PlotsView = (function () {
                         content += "CNA: <strong>" + parseFloat(d.xVal).toFixed(3) + "</strong><br>" +
                             "mRNA: <strong>" + parseFloat(d.yVal).toFixed(3) + "</strong><br>";
                     }
-                    content += "Case ID: <strong><a href='tumormap.do?case_id=" + d.caseId +
-                        "&cancer_study_id=" + cancer_study_id + "' target = '_blank'>" + d.caseId +
+                    content += "Case ID: <strong><a href='"+
+                            +cbio.util.getLinkToSampleView(cancer_study_id,d.caseId)
+                            +"' target = '_blank'>" + d.caseId +
                         "</a></strong><br>";
                     if (d.mutationType !== 'non') {
                         content = content + "Mutation: " + "<strong>" + d.mutationDetail.replace(/,/g, ", ") + "<br>";
@@ -1193,8 +1224,9 @@ var PlotsView = (function () {
                     if (d.gisticType !== "Diploid") {
                         content = content + "CNA: " + "<strong>" + d.gisticType + "</strong><br>";
                     }
-                    content += "Case ID: <strong><a href='tumormap.do?case_id=" + d.caseId +
-                        "&cancer_study_id=" + cancer_study_id + "'>" + d.caseId +
+                    content += "Case ID: <strong><a href='"
+                            +cbio.util.getLinkToSampleView(cancer_study_id,d.caseId)
+                            + "'>" + d.caseId +
                         "</a></strong><br>";
                     if (d.mutationType !== 'non') {
                         content = content + "Mutation: " + "<strong>" + d.mutationDetail.replace(/,/g, ", ") + "<br>";
@@ -1205,8 +1237,9 @@ var PlotsView = (function () {
                     if (d.gisticType !== "Diploid") {
                         content = content + "CNA: " + "<strong>" + d.gisticType + "</strong><br>";
                     }
-                    content += "Case ID: <strong><a href='tumormap.do?case_id=" + d.caseId +
-                        "&cancer_study_id=" + cancer_study_id + "'>" + d.caseId +
+                    content += "Case ID: <strong><a href='"
+                            +cbio.util.getLinkToSampleView(cancer_study_id,d.caseId)
+                            + "'>" + d.caseId +
                         "</a></strong><br>";
                     if (d.mutationType !== 'non') {
                         content = content + "Mutation: " + "<strong>" + d.mutationDetail.replace(/,/g, ", ") + "<br>";
@@ -1296,7 +1329,6 @@ var PlotsView = (function () {
                     );
                 }
             };
-
         }());
 
         var ScatterPlots = (function() {
@@ -1636,7 +1668,6 @@ var PlotsView = (function () {
                     }
                 }
             }
-
         }());
 
         var Legends = (function() {
@@ -1736,9 +1767,27 @@ var PlotsView = (function () {
                     } else {
                         drawOtherViewLegends();
                     }
+                    if (!Util.plotsIsDiscretized()) {
+                        var tmpDataAttr = PlotsData.getDataAttr();
+                        var tmpPearson = "Pearson: " + tmpDataAttr.pearson,
+                            tmpSpearman = "Spearman: " + tmpDataAttr.spearman;
+                        var coExpLegend = elem.svg.selectAll(".coexp_legend")
+                            .data(["Correlation", tmpPearson, tmpSpearman])
+                            .enter().append("g")
+                            .attr("class", "coexp_legend")
+                            .attr("transform", function(d, i) {
+                                return "translate(600, " + (150 + i * 15) + ")";
+                            });
+                        coExpLegend.append("text")
+                                .attr("dx", ".75em")
+                                .attr("dy", ".35em")
+                                .style("text-anchor", "front")
+                                .text(function(d) {
+                                    return d;
+                                });                      
+                    }
                 }
             }
-
         }());
 
         function initCanvas() {
@@ -1907,8 +1956,8 @@ var PlotsView = (function () {
         Plots.getProfileData(
             userSelection.gene,
             _profileIdsStr,
-            case_set_id,
-            case_ids_key,
+            patient_set_id,
+            patient_ids_key,
             getProfileDataCallBack
         );
     }
@@ -1930,26 +1979,18 @@ var PlotsView = (function () {
             Plots.getMutationType(
                 userSelection.gene,
                 cancer_study_id + "_mutations",
-                case_set_id,
-                case_ids_key,
+                patient_set_id,
+                patient_ids_key,
                 getMutationTypeCallBack
             );
         } else {
             PlotsData.init(profileDataResult, "");
-            $('#view_title').show();
-            $('#plots_box').show();
-            $('#loading-image').hide();
-            View.init();
         }
 
         function getMutationTypeCallBack(mutationTypeResult) {
             PlotsData.init(profileDataResult, mutationTypeResult);
-            $('#view_title').show();
-            $('#plots_box').show();
-            $('#loading-image').hide();
-            View.init();
-        }
 
+        }
     }
 
     return {

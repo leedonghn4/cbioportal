@@ -31,11 +31,11 @@
 </style>
 
 <script>
-    var cancer_study_id = "<%out.print(cancer_study_id);%>",
-            case_set_id = "<%out.print(case_set_id);%>";
-    var case_ids_key = "";
-    if (case_set_id === "-1") {
-        case_ids_key = "<%out.print(caseIdsKey);%>";
+    var cancer_study_id = "<%out.print(cancer_study_id);%>";
+    var patient_set_id = "<%out.print(patient_set_id);%>";
+    var patient_ids_key = "";
+    if (patient_set_id === "-1") {
+        patient_ids_key = "<%out.print(patientIdsKey);%>";
     }
 </script>
 
@@ -60,7 +60,7 @@
     function getSurvivalPlotsCaseList() {
         <%
             JSONObject result = new JSONObject();
-            for (String caseId : mergedCaseList) { 
+            for (String caseId : mergedPatientList) { 
                 if (dataSummary.isCaseAltered(caseId)) {
                     result.put(caseId, "altered");
                 } else {

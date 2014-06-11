@@ -25,6 +25,9 @@ public class ClinicalAttribute  {
 
 	// some defined statics
 	public static final String NA = "NA";
+    public static final String DEFAULT_DATATYPE = "STRING";
+    public static final String PATIENT_ATTRIBUTE = "PATIENT";
+    public static final String SAMPLE_ATTRIBUTE = "SAMPLE";
 	public static final String MISSING = "MISSING";
 	public static final String OS_STATUS = "OS_STATUS";
 	public static final String OS_MONTHS = "OS_MONTHS";
@@ -40,12 +43,14 @@ public class ClinicalAttribute  {
     private String displayName;
     private String description;
     private String datatype;
+    private boolean patientAttribute;
 
-    public ClinicalAttribute(String attributeId, String displayName, String description, String datatype) {
+    public ClinicalAttribute(String attributeId, String displayName, String description, String datatype, boolean patientAttribute) {
         this.attributeId = attributeId;
 		this.displayName = displayName;
 		this.description = description;
         this.datatype = datatype;
+        this.patientAttribute = patientAttribute;
     }
 
     @Override
@@ -88,4 +93,12 @@ public class ClinicalAttribute  {
     public void setDatatype(String datatype) {
         this.datatype = datatype;
     }
+
+	public boolean isPatientAttribute() {
+		return patientAttribute;
+	}
+
+	public void setPatientAttribute(boolean patientAttribute) {
+		this.patientAttribute = patientAttribute;
+	}
 }

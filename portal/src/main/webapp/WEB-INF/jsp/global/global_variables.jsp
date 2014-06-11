@@ -16,7 +16,7 @@
 <%@ page import="org.mskcc.cbio.portal.oncoPrintSpecLanguage.OncoPrintSpecification" %>
 <%@ page import="org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities" %>
 <%@ page import="org.mskcc.cbio.portal.model.CancerStudy" %>
-<%@ page import="org.mskcc.cbio.portal.model.CaseList" %>
+<%@ page import="org.mskcc.cbio.portal.model.PatientList" %>
 <%@ page import="org.mskcc.cbio.portal.model.GeneticProfile" %>
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 <%@ page import="org.mskcc.cbio.portal.model.Patient" %>
@@ -27,6 +27,12 @@
 <%@ page import="java.lang.reflect.Array" %>
 <%@ page import="static org.mskcc.cbio.portal.servlet.QueryBuilder.INTERNAL_EXTENDED_MUTATION_LIST" %>
 <%@ page import="org.mskcc.cbio.portal.util.*" %>
+<%@ page import="org.codehaus.jackson.node.*" %>
+<%@ page import="org.codehaus.jackson.JsonNode" %>
+<%@ page import="org.codehaus.jackson.JsonParser" %>
+<%@ page import="org.codehaus.jackson.JsonFactory" %>
+<%@ page import="org.codehaus.jackson.map.ObjectMapper" %>
+
 
 <%
     //Security Instance
@@ -97,20 +103,20 @@
     String genes = (String) request.getAttribute(QueryBuilder.RAW_GENE_STR);
     genes = StringEscapeUtils.escapeJavaScript(genes);
 
-    //Info about Case Set(s)/Cases
-    ArrayList<CaseList> caseSets = (ArrayList<CaseList>)request.getAttribute(QueryBuilder.CASE_SETS_INTERNAL);
-    ArrayList<String> mergedCaseList = mergedProfile.getCaseIdList();
-    int mergedCaseListSize = mergedCaseList.size();
-    String caseSetId = (String) request.getAttribute(QueryBuilder.CASE_SET_ID);
-    String caseSetName = "";
-    for (CaseList caseSet:  caseSets) {
-        if (caseSetId.equals(caseSet.getStableId())) {
-            caseSetName = caseSet.getName();
+    //Info about Patient Set(s)/Patients
+    ArrayList<PatientList> patientSets = (ArrayList<PatientList>)request.getAttribute(QueryBuilder.CASE_SETS_INTERNAL);
+    ArrayList<String> mergedPatientList = mergedProfile.getCaseIdList();
+    int mergedPatientListSize = mergedPatientList.size();
+    String patientSetId = (String) request.getAttribute(QueryBuilder.CASE_SET_ID);
+    String patientSetName = "";
+    for (PatientList patientSet:  patientSets) {
+        if (patientSetId.equals(patientSet.getStableId())) {
+            patientSetName = patientSet.getName();
         }
     }
-    String cases = (String) request.getAttribute(QueryBuilder.SET_OF_CASE_IDS);
+    String patients = (String) request.getAttribute(QueryBuilder.SET_OF_CASE_IDS);
     //cases = xssUtil.getCleanerInput(cases);
-    String caseIdsKey = (String) request.getAttribute(QueryBuilder.CASE_IDS_KEY);
+    String patientIdsKey = (String) request.getAttribute(QueryBuilder.CASE_IDS_KEY);
     //caseIdsKey = xssUtil.getCleanerInput(caseIdsKey);
 
     //Vision Control Tokens
@@ -133,10 +139,10 @@
     request.setAttribute(QueryBuilder.HTML_TITLE, siteTitle+"::Results");
 
     //Escape quotes in the returned strings
-    cases = cases.replaceAll("'", "\\'");
-    cases = cases.replaceAll("\"", "\\\"");
-    caseSetName = caseSetName.replaceAll("'", "\\'");
-    caseSetName = caseSetName.replaceAll("\"", "\\\"");
+    patients = patients.replaceAll("'", "\\'");
+    patients = patients.replaceAll("\"", "\\\"");
+    patientSetName = patientSetName.replaceAll("'", "\\'");
+    patientSetName = patientSetName.replaceAll("\"", "\\\"");
 
     //check if show co-expression tab
     boolean showCoexpTab = false;
@@ -144,6 +150,43 @@
     if (final_gp != null) {
         showCoexpTab = true;
     } 
+
+    Object patientSampleIdMap = request.getAttribute(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    //Get the patient/sample Id map
+    // ObjectMapper mapper = new ObjectMapper();
+    // JsonFactory factory = mapper.getFactory();
+    // JsonParser parser = factory.createParser(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    // JsonNode patientSampleIdMap = mapper.readTree(parser);
+
+    // String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+    // ObjectMapper mapper = new ObjectMapper();
+    // JsonNode patientSampleIdMap = mapper.readTree(jsonString);
+
+    // String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+    // JsonFactory factory = new JsonFactory();
+    // JsonParser parser = factory.createJsonParser(jsonString);
+    // JsonNode patientSampleIdMap = mapper.readTree(parser);
+
+    // ObjectMapper mapper = new ObjectMapper(); 
+    // String json = mapper.writeValueAsString(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    // JsonNode patientSampleIdMap = mapper.readTree(json);
+
+    //ObjectMapper mapper = new ObjectMapper();
+    // JsonFactory factory = new JsonFactory(); // since 2.1 use mapper.getFactory() instead
+    // JsonParser jp = factory.createJsonParser("{\"k1\":\"v1\"}");
+    // JsonNode patientSampleIdMap = mapper.readTree(jp);
+
+    // ObjectMapper mapper = new ObjectMapper();
+    // JsonFactory factory = mapper.getFactory();
+    // JsonParser parser = factory.createParser(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    // JsonNode patientSampleIdMap = mapper.readTree(parser);
+
+    //JsonNode patientSampleIdMap = mapper.readTree(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    //JsonNode patientSampleIdMap = mapper.createObjectNode();
+    //patientSampleIdMap = mapper.valueToTree(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+    //patientSampleIdMap = mapper.convertValue(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP, JsonNode.class);
+    //patientSampleIdMap = request.getAttribute(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
+
 %>
 
 <script type="text/javascript">
@@ -157,11 +200,11 @@
             var _geneList = '<%=StringUtils.join(theOncoPrintSpecParserOutput.getTheOncoPrintSpecification().listOfGenes(), " ")%>';
             return _geneList.split(/\s+/);    //Gene Id list without onco query language
         },
-        getCaseSetId: function() { return '<%= caseSetId %>';},  //Id for user chosen standard case set
-        getCaseSetName: function() { return '<%= caseSetName %>'},  //Name for user chose standard case set
-        getCaseIdsKey: function() { return '<%= caseIdsKey %>'; },   //A key arrsigned to use build case set
-        getCases: function() { return '<%= cases %>'; }, // list of queried case ids
-        getMergedCases: function() { return '<%=  mergedCaseList %>'; },
+        getCaseSetId: function() { return '<%= patientSetId %>';},  //Id for user chosen standard case set
+        getCaseSetName: function() { return '<%= patientSetName %>'},  //Name for user chose standard case set
+        getCaseIdsKey: function() { return '<%= patientIdsKey %>'; },   //A key arrsigned to use build case set
+        getCases: function() { return '<%= patients %>'; }, // list of queried case ids
+        getMergedCases: function() { return '<%=  mergedPatientList %>'; },
         getOqlString: (function() {     // raw gene list (as it is entered by the user, it may contain onco query language)
             var oql = '<%=oql%>'
                     .replace("&gt;", ">", "gm")
@@ -172,7 +215,19 @@
         })(),
         getGeneticProfiles: function() { return '<%=geneticProfiles%>'; },
         getZscoreThreshold: function() { return '<%=zScoreThreshold%>'; },
-        getRppaScoreThreshold: function() { return '<%=rppaScoreThreshold%>'; }
+        getRppaScoreThreshold: function() { return '<%=rppaScoreThreshold%>'; },
+        getPatientIds: function() { return '<%=patients%>'; },
+        getPatientSampleIdMap: function() { 
+            var _tmpPatientSampleIdMap = '<%=patientSampleIdMap%>'; 
+            var tmpPatientSampleIdMap = _tmpPatientSampleIdMap.substring(1, _tmpPatientSampleIdMap.length-1);
+            var _arrPatientSampleMap = tmpPatientSampleIdMap.split(",");
+            var result = {};
+            $.each(_arrPatientSampleMap, function(index, obj) {
+                var _arr = obj.split("=");
+                result[(_arr[0].replace(/\s+/, ""))] = (_arr[1].replace(/\s+/, ""));
+            });
+            return result;
+        }
     };
 </script>
 
@@ -191,20 +246,12 @@
 
 <!------------------- Duplicate Code ------------------------->
 <%
-    //////////////from network.jsp
-//    String zScoreThesholdStr4Network =
-//            xssUtil.getCleanerInput(request.getAttribute(QueryBuilder.Z_SCORE_THRESHOLD).toString());
-//    String genes4Network = StringUtils.join((List)request.getAttribute(QueryBuilder.GENE_LIST)," ");
-//    String geneticProfileIds4Network = xssUtil.getCleanerInput(StringUtils.join(geneticProfileIdSet," "));
-//    String cancerTypeId4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CANCER_STUDY_ID));
-//    String caseIdsKey4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CASE_IDS_KEY));
-//    String caseSetId4Network = xssUtil.getCleanerInput((String)request.getAttribute(QueryBuilder.CASE_SET_ID));
-
-    //////////////from plots_tab.jsp
+    // plots_tab.jsp
     String cancer_study_id = request.getParameter("cancer_study_id");
-    String case_set_id = request.getParameter("case_set_id");
+    String patient_set_id = request.getParameter("case_set_id");
     String genetic_profile_id = request.getParameter("genetic_profile_id");
-    //Translate Onco Query Language
+
+    // Translate Onco Query Language
     ArrayList<String> _listOfGenes = theOncoPrintSpecParserOutput.getTheOncoPrintSpecification().listOfGenes();
     String tmpGeneStr = "";
     for(String gene: _listOfGenes) {
@@ -212,7 +259,7 @@
     }
     tmpGeneStr = tmpGeneStr.trim();
 
-    //////////from protein_exp.jsp
+    // protein_exp.jsp
     String cancerStudyId_RPPA =
             (String) request.getAttribute(QueryBuilder.CANCER_STUDY_ID);
 
@@ -224,28 +271,22 @@
     // gene list after being processed by the onco query language parser
     var geneList = "<%=StringUtils.join(theOncoPrintSpecParserOutput.getTheOncoPrintSpecification().listOfGenes(), " ")%>";
 
-    // list of samples (case ids)
-    var samples = "<%=cases%>";
+    // list of samples (patient ids)
+    var samples = "<%=patients%>";
 
     // genetic profile ids
     var geneticProfiles = "<%=geneticProfiles%>";
 
-    /////from plots_tab.jsp
+    // plots_tab.jsp
     var cancer_study_id = "<%out.print(cancer_study_id);%>",
-            case_set_id = "<%out.print(case_set_id);%>";
-    case_ids_key = "";
-    if (case_set_id === "-1") {
-        case_ids_key = "<%out.print(caseIdsKey);%>";
+            patient_set_id = "<%out.print(patient_set_id);%>";
+    patient_ids_key = "";
+    if (patient_set_id === "-1") {
+        patient_ids_key = "<%out.print(patientIdsKey);%>";
     }
     var genetic_profile_id = "<%out.print(genetic_profile_id);%>";
     var gene_list_str = "<%out.print(tmpGeneStr);%>";
     var gene_list = gene_list_str.split(/\s+/);
 
-    //////////from protein_exp.jsp
-    //var case_set_id = "<//%out.print(case_set_id);%>";
-    //case_ids_key = "";
-    //if (case_set_id === "-1") {
-    //    case_ids_key = "<//%out.print(caseIdsKey);%>";
-    //}
 </script>
 
