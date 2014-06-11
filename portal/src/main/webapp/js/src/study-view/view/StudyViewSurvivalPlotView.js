@@ -290,6 +290,7 @@ var StudyViewSurvivalPlotView = (function() {
     
     function addPvalQtip(_plotKey) {
         var _mouse_is_inside = false;
+        $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy', true);
         $("#" + opts[_plotKey].divs.pvalIcon).qtip({
             content: {
                 text: $("#" + opts[_plotKey].divs.pvalMatrix).html()
