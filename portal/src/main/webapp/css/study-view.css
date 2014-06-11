@@ -561,6 +561,15 @@
     float:left;
     display: none;
 }*/
+.pvalMatixTable {
+    background-color: white;
+}
+.pvalMatixTable td {
+    border: 1px solid black;
+}
+.pvalMatixTable th:not(:first-child) {
+    border: 1px solid black;
+}
 .study-view-bar-chart path {
     shape-rendering: crispEdges
 }
@@ -721,6 +730,9 @@ pieH3{
     z-index: 14800 !important;
 }
 .qtip-max-width {
+    max-width: 1000px;
+}
+.qtip {
     max-width: 1000px;
 }
 //Show/Hide columns related classes
