@@ -101,9 +101,6 @@ function prepGSLaunch(form, genomicProfiles)
     var downloadDataParameters = $(form).serializeArray();
     if (validDownloadDataForm(downloadDataParameters)) {
         var urlToDownloadData = getOrigin() + getFormParametersString(downloadDataParameters);
-        if (urlToDownloadData.indexOf("cross_cancer.do")) {
-            urlToDownloadData = urlToDownloadData.replace("cross_cancer.do", "index.do");
-        }
         var dataFilename = getDataFilename(genomicProfiles)
         uploadUrlByGetToGS(urlToDownloadData, dataFilename);
     }
