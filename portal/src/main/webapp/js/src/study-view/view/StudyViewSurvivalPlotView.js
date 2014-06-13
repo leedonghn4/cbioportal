@@ -215,7 +215,7 @@ var StudyViewSurvivalPlotView = (function() {
                         _curveInfo[1].name+"</span></div>");
             
             $("#" + opts[_plotKey].divs.pvalMatrix)
-                .append("<div style='height: 15px'><span>Logrank T-test P-Value: "+_content+"</span></div>");
+                .append("<div style='height: 15px'><span>Logrank Test P-Value: "+_content+"</span></div>");
             
             $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'block');
             addPvalQtip(_plotKey);
@@ -228,20 +228,9 @@ var StudyViewSurvivalPlotView = (function() {
             
             $("#" + opts[_plotKey].divs.pvalMatrix).empty();
             
-            $("#" + opts[_plotKey].divs.pvalMatrix).append("<span style='font-weight:bold;font-size:12px'>Logrank Test P-Value</span>");
+            $("#" + opts[_plotKey].divs.pvalMatrix).append("<span style='font-weight:bold;font-size:12px'>Logrank Test P-Value</span><br/><br/>");
             
-            var _table = $('<table />', {attr: {'class':'pvalMatixTable'}, css: {"text-align": 'left'}}),
-                _thead = $('<thead />');
-        
-            _thead.append($("<th />"));
-            _thead.append($("<th />"));
-            for(var i = 0; i < _numOfCurves-1; i++) {
-                var _content = "<svg style='width: 10px;'><rect width=10 height=10 fill="+_curveInfo[i].color+"></rect></svg>";
-                var _th = $("<th style='text-align: center'> "+_content+"</th>");
-                _thead.append(_th);
-            }
-            _table.append(_thead);
-            
+            var _table = $('<table />', {attr: {'class':'pvalMatixTable'}, css: {"text-align": 'left'}});
             var _tbody = $('<tbody />');
             var _pairIndex = 0;
             for(var i = 0; i < _numOfCurves; i++) {
@@ -308,6 +297,17 @@ var StudyViewSurvivalPlotView = (function() {
             }
             _table.append(_tbody);
             
+            var _tfoot = $('<tfoot />');
+        
+            _tfoot.append($("<th />"));
+            _tfoot.append($("<th />"));
+            for(var i = 0; i < _numOfCurves-1; i++) {
+                var _content = "<svg style='width: 10px;'><rect width=10 height=10 fill="+_curveInfo[i].color+"></rect></svg>";
+                var _th = $("<th style='text-align: center'> "+_content+"</th>");
+                _tfoot.append(_th);
+            }
+            _table.append(_tfoot);
+            
             $("#" + opts[_plotKey].divs.pvalMatrix).append(_table);
             $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'block');
             addPvalQtip(_plotKey);
@@ -373,12 +373,12 @@ var StudyViewSurvivalPlotView = (function() {
             content:$("#" + opts[_plotKey].divs.pvalMatrix).html(),
             events: {
                 render: function(event, api) {
-                    $('svg image', api.elements.tooltip).hover(function() {
+                    $('img', api.elements.tooltip).hover(function() {
                         $(this).css('cursor', 'pointer');
                     });
 
-                    $('svg image', api.elements.tooltip).unbind('click');
-                    $('svg image', api.elements.tooltip).click(function() {
+                    $('img', api.elements.tooltip).unbind('click');
+                    $('img', api.elements.tooltip).click(function() {
 //                        if ($(this).attr('name') === 'pin') {
 //
 //                            //The following functions will be excuted after user inputting
@@ -387,13 +387,13 @@ var StudyViewSurvivalPlotView = (function() {
 //
 //                        } else if ($(this).attr('name') === 'close') {
                             var _parent = $(this).parent(),
-                                    _name = $(_parent).find('text').attr('oValue'),
-                                _color = $(_parent).find('rect').attr('fill'),
-                                _index = $(this).parent().index();
-
-                            $(_parent).remove();
+                                _color = _parent.parent().find('rect').attr('fill'),
+                                _index = _parent.parent().index();
+                            $('table td', api.elements.tooltip).remove(":nth-child("+(_index+3)+")");
+                            $('table tfoot th', api.elements.tooltip).remove(":nth-child("+(_index+3)+")");
+                            _parent.parent().remove();
                             removeCurveFunc(_index, _plotKey);
-                            redrawLabel(_plotKey);
+//                            redrawLabel(_plotKey);
                             survivalPlot[_plotKey].removeCurve(_color.toString().substring(1) + "-" + _plotKey);
 //                        } else if ($(this).attr('name') === 'saved-close') {
 //                            var _parent = $(this).parent(),
