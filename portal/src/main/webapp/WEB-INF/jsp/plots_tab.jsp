@@ -10,7 +10,8 @@
 <script type="text/javascript" src="js/src/plots-view/plots_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_two_genes.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
-
+<script type="text/javascript" src="js/src/plots-view/component/ControlPanel.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/component/BoxPlots.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <style>
     #plots .plots {
         height: 610px;
