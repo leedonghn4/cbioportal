@@ -565,10 +565,10 @@
     background-color: white;
 }
 .pvalMatixTable td {
-    border: 1px solid black;
+    border: 1px solid white;
 }
 .pvalMatixTable th:not(:first-child) {
-    border: 1px solid black;
+    border: 1px solid white;
 }
 .study-view-bar-chart path {
     shape-rendering: crispEdges

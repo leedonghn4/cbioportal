@@ -111,16 +111,16 @@ var StudyViewSurvivalPlotView = (function() {
         $("#" + _opts.divs.body).css('opacity', '1');
         $("#" + _opts.divs.loader).css('display', 'none');
         
-        $('#' + _opts.divs.pvalIconWrapper).qtip('destroy', true);
-        $('#' + _opts.divs.pvalIconWrapper).qtip({
-            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
-            show: {event: "mouseover", delay: 0},
-            hide: {fixed:true, delay: 300, event: "mouseout"},
-            position: {my:'bottom left',at:'top right', viewport: $(window)},
-            content: {
-                text:   "Logrank Test P-Value"
-            }
-        });
+//        $('#' + _opts.divs.pvalIconWrapper).qtip('destroy', true);
+//        $('#' + _opts.divs.pvalIconWrapper).qtip({
+//            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
+//            show: {event: "mouseover", delay: 0},
+//            hide: {fixed:true, delay: 300, event: "mouseout"},
+//            position: {my:'bottom left',at:'top right', viewport: $(window)},
+//            content: {
+//                text:   "Logrank Test P-Value"
+//            }
+//        });
         
         $('#' + _opts.divs.downloadIcon).qtip('destroy', true);
         $('#' + _opts.divs.downloadIcon).qtip({
@@ -191,16 +191,53 @@ var StudyViewSurvivalPlotView = (function() {
         
         var _callback = function(_data) {
 //            var _plotKey = _data['jobKey'];
+            var _content = 0;
+            
+            if(isNaN(_data)) {
+                _content = "NA";
+            } else {
+                if(_data < 0.001) {
+                    _content = "< 0.001";
+                } else {
+                    _content = parseFloat(_data).toFixed(3);
+                }
+            }
+            
+            $("#" + opts[_plotKey].divs.pvalMatrix).empty();
+            $("#" + opts[_plotKey].divs.pvalMatrix)
+                .append("<div style='height: 15px'><svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                        _curveInfo[0].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
+                        _curveInfo[0].name+"</span></div>");
+            
+            $("#" + opts[_plotKey].divs.pvalMatrix)
+                .append("<div style='height: 15px'><svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                        _curveInfo[1].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
+                        _curveInfo[1].name+"</span></div>");
+            
+            $("#" + opts[_plotKey].divs.pvalMatrix)
+                .append("<div style='height: 15px'><span>Logrank T-test P-Value: "+_content+"</span></div>");
+            
+            $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'block');
+            addPvalQtip(_plotKey);
+        };
+        
+        var _listCallback = function(_data) {
+//            var _plotKey = _data['jobKey'];
             var _pvalueList = _data['pvalueList'].split(/[,\s+]/);
             var _length = _pvalueList.length;
             
-            $("#" + opts[_plotKey].divs.pvalMatrix).find('table').remove();
-            var _table = $('<table />', {attr: {'class':'pvalMatixTable'}}),
+            $("#" + opts[_plotKey].divs.pvalMatrix).empty();
+            
+            $("#" + opts[_plotKey].divs.pvalMatrix).append("<span style='font-weight:bold;font-size:12px'>Logrank Test P-Value</span>");
+            
+            var _table = $('<table />', {attr: {'class':'pvalMatixTable'}, css: {"text-align": 'left'}}),
                 _thead = $('<thead />');
         
             _thead.append($("<th />"));
-            for(var i = 0; i < _numOfCurves; i++) {
-                var _th = $("<th />", {text: _curveInfo[i].name});
+            _thead.append($("<th />"));
+            for(var i = 0; i < _numOfCurves-1; i++) {
+                var _content = "<svg style='width: 10px;'><rect width=10 height=10 fill="+_curveInfo[i].color+"></rect></svg>";
+                var _th = $("<th style='text-align: center'> "+_content+"</th>");
                 _thead.append(_th);
             }
             _table.append(_thead);
@@ -208,12 +245,19 @@ var StudyViewSurvivalPlotView = (function() {
             var _tbody = $('<tbody />');
             var _pairIndex = 0;
             for(var i = 0; i < _numOfCurves; i++) {
+                var _content = "<svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                        _curveInfo[i].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
+                        _curveInfo[i].name+"</span>";
                 var _tr = $('<tr />');
-                _tr.append($('<td />', {text: _curveInfo[i].name, css:{'font-weight': 'bold'}}));
+                var _img = $('<img />', {css: {width: '8px'}, src: 'images/close.svg'});
+                var _td = $('<td />');
+                _td.append(_img);
+                _tr.append(_td);
+                _tr.append($('<td>'+_content+'</td>'));
                 
-                for(var j = 0; j < _numOfCurves; j++) {
+                for(var j = 0; j < _numOfCurves-1; j++) {
                     var _td = "";
-                    if( j === i ) {
+                    if( j >= i ) {
                         _td = $('<td />', {text: ''});
                     }else if( j < i ) {
                         var _distance = 0;
@@ -231,14 +275,8 @@ var StudyViewSurvivalPlotView = (function() {
                             _color = "#FFFFFF";
                         }else if(!isNaN(_content)){
                             _content = _content.toFixed(3);
-                            if(_content < 0.01) {
-                                _bacgroundColor = "#FF6600";
-                            }else if(_content < 0.1) {
-                                _bacgroundColor = "#FF9900";
-                            }else if(_content < 1){
+                            if(_content < 0.05) {
                                 _bacgroundColor = "#FFcc00";
-                            }else {
-                                _bacgroundColor = "#FFFF00";
                             }
                         }else {
                             _content = "NA";
@@ -254,14 +292,8 @@ var StudyViewSurvivalPlotView = (function() {
                             _color = "#FFFFFF";
                         }else if(!isNaN(_content)){
                             _content = _content.toFixed(3);
-                            if(_content < 0.01) {
-                                _bacgroundColor = "#FF6600";
-                            }else if(_content < 0.1) {
-                                _bacgroundColor = "#FF9900";
-                            }else if(_content < 1){
+                            if(_content < 0.05) {
                                 _bacgroundColor = "#FFcc00";
-                            }else {
-                                _bacgroundColor = "#FFFF00";
                             }
                         }else {
                             _content = "NA";
@@ -271,6 +303,7 @@ var StudyViewSurvivalPlotView = (function() {
                     }
                     _tr.append(_td);
                 }
+                
                 _tbody.append(_tr);
             }
             _table.append(_tbody);
@@ -282,51 +315,126 @@ var StudyViewSurvivalPlotView = (function() {
                 
         var _logRankTest = new LogRankTest();
 //                var _key = curveInfo[_plotKey][i].name + "-" + curveInfo[_plotKey][j].name;
-        if(_curvePairs.length > 0) {
-            var _logRankTest = new LogRankTest();
-            _logRankTest.calcList(_plotKey, _input, _callback);
+        if(_curvePairs.length > 1) {
+            _logRankTest.calcList(_plotKey, _input, _listCallback);
+        }else if (_curvePairs.length === 1) {
+            _logRankTest.calc(_input[0][0], _input[0][1], _callback);
         }
     }
     
     function addPvalQtip(_plotKey) {
-        var _mouse_is_inside = false;
-        $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy', true);
-        $("#" + opts[_plotKey].divs.pvalIcon).qtip({
-            content: {
-                text: $("#" + opts[_plotKey].divs.pvalMatrix).html()
-            },
-            position: {
-                my: 'center', at: 'center',
-                target: $(window)
-            },
-//            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow qtip-max-width'  },
-            show: {
-                event: "click",
-                modal: {
-                    on: true,
-                    blur: false
-                }
-            },
-            style: 'dialogue',
-            hide: false,
+//        var _mouse_is_inside = false;
+//        $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy', true);
+//        $("#" + opts[_plotKey].divs.pvalIcon).qtip({
+//            content: {
+//                text: $("#" + opts[_plotKey].divs.pvalMatrix).html()
+//            },
+//            position: {
+//                my: 'center', at: 'center',
+//                target: $(window)
+//            },
+////            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow qtip-max-width'  },
+//            show: {
+//                event: "click",
+//                modal: {
+//                    on: true,
+//                    blur: false
+//                }
+//            },
+//            style: 'dialogue',
+//            hide: false,
+//            events: {
+//                show: function(event, api) {
+//                    $(this, api.elements.tooltips).hover(function(){ 
+//                        _mouse_is_inside=true; 
+//                    }, function(){ 
+//                        _mouse_is_inside=false; 
+//                    });
+//
+//                    $("body").mouseup(function(e){ 
+//                        if(! _mouse_is_inside) api.hide(e);
+//                    });
+//                },
+//                hide: function(event, api){
+//                    $("body").unbind('mouseup');
+//                }
+//            }
+//        });
+        $("#" + opts[_plotKey].divs.pvalMatrix).css('display', 'none');
+        
+        $("#" + opts[_plotKey].divs.main + " svg").qtip({
+            id: opts[_plotKey].divs.bodyLabel + "-qtip",
+            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow forceZindex'},
+            show: {event: "mouseover", delay: 0},
+            hide: {fixed:true, delay: 100, event: "mouseout"},
+//            hide: false,
+            position: {my:'left top',at:'top right', viewport: $(window)},
+//            content: $("#" + opts[_plotKey].divs.bodyLabel).html(),
+            content:$("#" + opts[_plotKey].divs.pvalMatrix).html(),
             events: {
-                show: function(event, api) {
-                    $(this, api.elements.tooltips).hover(function(){ 
-                        _mouse_is_inside=true; 
-                    }, function(){ 
-                        _mouse_is_inside=false; 
+                render: function(event, api) {
+                    $('svg image', api.elements.tooltip).hover(function() {
+                        $(this).css('cursor', 'pointer');
                     });
 
-                    $("body").mouseup(function(e){ 
-                        if(! _mouse_is_inside) api.hide(e);
+                    $('svg image', api.elements.tooltip).unbind('click');
+                    $('svg image', api.elements.tooltip).click(function() {
+//                        if ($(this).attr('name') === 'pin') {
+//
+//                            //The following functions will be excuted after user inputting
+//                            //the curve name, so we need to give it a call back function.
+//                            nameCurveDialog(this, saveCurveInfoFunc, _plotKey);
+//
+//                        } else if ($(this).attr('name') === 'close') {
+                            var _parent = $(this).parent(),
+                                    _name = $(_parent).find('text').attr('oValue'),
+                                _color = $(_parent).find('rect').attr('fill'),
+                                _index = $(this).parent().index();
+
+                            $(_parent).remove();
+                            removeCurveFunc(_index, _plotKey);
+                            redrawLabel(_plotKey);
+                            survivalPlot[_plotKey].removeCurve(_color.toString().substring(1) + "-" + _plotKey);
+//                        } else if ($(this).attr('name') === 'saved-close') {
+//                            var _parent = $(this).parent(),
+//                                _name = $(_parent).find('text').attr('oValue');
+//
+//                            $(_parent).remove();
+//                            undoSavedCurve(_name, _plotKey);
+//                            removeSavedCurveFunc(_name, _plotKey);
+//                            redrawLabel(_plotKey);
+//                        } else {
+//                            //TODO: Add more function
+//                        }
                     });
-                },
-                hide: function(event, api){
-                    $("body").unbind('mouseup');
+
+                    //$('#' + _opts.divs.main + ' svg rect').unbind('hover');
+                    $('svg rect', api.elements.tooltip).hover(function() {
+                        $(this).css('cursor', 'pointer');
+                    });
+
+                    $('svg rect', api.elements.tooltip).unbind('click');
+                    $('svg rect', api.elements.tooltip).click(function() {
+                        var _text = $($(this).parent().parent()).find('span'),
+                                _rgbRect = StudyViewUtil.rgbStringConvert($(this).css('fill')),
+                                _rgbText = StudyViewUtil.rgbStringConvert($(_text).css('color')),
+//                                _rgbText = $(_text).css('color'),
+                                _rectColor = StudyViewUtil.rgbToHex(_rgbRect[0], _rgbRect[1], _rgbRect[2]),
+                                _textColor = StudyViewUtil.rgbToHex(_rgbText[0], _rgbText[1], _rgbText[2]);
+//                                _textColor = $(_text).css('color');
+                        
+                        if (_textColor === '#000000') {
+                            $(_text).css('color', 'red');
+                            highlightCurve(_rectColor.substring(1) + "-" + _plotKey);
+                        } else {
+                            $(_text).css('color', 'black');
+                            resetCurve(_rectColor.substring(1) + "-" + _plotKey);
+                        }
+
+                    });
                 }
             }
         });
-        $("#" + opts[_plotKey].divs.pvalMatrix).css('display', 'none');
     }
     /**
      * Be used to create svg/pdf file
@@ -561,9 +669,9 @@ var StudyViewSurvivalPlotView = (function() {
 //                "<input type='submit' style='font-size:10px' value='SVG'>" +
 //                "</form>" +
 //                "<img id='" + _opt.divs.menu + "' class='study-view-menu-icon' style='float:left; width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-menu-icon' src='images/menu.svg'/>" +
-                "<div id='"+_opt.divs.pvalIconWrapper+"' "+
-                "class='study-view-download-icon hidden'>" + 
-                "<img id='"+_opt.divs.pvalIcon+"' style='width:10px;float:left' src='images/pval-red.svg'/></div>" +
+//                "<div id='"+_opt.divs.pvalIconWrapper+"' "+
+//                "class='study-view-download-icon hidden'>" + 
+//                "<img id='"+_opt.divs.pvalIcon+"' style='width:10px;float:left' src='images/pval-red.svg'/></div>" +
                 "<img id='"+_opt.divs.downloadIcon+"' class='study-view-download-icon' src='images/in.svg'/>" +
                 "<img style='float:left; width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-drag-icon' src='images/move.svg'/>" +
                 "<span class='study-view-chart-plot-delete study-view-survival-plot-delete'>x</span>" +
@@ -574,7 +682,7 @@ var StudyViewSurvivalPlotView = (function() {
                 "<div id='" + _opt.divs.bodySvg + "' style='float:left'></div>" +
                 "<div id='" + _opt.divs.bodyLabel +
                 "' class='study-view-survival-plot-body-label'></div>" +
-                "<div id='" + _opt.divs.pvalMatrix + "'></div>"+
+                "<div id='" + _opt.divs.pvalMatrix + "' style='text-align:center'></div>"+
                 "</div></div>";
 
         $("#study-view-charts").append(_div);
@@ -707,7 +815,7 @@ var StudyViewSurvivalPlotView = (function() {
         _opts.divs.loader = "study-view-survival-plot-loader-" + _index;
         _opts.divs.downloadIcon = "study-view-survival-download-icon-" + _index;
         _opts.divs.pvalMatrix = "study-view-survival-pval-matrix-" + _index;
-        _opts.divs.pvalIcon = "study-view-survival-pval-icon" + _index;
+//        _opts.divs.pvalIcon = "study-view-survival-pval-icon" + _index;
         _opts.divs.pvalIconWrapper = "study-view-survival-pval-icon" + _index + "-wrapper";
         
         //plot in _opts is for survival plot
@@ -741,15 +849,25 @@ var StudyViewSurvivalPlotView = (function() {
 
     function redrawView(_plotKey, _casesInfo) {
         var _color = "";
-        
+        var _casesInfoKeys = Object.keys(_casesInfo);
+        var _keysLength = _casesInfoKeys.length;
         inputArr = [];
         kmEstimator = new KmEstimator();
         logRankTest = new LogRankTest();
         //confidenceIntervals = new ConfidenceIntervals();
         curveInfo[_plotKey] = [];
-
-        for (var key in _casesInfo) {
+        
+        _casesInfoKeys.sort(function(a, b) {
+           if(a < b) {
+               return -1;
+           } else {
+               return 1;
+           }
+        });
+        
+        for (var i = 0; i < _keysLength; i++) {
             var instanceData = new SurvivalCurveProxy();
+            var key = _casesInfoKeys[i];
             instanceData.init(aData[_plotKey], _casesInfo[key].caseIds, kmEstimator, logRankTest);
 
             //If no data return, will no draw this curve
@@ -788,8 +906,8 @@ var StudyViewSurvivalPlotView = (function() {
         
         if(curveInfo[_plotKey].length > 1) {
             createPvalMatrix(_plotKey, curveInfo[_plotKey]);
-        } else {
-            $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy');
+        }else {
+//            $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy');
             $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'none');
         }
         
@@ -800,7 +918,7 @@ var StudyViewSurvivalPlotView = (function() {
         
         addEvents(_plotKey);
     }
-
+    
     /*
      * Initialize survival plot by calling survivalCurve component
      * 
@@ -946,75 +1064,7 @@ var StudyViewSurvivalPlotView = (function() {
             }
         }
         
-        $("#" + opts[_plotKey].divs.main + " svg").qtip({
-            id: opts[_plotKey].divs.bodyLabel + "-qtip",
-            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow forceZindex'},
-            show: {event: "mouseover", delay: 0},
-            hide: {fixed:true, delay: 100, event: "mouseout"},
-            position: {my:'left top',at:'top right', viewport: $(window)},
-            content: $("#" + opts[_plotKey].divs.bodyLabel).html(),
-            events: {
-                render: function(event, api) {
-                    $('svg image', api.elements.tooltip).hover(function() {
-                        $(this).css('cursor', 'pointer');
-                    });
-
-                    $('svg image', api.elements.tooltip).unbind('click');
-                    $('svg image', api.elements.tooltip).click(function() {
-                        if ($(this).attr('name') === 'pin') {
-
-                            //The following functions will be excuted after user inputting
-                            //the curve name, so we need to give it a call back function.
-                            nameCurveDialog(this, saveCurveInfoFunc, _plotKey);
-
-                        } else if ($(this).attr('name') === 'close') {
-                            var _parent = $(this).parent(),
-                                    _name = $(_parent).find('text').attr('oValue'),
-                                _color = $(_parent).find('rect').attr('fill'),
-                                _index = $(this).parent().index();
-
-                            $(_parent).remove();
-                            removeCurveFunc(_index, _plotKey);
-                            redrawLabel(_plotKey);
-                            survivalPlot[_plotKey].removeCurve(_color.toString().substring(1) + "-" + _plotKey);
-                        } else if ($(this).attr('name') === 'saved-close') {
-                            var _parent = $(this).parent(),
-                                _name = $(_parent).find('text').attr('oValue');
-
-                            $(_parent).remove();
-                            undoSavedCurve(_name, _plotKey);
-                            removeSavedCurveFunc(_name, _plotKey);
-                            redrawLabel(_plotKey);
-                        } else {
-                            //TODO: Add more function
-                        }
-                    });
-
-                    //$('#' + _opts.divs.main + ' svg rect').unbind('hover');
-                    $('svg rect', api.elements.tooltip).hover(function() {
-                        $(this).css('cursor', 'pointer');
-                    });
-
-                    $('svg rect', api.elements.tooltip).unbind('click');
-                    $('svg rect', api.elements.tooltip).click(function() {
-                        var _text = $($(this).parent()).find('text:first'),
-                                _rgbRect = StudyViewUtil.rgbStringConvert($(this).css('fill')),
-                                _rgbText = StudyViewUtil.rgbStringConvert($(_text).css('fill')),
-                                _rectColor = StudyViewUtil.rgbToHex(_rgbRect[0], _rgbRect[1], _rgbRect[2]),
-                                _textColor = StudyViewUtil.rgbToHex(_rgbText[0], _rgbText[1], _rgbText[2]);
-
-                        if (_textColor === '#000000') {
-                            $(_text).css('fill', 'red');
-                            highlightCurve(_rectColor.substring(1) + "-" + _plotKey);
-                        } else {
-                            $(_text).css('fill', 'black');
-                            resetCurve(_rectColor.substring(1) + "-" + _plotKey);
-                        }
-
-                    });
-                }
-            }
-        });
+        
     }
     
     /**
