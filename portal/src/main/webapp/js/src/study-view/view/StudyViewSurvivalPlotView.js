@@ -380,6 +380,7 @@ var StudyViewSurvivalPlotView = (function() {
         $("#" + _idNeedToSetValue).val(_svgElement);
         $("#" + opts[_plotKey].divs.bodyLabel + " svg").remove();
         drawLabels(_plotKey);
+        addPvalQtip(_plotKey);
         //The style has been reset because of the addEvents function, so we
         //need to change the related components manully 
         $("#" + opts[_plotKey].divs.header).css('display', 'block');
@@ -971,8 +972,6 @@ var StudyViewSurvivalPlotView = (function() {
                 drawSavedLabels(_plotKey, _svg, (_newLabelsLength + 1) * 20, _width);
             }
         }
-        
-        
     }
     
     /**
