@@ -203,7 +203,7 @@ var BarChart = function(){
                 
                 for(var key in _caseIds){
                     var _caseInfoDatum = {},
-                        _range = key.split("-");
+                        _range = key.split("~");
                     if(key === 'NA'){
                         _caseInfoDatum.color = barColor['NA'];
                     }else {
@@ -245,7 +245,7 @@ var BarChart = function(){
         
         for(var i = 0; i < _barsLength; i++) {
             if(i === _bars.length-1 && hasEmptyValue) {
-                $(_bars[i]).attr('fill', '#CCCCCC');
+                $(_bars[i]).attr('fill', '#cccccc');
             }else {
                 $(_bars[i]).attr('fill', color[i]);
             }
@@ -267,7 +267,7 @@ var BarChart = function(){
         }
         
         for(var i = 0; i< _caseIdsLength; i++) {
-            var _key = xDomain[i] + "-" + xDomain[i+1];
+            var _key = xDomain[i] + "~" + xDomain[i+1];
             _caseIds[_key] = [];
         }
         
@@ -280,7 +280,7 @@ var BarChart = function(){
                 _value = Number(_value);
                 for(var j = 0; j < _xDomainLength; j++){
                     if(_value < xDomain[j]){
-                        var _key = xDomain[j-1] + "-" + xDomain[j];
+                        var _key = xDomain[j-1] + "~" + xDomain[j];
                         
                         _caseIds[_key].push(_cases[i].CASE_ID);
                         break;
@@ -727,7 +727,7 @@ var BarChart = function(){
                                     Number(emptyValueMapping), 3, 0.1 )
                                 )
                         );
-            barColor['NA'] = '#CCCCCC';
+            barColor['NA'] = '#cccccc';
         }else {
             barColor[_barValue[_barLength-1]] = color[_barLength-1];
         }
@@ -845,7 +845,7 @@ var BarChart = function(){
         }
         
         if(hasEmptyValue){
-            barColor['NA'] = '#CCCCCC';
+            barColor['NA'] = '#cccccc';
         }else {
             barColor[_barValue[_barLength-1]] = color[_barLength-1];
         }

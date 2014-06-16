@@ -111,17 +111,6 @@ var StudyViewSurvivalPlotView = (function() {
         $("#" + _opts.divs.body).css('opacity', '1');
         $("#" + _opts.divs.loader).css('display', 'none');
         
-//        $('#' + _opts.divs.pvalIconWrapper).qtip('destroy', true);
-//        $('#' + _opts.divs.pvalIconWrapper).qtip({
-//            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
-//            show: {event: "mouseover", delay: 0},
-//            hide: {fixed:true, delay: 300, event: "mouseout"},
-//            position: {my:'bottom left',at:'top right', viewport: $(window)},
-//            content: {
-//                text:   "Logrank Test P-Value"
-//            }
-//        });
-        
         $('#' + _opts.divs.downloadIcon).qtip('destroy', true);
         $('#' + _opts.divs.downloadIcon).qtip({
             id: "#" + _opts.divs.downloadIcon + "-qtip",
@@ -157,20 +146,6 @@ var StudyViewSurvivalPlotView = (function() {
                         setSVGElementValue(_opts.divs.bodySvg,
                                 _opts.divs.svgValue, _plotKey, _title);
                     });
-//                    $("#study-view-scatter-plot-pdf", api.elements.tooltip).submit(function(){
-//                        $("#study-view-scatter-plot-pdf-name").val("Scatter_Plot_result-"+ StudyViewParams.params.studyId +".pdf");
-//                        setSVGElementValue("study-view-scatter-plot-body-svg",
-//                            "study-view-scatter-plot-pdf-value",
-//                            scatterPlotOptions,
-//                            _title);
-//                    });
-//                    $("#study-view-scatter-plot-svg", api.elements.tooltip).submit(function(){
-//                        $("#study-view-scatter-plot-svg-name").val("Scatter_Plot_result-"+ StudyViewParams.params.studyId +".svg");
-//                        setSVGElementValue("study-view-scatter-plot-body-svg",
-//                            "study-view-scatter-plot-svg-value",
-//                            scatterPlotOptions,
-//                            _title);
-//                    });
                 }
             }
         });
@@ -190,7 +165,6 @@ var StudyViewSurvivalPlotView = (function() {
         }
         
         var _callback = function(_data) {
-//            var _plotKey = _data['jobKey'];
             var _content = 0;
             
             if(isNaN(_data)) {
@@ -217,14 +191,11 @@ var StudyViewSurvivalPlotView = (function() {
             $("#" + opts[_plotKey].divs.pvalMatrix)
                 .append("<div style='height: 15px'><span>Logrank Test P-Value: "+_content+"</span></div>");
             
-            $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'block');
             addPvalQtip(_plotKey);
         };
         
         var _listCallback = function(_data) {
-//            var _plotKey = _data['jobKey'];
             var _pvalueList = _data['pvalueList'].split(/[,\s+]/);
-            var _length = _pvalueList.length;
             
             $("#" + opts[_plotKey].divs.pvalMatrix).empty();
             
@@ -314,7 +285,6 @@ var StudyViewSurvivalPlotView = (function() {
         };
                 
         var _logRankTest = new LogRankTest();
-//                var _key = curveInfo[_plotKey][i].name + "-" + curveInfo[_plotKey][j].name;
         if(_curvePairs.length > 1) {
             _logRankTest.calcList(_plotKey, _input, _listCallback);
         }else if (_curvePairs.length === 1) {
@@ -323,43 +293,6 @@ var StudyViewSurvivalPlotView = (function() {
     }
     
     function addPvalQtip(_plotKey) {
-//        var _mouse_is_inside = false;
-//        $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy', true);
-//        $("#" + opts[_plotKey].divs.pvalIcon).qtip({
-//            content: {
-//                text: $("#" + opts[_plotKey].divs.pvalMatrix).html()
-//            },
-//            position: {
-//                my: 'center', at: 'center',
-//                target: $(window)
-//            },
-////            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow qtip-max-width'  },
-//            show: {
-//                event: "click",
-//                modal: {
-//                    on: true,
-//                    blur: false
-//                }
-//            },
-//            style: 'dialogue',
-//            hide: false,
-//            events: {
-//                show: function(event, api) {
-//                    $(this, api.elements.tooltips).hover(function(){ 
-//                        _mouse_is_inside=true; 
-//                    }, function(){ 
-//                        _mouse_is_inside=false; 
-//                    });
-//
-//                    $("body").mouseup(function(e){ 
-//                        if(! _mouse_is_inside) api.hide(e);
-//                    });
-//                },
-//                hide: function(event, api){
-//                    $("body").unbind('mouseup');
-//                }
-//            }
-//        });
         $("#" + opts[_plotKey].divs.pvalMatrix).css('display', 'none');
         
         $("#" + opts[_plotKey].divs.main + " svg").qtip({
@@ -367,7 +300,6 @@ var StudyViewSurvivalPlotView = (function() {
             style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow forceZindex'},
             show: {event: "mouseover", delay: 0},
             hide: {fixed:true, delay: 100, event: "mouseout"},
-//            hide: false,
             position: {my:'left top',at:'top right', viewport: $(window)},
 //            content: $("#" + opts[_plotKey].divs.bodyLabel).html(),
             content:$("#" + opts[_plotKey].divs.pvalMatrix).html(),
@@ -418,10 +350,8 @@ var StudyViewSurvivalPlotView = (function() {
                         var _text = $($(this).parent().parent()).find('span'),
                                 _rgbRect = StudyViewUtil.rgbStringConvert($(this).css('fill')),
                                 _rgbText = StudyViewUtil.rgbStringConvert($(_text).css('color')),
-//                                _rgbText = $(_text).css('color'),
                                 _rectColor = StudyViewUtil.rgbToHex(_rgbRect[0], _rgbRect[1], _rgbRect[2]),
                                 _textColor = StudyViewUtil.rgbToHex(_rgbText[0], _rgbText[1], _rgbText[2]);
-//                                _textColor = $(_text).css('color');
                         
                         if (_textColor === '#000000') {
                             $(_text).css('color', 'red');
@@ -430,7 +360,6 @@ var StudyViewSurvivalPlotView = (function() {
                             $(_text).css('color', 'black');
                             resetCurve(_rectColor.substring(1) + "-" + _plotKey);
                         }
-
                     });
                 }
             }
@@ -656,22 +585,6 @@ var StudyViewSurvivalPlotView = (function() {
                 "' class='study-view-survival-plot-title'>" + _opt.title + "</chartTitleH4>" +
                 "<div id='" + _opt.divs.header +
                 "' class='study-view-survival-plot-header' style='float:right'>" +
-//                "<form style='display:inline-block; float:left; margin-right:5px' action='svgtopdf.do' method='post' id='" + _opt.divs.pdf + "'>" +
-//                "<input type='hidden' name='svgelement' id='" + _opt.divs.pdfValue + "'>" +
-//                "<input type='hidden' name='filetype' value='pdf'>" +
-//                "<input type='hidden' id='" + _opt.divs.pdfName + "' name='filename' value=''>" +
-//                "<input type='submit' style='font-size:10px' value='PDF'>" +
-//                "</form>" +
-//                "<form style='display:inline-block; float:left; margin-right:5px' action='svgtopdf.do' method='post' id='" + _opt.divs.svg + "'>" +
-//                "<input type='hidden' name='svgelement' id='" + _opt.divs.svgValue + "'>" +
-//                "<input type='hidden' name='filetype' value='svg'>" +
-//                "<input type='hidden' id='" + _opt.divs.svgName + "' name='filename' value=''>" +
-//                "<input type='submit' style='font-size:10px' value='SVG'>" +
-//                "</form>" +
-//                "<img id='" + _opt.divs.menu + "' class='study-view-menu-icon' style='float:left; width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-menu-icon' src='images/menu.svg'/>" +
-//                "<div id='"+_opt.divs.pvalIconWrapper+"' "+
-//                "class='study-view-download-icon hidden'>" + 
-//                "<img id='"+_opt.divs.pvalIcon+"' style='width:10px;float:left' src='images/pval-red.svg'/></div>" +
                 "<img id='"+_opt.divs.downloadIcon+"' class='study-view-download-icon' src='images/in.svg'/>" +
                 "<img style='float:left; width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-drag-icon' src='images/move.svg'/>" +
                 "<span class='study-view-chart-plot-delete study-view-survival-plot-delete'>x</span>" +
@@ -815,8 +728,6 @@ var StudyViewSurvivalPlotView = (function() {
         _opts.divs.loader = "study-view-survival-plot-loader-" + _index;
         _opts.divs.downloadIcon = "study-view-survival-download-icon-" + _index;
         _opts.divs.pvalMatrix = "study-view-survival-pval-matrix-" + _index;
-//        _opts.divs.pvalIcon = "study-view-survival-pval-icon" + _index;
-        _opts.divs.pvalIconWrapper = "study-view-survival-pval-icon" + _index + "-wrapper";
         
         //plot in _opts is for survival plot
         _opts.plot = jQuery.extend(true, {}, SurvivalCurveBroilerPlate);
@@ -847,23 +758,62 @@ var StudyViewSurvivalPlotView = (function() {
         return _opts;
     }
 
-    function redrawView(_plotKey, _casesInfo) {
+    function redrawView(_plotKey, _casesInfo, _selectedAttr) {
         var _color = "";
         var _casesInfoKeys = Object.keys(_casesInfo);
         var _keysLength = _casesInfoKeys.length;
+        var _showedCharts = StudyViewInitCharts.getShowedChartsInfo(),
+            _selectedAttrType = _showedCharts['type'][_selectedAttr];
+        
         inputArr = [];
         kmEstimator = new KmEstimator();
         logRankTest = new LogRankTest();
         //confidenceIntervals = new ConfidenceIntervals();
         curveInfo[_plotKey] = [];
         
-        _casesInfoKeys.sort(function(a, b) {
-           if(a < b) {
-               return -1;
-           } else {
-               return 1;
-           }
-        });
+        if(_selectedAttrType === 'bar') {
+            _casesInfoKeys.sort(function(a, b) {
+                if(a === 'NA') {
+                    return 1;
+                } else if(b === 'NA') {
+                    return -1;
+                } else {
+                    var _a = a.split('~').map(function(_item) {
+                        return Number(_item);
+                    });
+                    var _b = b.split('~').map(function(_item) {
+                        return Number(_item);
+                    });
+
+                    if(_a.length < 2 || _b.length < 2) {
+                        StudyViewUtil.echoWarningMessg('RedrawView Error:  bar chart key format is wrong.');
+                    }
+                    
+                    if(_a[0] < _b[0]) {
+                        return -1;
+                    } else if(_a[0] > _b[0]){
+                        return 1;
+                    } else {
+                        if(_a[1] < _b[1]) {
+                            return -1;
+                        }else {
+                            return 1;
+                        }
+                    }
+                }
+            });
+        }else if (_selectedAttrType === 'pie' || typeof _selectedAttrType === 'undefined') {
+            _casesInfoKeys.sort(function(a, b) {
+                if(a < b) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+        }else {
+            StudyViewUtil.echoWarningMessg('Unknown chart type in redrawView');
+        }
+        
         
         for (var i = 0; i < _keysLength; i++) {
             var instanceData = new SurvivalCurveProxy();
@@ -906,9 +856,6 @@ var StudyViewSurvivalPlotView = (function() {
         
         if(curveInfo[_plotKey].length > 1) {
             createPvalMatrix(_plotKey, curveInfo[_plotKey]);
-        }else {
-//            $("#" + opts[_plotKey].divs.pvalIcon).qtip('destroy');
-            $("#" + opts[_plotKey].divs.pvalIconWrapper).css('display', 'none');
         }
         
         var inputArrLength = inputArr.length;
@@ -971,7 +918,6 @@ var StudyViewSurvivalPlotView = (function() {
             }
         }
 
-        //We disabled pvalue calculation in here
         survivalPlot[_plotKey] = new SurvivalCurve();
         survivalPlot[_plotKey].init(inputArr, opts[_plotKey].plot);
     }
@@ -998,7 +944,7 @@ var StudyViewSurvivalPlotView = (function() {
             delete curveInfo[key];
 
             var _tmpCasesInfo = grouping(_casesInfo, _selectedAttr[0]);
-            redrawView(key, _tmpCasesInfo);
+            redrawView(key, _tmpCasesInfo, _selectedAttr[0]);
             drawLabels(key);
             if (typeof _selectedAttr !== 'undefined') {
                 StudyViewUtil.changeTitle("#" + opts[key].divs.main + " chartTitleH4", _selectedAttr[1], false);

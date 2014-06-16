@@ -564,8 +564,9 @@
 .pvalMatixTable {
     background-color: white;
 }
-.pvalMatixTable td {
+.pvalMatixTable td:not(:nth-child(2)) {
     border: 1px solid white;
+    text-align: center;
 }
 .pvalMatixTable th:not(:first-child) {
     border: 1px solid white;

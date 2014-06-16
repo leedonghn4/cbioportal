@@ -903,7 +903,7 @@ var PieChart = function(){
                 }
             });
             if(_keys.indexOf('NA') !== -1) {
-                _color[_keys.indexOf('NA')] = '#CCCCCC';
+                _color[_keys.indexOf('NA')] = '#cccccc';
             }
         
             if(_keys.length > 10) {
