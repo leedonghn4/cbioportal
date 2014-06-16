@@ -31,6 +31,46 @@ var StudyViewUtil = (function(){
         });
     }
     
+    function showHideTitle(_listenedDiv, _targetDiv, _time, _title, _showCutOff, _hideCutOff){
+        var _target = $(_targetDiv),
+            _targetParent = $(_targetDiv).parent(),
+            _targetTitle = _targetParent.find('charttitleh4');
+    
+        _target.css('display', 'none');
+        
+        $(_listenedDiv).unbind('hover');
+        $(_listenedDiv).hover(function(){
+            $(_listenedDiv).css('z-index', '1');
+                _target.stop().fadeIn(_time, function(){
+                    $(this).css('display', 'block');
+                });
+            _targetParent.css('text-align', 'left');
+            if(_title.length > _showCutOff) {
+                _targetTitle.text(_title.substring(0,_showCutOff-2) + "...");
+                addQtip(_title, _targetTitle);
+            }
+        }, function(){
+            $(_listenedDiv).css('z-index', '0');
+            _target.stop().fadeOut(_time, function(){
+                $(this).css('display', 'none');
+            });
+            _targetParent.css('text-align', 'center');
+            if(_title.length > _hideCutOff) {
+                _targetTitle.text(_title.substring(0,(_hideCutOff-2)) + "...");
+            }else {
+                _targetTitle.text(_title);
+            }
+            _targetTitle.qtip('destroy', true);
+        });
+    }
+    
+    function addQtip(_text, _div){
+        var _qtip = jQuery.extend(true,{},StudyViewBoilerplate.pieLabelQtip);
+                
+        _qtip.content.text = _text;
+        _div.qtip(_qtip);
+    }
+    
     function changePosition(_listenedDiv, _targetDiv, _parentDiv) {
         var _parentOffset = $(_parentDiv).offset(),
             _parentWidth = $(_parentDiv).width(),
@@ -160,6 +200,7 @@ var StudyViewUtil = (function(){
         changePosition: changePosition,
         testM: testM,
         changeTitle: changeTitle,
-        isInt: isInt
+        isInt: isInt,
+        showHideTitle: showHideTitle
     };
 })();

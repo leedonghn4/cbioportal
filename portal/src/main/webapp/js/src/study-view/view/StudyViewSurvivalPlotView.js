@@ -66,47 +66,10 @@ var StudyViewSurvivalPlotView = (function() {
         var _opts = opts[_plotKey],
             _title = $("#" + _opts.divs.main + " charttitleh4").text();
 
-        if (!initStatus) {
-            StudyViewUtil.showHideDivision(
-                    '#' + _opts.divs.main,
-                    '#' + _opts.divs.header
-                    );
-        }
-//        $("#" + _opts.divs.pdf).unbind('submit');
-//        $("#" + _opts.divs.pdf).submit(function() {
-//            setSVGElementValue(_opts.divs.bodySvg,
-//                    _opts.divs.pdfValue, _plotKey, _title);
-//        });
-//        $("#" + _opts.divs.svg).unbind('submit');
-//        $("#" + _opts.divs.svg).submit(function() {
-//            setSVGElementValue(_opts.divs.bodySvg,
-//                    _opts.divs.svgValue, _plotKey, _title);
-//        });
-
-//        $("#" + _opts.divs.menu).unbind("click");
-//        $("#" + _opts.divs.menu).click(function() {
-//            var _svgWidth = 0,
-//                    _label = $("#" + _opts.divs.bodyLabel),
-//                    _display = _label.css('display');
-//
-//            if (_display === "none") {
-//                StudyViewUtil.changePosition(
-//                        '#' + _opts.divs.main,
-//                        '#' + _opts.divs.bodyLabel,
-//                        "#dc-plots");
-//                $('#' + _opts.divs.bodyLabel).children('float', '');
-//                _label.css('display', 'block');
-//                _svgWidth = $("#" + _opts.divs.bodyLabel + " svg").width();
-//                $("#" + _opts.divs.bodyLabel).width(_svgWidth + 15);
-//            } else {
-//                _label.css('display', 'none');
-//            }
-//        });
-
-//        if ($("#" + _opts.divs.bodyLabel).css('display') === 'block') {
-//            var _svgWidth = $("#" + _opts.divs.bodyLabel + " svg").width();
-//            $("#" + _opts.divs.bodyLabel).width(_svgWidth + 15);
-//        }
+        StudyViewUtil.showHideTitle(
+            '#' + _opts.divs.main,
+            '#' + _opts.divs.header,
+            0, _title, 60, 70 );
 
         $("#" + _opts.divs.body).css('opacity', '1');
         $("#" + _opts.divs.loader).css('display', 'none');
@@ -149,8 +112,7 @@ var StudyViewSurvivalPlotView = (function() {
                 }
             }
         });
-    }
-        
+    }  
         
     function createPvalMatrix(_plotKey, _curveInfo) {
         var _input = [],

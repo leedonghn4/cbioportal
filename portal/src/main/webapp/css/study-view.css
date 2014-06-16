@@ -841,7 +841,6 @@ Style for search box in dataTable of Summaery Tab
 .study-view-survival-plot-title {
     float: left;
     margin: 5px 0 0 5px;
-    max-width: 240px;
 }
 .study-view-survival-plot-body {
     width: 100%;
