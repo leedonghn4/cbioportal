@@ -145,6 +145,10 @@ var StudyViewUtil = (function(){
         }
     }
     
+    function isInt(n) {
+        return typeof n === 'number' && parseFloat(n) == parseInt(n, 10) && !isNaN(n);
+    }
+
     return{
         showHideDivision: showHideDivision,
         echoWarningMessg: echoWarningMessg,
@@ -155,6 +159,7 @@ var StudyViewUtil = (function(){
         arrayFindByValue: arrayFindByValue,
         changePosition: changePosition,
         testM: testM,
-        changeTitle: changeTitle
+        changeTitle: changeTitle,
+        isInt: isInt
     };
 })();
