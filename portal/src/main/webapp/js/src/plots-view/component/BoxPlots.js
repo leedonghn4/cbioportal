@@ -28,13 +28,12 @@
 /****************************************************************************************************
  * Calculating and Rendering boxplots for the input dataset
  * @author Yichao Sun / Eduardo
- * @date Jun 13
+ * @date Jun 13, 2014
  *
  * @input: dataAttr -- the attributes of the input dataset (min val, max val, xScale, yScale, etc.)
  *         dotsGroup -- array of datum with info about every datapoints 
  *         boxPlotsElem -- DOM which the box plots would attach to
  *         positionIndicator -- 0, 1, 2, .... (# CNA groups - 1)
- *
  ****************************************************************************************************/
 
 var BoxPlots = function() {
