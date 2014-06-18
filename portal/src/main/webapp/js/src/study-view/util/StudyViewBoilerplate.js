@@ -154,12 +154,9 @@ var StudyViewBoilerplate ={
     
     headerLeftDiv: function() {
         var _header = $('<div></div>'),
-//            _span1 = $('<span></span>'),
-//            _span2 = $('<span></span>'),
             _span3 = $('<span></span>'),
             _span1 = $("<input type='button' />"),
             _span2 = $("<input type='button' />"),
-//            _span3 = $("<input type='button' />"),
             _form = $('<form></form>'),
             _input1 = $('<input></input>'),
             _input2 = $('<input></input>'),
@@ -171,8 +168,6 @@ var StudyViewBoilerplate ={
             .attr({
                 'id': 'study-view-header-left-0',
                 'class': 'study-view-header-button'})
-//                'class': 'study-view-header study-view-header-left'})
-//            .text('Select cases by IDs');
             .val('Select cases by IDs');
         _form
             .attr({
@@ -207,7 +202,6 @@ var StudyViewBoilerplate ={
                 type: "submit",
                 id: "study-view-header-left-1",
                 value: "Query selected cases",
-//                class: "study-view-header hidden"
                 class: "hidden study-view-header-button"
             });
         _form.append(_input1);
@@ -218,8 +212,6 @@ var StudyViewBoilerplate ={
         _span2
             .attr({
                 'id': 'study-view-header-left-2',
-//                'class': 'study-view-header hidden'})
-//            .text('Reset all');
                 'class': 'hidden study-view-header-button'})
             .val('Reset all');
         
@@ -228,7 +220,6 @@ var StudyViewBoilerplate ={
                 'id': 'study-view-header-left-3',
                 'class': 'hidden'})
             .text('');
-//            .val('Reset all');
        
         _header.append(_span1);
         _header.append(_form);
@@ -246,42 +237,11 @@ var StudyViewBoilerplate ={
             "</div>",
     addChartDiv:
             "<select id='study-view-add-chart'><option id=''>Add Chart</option></select>",
-//            "<div  id='study-view-add-chart' class='study-view-header'>" +
-//                "<span>Add Chart</span><br>" +
-//                "<ul>" +
-//                "</ul>" +
-//            "</div>",
     
     tutorialDiv:
             "<div  id='study-view-tutorial' class='study-view-header'>" +
                 "<span>Tutorial</span>" +
             "</div>",
-    
-    updateTableDiv: 
-            "<div style='float: left'>" +
-            "<input type='button' "+
-                "id='study-view-dataTable-updateTable' "+
-                "class='study-view-middle-button' "+
-                "value = 'Update Table'/>" +
-            "</div>",
-    
-    updateChartsDiv: 
-            "<div style='float: left'>" +
-            "<input type='button' "+
-                "id='study-view-dataTable-updateCharts' "+
-                "class='study-view-middle-button' "+
-                "value = 'Update Charts'/>" +
-            "</div>",
-    
-    upArrowDiv:
-            "<img src='images/arrow_top.png' " +
-                "height='25px' alt='Update Charts' " +
-                "style='float: left'/>",
-    
-    downArrowDiv:
-            "<img src='images/arrow_bottom.png' " +
-                "height='25px' alt='Update Table' " +
-                "style='float: left'/>",
         
     scatterPlotDiv: 
             "<div id='study-view-scatter-plot' class='study-view-dc-chart w2 h1half'"+
@@ -290,22 +250,6 @@ var StudyViewBoilerplate ={
             "<chartTitleH4 id='study-view-scatter-plot-title'>"+
             "Mutation Count vs CNA</chartTitleH4>"+
             "<div id='study-view-scatter-plot-header'>"+
-            
-//            "<form style='display:inline-block; margin-right:5px; float:left' action='svgtopdf.do' method='post' id='study-view-scatter-plot-pdf'>"+
-//            "<input type='hidden' name='svgelement' id='study-view-scatter-plot-pdf-value'>"+
-//            "<input type='hidden' name='filetype' value='pdf'>"+
-//            "<input type='hidden' id='study-view-scatter-plot-pdf-name' name='filename' value=''>"+
-//            "<input type='submit' style='font-size:10px' value='PDF'>"+          
-//            "</form>"+
-//            
-//            "<form style='display:inline-block; margin-right:5px; float:left' action='svgtopdf.do' method='post' id='study-view-scatter-plot-svg'>"+
-//            "<input type='hidden' name='svgelement' id='study-view-scatter-plot-svg-value'>"+
-//            "<input type='hidden' name='filetype' value='svg'>"+
-//            "<input type='hidden' id='study-view-scatter-plot-svg-name' name='filename' value=''>"+
-//            "<input type='submit' style='font-size:10px' value='SVG'>"+    
-//            "</form>"+
-            
-//            "<img id='study-view-scatter-plot-menu-icon' class='study-view-menu-icon' style='float:left; width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-menu-icon' src='images/menu.svg'/>"+
             "<img id='study-view-scatter-plot-download-icon' class='study-view-download-icon' src='images/in.svg'/>" +
             "<img style='width:10px; height:10px;margin-top:4px; margin-right:4px;float:left;' class='study-view-drag-icon' src='images/move.svg'/>"+
             "<span style='float:left;' class='study-view-chart-plot-delete study-view-scatter-plot-delete'>x</span>"+
@@ -315,10 +259,6 @@ var StudyViewBoilerplate ={
             "<div id='study-view-scatter-plot-body-top-chart'></div>"+
             "<div id='study-view-scatter-plot-body-svg'></div>"+
             "<div id='study-view-scatter-plot-body-right-chart'></div></div>"+
-//            "<div id='study-view-scatter-plot-side'>"+
-//            "<div class='study-view-side-item'><input type='checkbox' id='study-view-scatter-plot-log-scale-x'></input><span class='study-view-scatter-plot-checkbox'>Log Scale X</span></div>"+
-//            "<div class='study-view-side-item'><input type='checkbox' id='study-view-scatter-plot-log-scale-y'></input><span class='study-view-scatter-plot-checkbox'>Log Scale y</span></div>"+
-//            "</div>"+
             "<div id='study-view-scatter-plot-loader' class='study-view-loader'>"+
             "<img src='images/ajax-loader.gif'/></div>"+
             "<div id='study-view-scatter-plot-control-panel'></div>"+
@@ -348,13 +288,5 @@ var StudyViewBoilerplate ={
             "</div></div>" +
             "<div id='study-view-word-cloud-loader' style='width: 100%; display:none; text-align:center'>"+
             "<img src='images/ajax-loader.gif'/></div>"+
-            "</div>",
-    dataTableDiv: 
-            "<table id='dataTable'>"+
-            "<tfoot>"+
-            "<tr>"+
-            "</tr>"+
-            "</tfoot>"+
-            "</table>"
-    
+            "</div>"
 };

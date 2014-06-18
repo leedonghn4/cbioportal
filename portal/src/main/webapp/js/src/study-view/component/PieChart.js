@@ -81,12 +81,8 @@ var PieChart = function(){
         $('#' + DIV.mainDiv + ' .study-view-pie-label').html("");
           
         initLabelInfo();
-        
-//        if(label.length > 6){
-//            bigLabelFunction();
-//        }else{
-            smallLabelFunction();
-//        }
+
+        basicPieLabel();
 
         _filters = pieChart.filters();
          
@@ -99,101 +95,6 @@ var PieChart = function(){
         });
         
         addPieLabelEvents();
-    }
-    
-    //Called when the number of label biggen than 6, used by addPieLabels()
-    function bigLabelFunction() {
-        var _totalTableNum = 1;
-        
-        if( label.length % 5 === 0 )
-            _totalTableNum = label.length / 5;
-        else
-            _totalTableNum = parseInt( label.length / 5 ) + 1;
-        
-        
-        for(var j = 0 ; j < label.length ; j+=5){
-            var _innerID = 0,
-                _tableId = parseInt(j/5),
-                _showTableStyle = '',
-                _leftArrowColor = 'blue',
-                _rightArrowColor = 'blue',
-                _currentTableDivId = DIV.labelTableID + "-" + _tableId;
-
-            if( _tableId !== 0 )  
-                _showTableStyle = 'style="display:none"';
-
-            $('#' + DIV.mainDiv)
-                    .find('.study-view-pie-label')
-                    .append("<table id='"+_currentTableDivId+"' "+
-                        _showTableStyle + " ></table>");
-
-            for(var i=j; i< j+5; i++){
-                if(i<label.length){
-                    var _tmpName = label[i].name;
-                    if(_tmpName.length > 9)
-                       _tmpName = _tmpName.substring(0,5) + " ...";
-                    if(( i - _tableId ) % 2 === 0 ){
-                        $('#' + DIV.mainDiv)
-                                .find('#' + _currentTableDivId)
-                                .append("<tr id="+ _innerID +" width='150px'></tr>");
-                        _innerID++;
-                    } 
-                    $('#' + DIV.mainDiv)
-                            .find('#'+_currentTableDivId+
-                                ' tr:nth-child(' + _innerID +')')
-                            .append('<td class="pieLabel" id="' +
-                                DIV.labelTableTdID+label[i].id + "-" + i +
-                                '" style="font-size:' + fontSize +
-                                'px"><svg width="'+(labelSize+3)+'" height="'+
-                                labelSize+'"><rect width="' +
-                                labelSize+'" height="'+ labelSize +
-                                '" style="fill:' + label[i].color + 
-                                ';" /></svg><span oValue="'+
-                                label[i].name + '" style="vertical-align: top">'+
-                                _tmpName+'</span></td>');
-
-                    //Only add qtip when the length of pie label bigger than 9
-                    if(label[i].name.length > 9){
-                        var _qtip = jQuery.extend(true, {}, StudyViewBoilerplate.pieLabelQtip);
-                        
-                        _qtip.content.text = label[i].name;
-                        $('#'+DIV.labelTableTdID+label[i].id+'-'+i).qtip(_qtip);
-                    }
-                }else{
-                    if(( i - _tableId ) % 2 === 0){
-                        $('#' + DIV.mainDiv)
-                            .find('#' + _currentTableDivId)
-                            .append("<tr id="+ _innerID +" width='150px'></tr>");
-                        _innerID++;
-                    } 
-                    $('#' + DIV.mainDiv )
-                        .find('#'+ _currentTableDivId +
-                            ' tr:nth-child(' + _innerID +')')
-                        .append('<td style="width="75px" height="15px"'+
-                                ' font-size:'+fontSize+'px"></td>');
-                }
-            }
-
-            if(_tableId === 0)
-                _leftArrowColor = 'grey';
-            if(_tableId+1 === _totalTableNum)
-                _rightArrowColor = 'grey';
-
-            $('#' + DIV.mainDiv)
-                .find('#'+_currentTableDivId+
-                    ' tr:nth-child(' + _innerID +')')
-                .append('<td id="pieLabel-pagging-' + DIV.chartDiv + "-" +
-                    _tableId + '" style=" width="75px" height="16px"' +
-                    ' border="0px" font-size:' + fontSize+'px">' +
-                    '<svg  width="75" height="13">' +
-                    '<path class="pie-label-left-pagging" ' +
-                    'd="M5 1 L0 11 L10 11 Z" fill="' + _leftArrowColor +
-                    '"/><text x=15 y=10 fill="black">' +
-                    ( _tableId + 1 ) + '/' + _totalTableNum + '</text>' +
-                    '<path class="pie-label-right-pagging"' +
-                    'd="M45 11 L40 1 L50 1 Z" fill="' + _rightArrowColor +
-                    '"/></svg></td>');
-        }
     }
     
     function addPieLabelEvents() {
@@ -263,77 +164,48 @@ var PieChart = function(){
         var _sDom = 'rt',
             _sScrollY = '200';
         if(category === 'regular') {
-//            _sDom = 'rt';
-//            _sScrollY = '200';
-//        }else {
-//            _sDom = '<f>rt';
-//            _sScrollY = '150';
-//            $("#"+ DIV.chartDiv +"-extend").css('display', 'block');
-//        }
         
-        $('#' + DIV.mainDiv).qtip({
-            id: DIV.mainDiv,
-            style: { 
-                classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow forceZindex qtip-max-width',
-            },
-            show: {event: "mouseover", solo: true, delay: 0},
-            hide: {fixed:true, delay: 300, event: "mouseleave"},
-            position: {my:'left center',at:'center right', viewport: $(window)},
-            content: $('#' + DIV.mainDiv + ' .study-view-pie-label').html(),
-            events: {
-                render: function(event, api) {
-                    $('#qtip-' + DIV.mainDiv + " table").attr('id', 'qtip-' + DIV.mainDiv + "-table");
-                    labelTable = $('#qtip-' + DIV.mainDiv + "-table").dataTable({
-                        "sDom": _sDom,
-                        "sScrollY": _sScrollY,
-                        "bPaginate": false,
-                        "bScrollCollapse": true,
-                        "aaSorting": [[1, 'desc']]
-                    });
-                    
-                    $('.pieLabel', api.elements.tooltip).mouseenter(function() {
-                        pieLabelMouseEnter(this);
-                    });
-                    
-                    $('.pieLabel', api.elements.tooltip).mouseleave(function(){
-                        pieLabelMouseLeave(this);
-                    });
-
-                    $('.pieLabel', api.elements.tooltip).click(function(_event){
-                        pieLabelClick(this);
-                        api.show(_event);
-                    });
-
-//                    $('.pie-label-left-pagging', api.elements.tooltip).click(function(){
-//                        var tmpValue = $(this).parent().parent().attr('id').split('-');
-//                        var currentTableID = Number(tmpValue[tmpValue.length-1]);
-//                        if(currentTableID !== 0){
-//                            var nextTableID = currentTableID-1;
-//                            $('#'+ DIV.labelTableID + '-'+currentTableID).css('display','none');            
-//                            $('#'+DIV.labelTableID+'-'+nextTableID).css('display','block');
-//                        }
-//                    });
-//                    
-//                    $('.pie-label-right-pagging', api.elements.tooltip).click(function(){
-//                        var fill = $(this).attr('fill');
-//                        if(fill === 'blue'){
-//                            var tmpValue = $(this).parent().parent().attr('id').split('-');
-//                            var currentTableID = Number(tmpValue[tmpValue.length-1]);
-//                            var nextTableID = currentTableID+1;
-//
-//                            $('#'+DIV.labelTableID+'-'+currentTableID).css('display','none');            
-//                            $('#'+DIV.labelTableID+'-'+nextTableID).css('display','block');
-//                        }
-//                    });
+            $('#' + DIV.mainDiv).qtip({
+                id: DIV.mainDiv,
+                style: { 
+                    classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow forceZindex qtip-max-width',
                 },
-                visible: function(event, api) {
-                    if(!$('#qtip-' + DIV.mainDiv + "-table").hasClass('clicked')){
-                        labelTable.fnAdjustColumnSizing();
-                        $('#qtip-' + DIV.mainDiv + "-table").addClass('clicked');
+                show: {event: "mouseover", solo: true, delay: 0},
+                hide: {fixed:true, delay: 300, event: "mouseleave"},
+                position: {my:'left center',at:'center right', viewport: $(window)},
+                content: $('#' + DIV.mainDiv + ' .study-view-pie-label').html(),
+                events: {
+                    render: function(event, api) {
+                        $('#qtip-' + DIV.mainDiv + " table").attr('id', 'qtip-' + DIV.mainDiv + "-table");
+                        labelTable = $('#qtip-' + DIV.mainDiv + "-table").dataTable({
+                            "sDom": _sDom,
+                            "sScrollY": _sScrollY,
+                            "bPaginate": false,
+                            "bScrollCollapse": true,
+                            "aaSorting": [[1, 'desc']]
+                        });
+                        
+                        $('.pieLabel', api.elements.tooltip).mouseenter(function() {
+                            pieLabelMouseEnter(this);
+                        });
+                        
+                        $('.pieLabel', api.elements.tooltip).mouseleave(function(){
+                            pieLabelMouseLeave(this);
+                        });
+
+                        $('.pieLabel', api.elements.tooltip).click(function(_event){
+                            pieLabelClick(this);
+                            api.show(_event);
+                        });
+                    },
+                    visible: function(event, api) {
+                        if(!$('#qtip-' + DIV.mainDiv + "-table").hasClass('clicked')){
+                            labelTable.fnAdjustColumnSizing();
+                            $('#qtip-' + DIV.mainDiv + "-table").addClass('clicked');
+                        }
                     }
                 }
-            }
-        });
+            });
 
         }else if(category === 'extendable'){
             $("#"+ DIV.chartDiv +"-extend").css('display', 'block');
@@ -343,48 +215,6 @@ var PieChart = function(){
     //This function is designed to add functions like click, on, or other
     //other functions added after initializing this Pie Chart.
     function addFunctions() {
-//        var _plotDataButtonDiv;
-//        if(plotDataButtonFlag) {
-////                _plotDataButtonDiv = "<input type='button' id='"+
-////                                    DIV.chartDiv+"-plot-data' "+
-////                                    "style='font-size:10px;clear:right;float:right;' value='Survival'>";
-//            _plotDataButtonDiv = "<img id='"+
-//                                DIV.chartDiv+"-plot-data' class='study-view-survival-icon' src='images/survival_icon.svg'/>";
-//        }else {
-//            _plotDataButtonDiv = "";
-//        }
-//        $("#"+DIV.chartDiv).append("<div id='"+DIV.chartDiv+"-side' class='study-view-pdf-svg-side'>"+
-////                _plotDataButtonDiv + 
-////                "<form style='display:inline-block;clear:right;float:right;' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-pdf'>"+
-////                "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-pdf-value'>"+
-////                "<input type='hidden' name='filetype' value='pdf'>"+
-////                "<input type='hidden' id='"+DIV.chartDiv+"-pdf-name' name='filename' value='"+StudyViewParams.params.studyId + "_" +selectedAttr+".pdf'>"+
-////                "<input type='submit' style='font-size:10px;' value='PDF'>"+          
-////                "</form>"+
-////                "<form style='display:inline-block;clear:right;float:right;' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-svg'>"+
-////                "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-svg-value'>"+
-////                "<input type='hidden' name='filetype' value='svg'>"+
-////                "<input type='hidden' id='"+DIV.chartDiv+"-svg-name' name='filename' value='"+StudyViewParams.params.studyId + "_" +selectedAttr+".svg'>"+
-////                "<input type='submit' style='font-size:10px;clear:right;float:right;' value='SVG'></form>"+
-//                _plotDataButtonDiv + 
-//                "<div id='"+ DIV.chartDiv+"-download-icon-wrapper'" +
-//                "class='study-view-download-icon'><img id='"+ 
-//                DIV.chartDiv+"-download-icon' style='float:left'"+
-//                "src='images/in.svg'/></div>"+
-////                "<img id='"+ DIV.chartDiv+"-transfer-icon'"+
-////                " class='study-view-transfer-icon hover' "+
-////                "src='images/transfer.svg'/>"+
-////                "<img id='"+ DIV.chartDiv+"-expand-icon'"+
-////                " class='study-view-expand-icon' "+
-////                "src='images/expand.svg'/><img id='"+ 
-////                DIV.chartDiv+"-contract-icon'"+
-////                " class='study-view-contract-icon' "+
-////                "src='images/contract.svg'/>"+
-//                "</div>");
-                
-        
-        
-        
         if(selectedAttr !== 'CASE_ID'){
             pieChart.on("filtered", function(chart,filter){
                 var _currentFilters = pieChart.filters();
@@ -731,36 +561,11 @@ var PieChart = function(){
 
         var _x1 = Number(_pointsInfo[1]),
             _y1 = Number(_pointsInfo[2]),
-            //_largeArc = Number(_pointsInfo[6]),
             _x2 = Number(_pointsInfo[8]),
             _y2 = Number(_pointsInfo[9]),
             _r = Number(_pointsInfo[3]);
 
         if((_x1 - _x2!==0 || _y1 - _y2!==0) && _pointsInfo1.length === 2){
-            
-            //This comment function is designed to calculate the central point
-            //between start and end points. Has been abandon since using arc
-            //marker stead of red circle marker.
-            /*
-            var _xm = (_x1 + _x2) /2,
-                _ym = (_y1 + _y2) /2;
-            
-            var m = Math.sqrt((Math.pow(_xm,2)+Math.pow(_ym,2)));
-
-            
-            var _tmpX = (_r + 3) / m * _xm,
-                _tmpY = (_r + 3) / m * _ym;
-
-            if(_xm === 0 && _ym === 0){
-                _tmpY = 0;
-                _tmpX = _r + 6;
-            }
-            if(_largeArc === 1 && Math.abs(_x1 - _x2) >0.1) {
-                _tmpX = -_tmpX;
-                _tmpY = -_tmpY;
-            }*/
-            
-            //
             var _pointOne = Math.atan2(_y1,_x1);
             var _pointTwo = Math.atan2(_y2,_x2);
 
@@ -932,7 +737,7 @@ var PieChart = function(){
     }
     
     //Called when the number of label biggen than 6, used by addPieLabels()
-    function smallLabelFunction() {
+    function basicPieLabel() {
         var _innerID = 0;
         $('#' + DIV.mainDiv)
                 .find('.study-view-pie-label')

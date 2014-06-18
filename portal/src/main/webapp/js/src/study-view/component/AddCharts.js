@@ -34,7 +34,6 @@ var AddCharts = (function(){
             _showedNames = [],
             _showedNamesLength = 0;
         
-//        $('#study-view-add-chart ul').find('li').remove().end();
         $('#study-view-add-chart')
                 .find('option')
                 .remove()
@@ -60,18 +59,12 @@ var AddCharts = (function(){
         });
         
         for(var i = 0; i < _showedNamesLength; i++){
-//            $('#study-view-add-chart ul')
-//                    .append($("<li></li>")
-//                        .attr("id",_showedNames[i].name)
-//                        .text(_showedNames[i].displayName));
             $('#study-view-add-chart')
                 .append($("<option></option>")
                     .attr("id",_showedNames[i].name)
                     .text(_showedNames[i].displayName));
         }
-        
-        
-//        if($('#study-view-add-chart ul').find('li').length === 0 ){
+      
         if($('#study-view-add-chart').find('option').length === 1){
             $('#study-view-add-chart').css('display','none');
         }else{
@@ -80,12 +73,8 @@ var AddCharts = (function(){
     }
     
     function bindliClickFunc() {
-//        $('#study-view-add-chart ul li').unbind('click');
-//        $('#study-view-add-chart ul li').click(function() {
         $('#study-view-add-chart').unbind('change');
         $('#study-view-add-chart').change(function() {
-//            var _id = $(this).attr('id'),
-//                _text = $(this).text();
             var _id = $(this).children(":selected").attr('id'),
                 _text = $(this).children(":selected").text()
             liClickCallback(_id, _text);
@@ -94,7 +83,6 @@ var AddCharts = (function(){
     return {
         init: function() {
             createDiv();
-//            addEvents();
         },
         
         initAddChartsButton: initAddChartsButton,

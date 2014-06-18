@@ -1,23 +1,8 @@
-/* main style */
-/*
-#study-view-add-chart li{
-    color: white;
-    text-align: center;
-    list-style: none;
-    border-style: solid;
-    border-width: 1px 0 0 0;
-    border-color: lightgrey;
-    padding: 0 5px;
-}
-#study-view-add-chart li:hover{
-    cursor: pointer;
-    background-color: lightgrey;
-}
-#study-view-add-chart ul{
-    float:right;
-    padding: 0 0 5px 0;
-}
-*/
+/* Study View Main Style 
+---------------------------------------------------*/
+
+/* All ID Styles 
+---------------------------------------------------*/
 #study-view-top-wrapper {
     width: 100%;
     float: left;
@@ -45,7 +30,6 @@
     z-index:21;
 }
 #study-view-header-left-0 {
-/*    left: 0;*/
     float: left;
     width: 160px;
     margin: 0 5px 0 0;
@@ -57,7 +41,6 @@
     color: #555555;
 }
 #study-view-header-left-1 {
-    /*left: 0;*/
     float: left;
     margin: 0 5px 0 0;
     width: 190px;
@@ -67,10 +50,8 @@
     background: #e6e6e6;
     font-weight: normal;
     color: #555555;
-    //height: 30px;
 }
 #study-view-header-left-2 {
-    /*left: 210px;*/
     float: left;
     margin: 0 5px 0 0;
     font-family: Verdana,Arial,sans-serif;
@@ -81,11 +62,6 @@
     color: #555555;
 }
 #study-view-header-left-3 {
-    /*position: absolute;*/
-    /*left: 410px;*/
-/*    height: 30px;
-    line-height: 30px;*/
-    /*top: 2px;*/
     float: left;
     border: 0;
     font-size: 13px;
@@ -95,7 +71,6 @@
     padding: 0 10px;
     background-color: white;
     width: auto;
-    /*color: #2986e2;*/
     color: black;
     text-align: center;
     font-family: Verdana,Arial,sans-serif;
@@ -104,9 +79,6 @@
 }
 #study-view-header-left-3:hover{
     cursor: default;
-}
-.study-view-header-button:hover {
-    cursor: pointer;
 }
 #study-view-main {
     margin-left: auto;
@@ -132,56 +104,6 @@
     border-width: 1px;
     border-color: lightgrey;
 }
-#data-table-chart {
-    max-width:1200px;
-    width : 100%;
-    float:left;
-    height:100%;
-    margin-top:30px;
-}
-#dialog-form {
-    position:fixed;
-    left:50px;
-    top:90px;
-    width:250px;
-    text-align:right;
-    font-size:12px;
-}
-#dialog-form h4{
-    font-size:15px;
-}
-#data-chart h4{
-    margin-top:0px;
-    margin-bottom:5px;
-    font-size:10px;
-}
-#data-chart h3{
-    margin-bottom:5px;
-    font-size:12px;
-    text-align:center;
-}
-#data-chart {
-    width:200px;
-    margin-bottom:10px;
-    margin-left:20px;
-    text-align: center;
-    float:left;
-}
-#study-view-update {
-    float:left;
-    width:1200px;
-    margin:auto;
-}
-#study-view-updateContent {
-    width: 350px;
-    height: 25px;
-    margin-left:auto;
-    margin-right:auto;
-    margin-top: 20px;
-}
-#study-view-dataTable-updateTable {
-    margin-right: 75px;
-}
 #study-view-header-function {
     position: absolute;
     top: 60px;
@@ -199,53 +121,68 @@
     float: left;
     margin: 5px 0 0 5px;
 }
-
-#study-view-scatter-plot-side {
-    border: 1px solid lightgray;
-    border-left-width: 0;
-    position: absolute;
-    width: auto;
-    left: 375px;
-    top: 22px;
-    background: white;
-    display: none;
-    z-index: 1;
-}
 #clinical_table_info {
     float: left;
 }
-/*
-#study-view-scatter-plot-body-top-chart {
-    width: 100%;
-    height: 80px;
-    float: left;
-}
-#study-view-scatter-plot-body-right-chart {
-    width: 130px;
-    height: 350px;
-    float: left;
-}
-#study-view-scatter-plot-body-svg {
-    width: 430px;
-    height: 350px;
-    float: left;
-}*/
 #study-view-word-cloud-title {
     width:180px; 
     text-align:center;
     margin-bottom: 20px;
 }
-#study-view-selectAttr{
-     display:none;
+#data-table-chart table.dataTable{
+    width:100%;
+    font-size:12px;
 }
-#dataTables_filter {
-    width:auto;
-    float: right;
+#data-table-chart table#dataTable>tbody:hover{
+    cursor: pointer;
 }
+#data-table-chart table.dataTable>thead>tr>th:nth-child(1) {background-color: white; white-space: nowrap;}
+#data-table-chart table.dataTable>thead>tr>th {
+    border-style: hidden;
+    text-align: center;
+    vertical-align: middle;
+    word-wrap:break-word;
+    max-width: 200px;
+    min-width: 60px;
+}#data-table-chart table.dataTable>tbody>tr>td:nth-child(1) {
+    text-align: center;
+    white-space: nowrap;
+}
+#data-table-chart table.dataTable>tbody>tr>td {
+    max-width: 200px;
+    min-width: 60px;
+}
+#data-table-chart table.dataTable>tfoot>tr>th {
+    max-width: 200px;
+    min-width: 60px;
+    border-top: 0;
+}
+/* Used for leftcolumnWrapper of the datatable in summary page*/
+#data-table-chart .DTFC_LeftBodyWrapper {
+    background-color: white;
+}
+#data-table-chart .DTFC_LeftBodyLiner {
+    overflow-y: hidden
+}
+#data-table-chart .DTFC_LeftHeadWrapper {
+    background-color: white;
+}
+#clinical_table_wrapper table.dataTable>tbody>tr>td {
+    white-space: nowrap;
+}
+
+
+
+
+/* All Class Styles 
+---------------------------------------------------*/
 .study-view-pie-label .dataTables_filter {
     width: 100%;
     text-align: left;
     padding-top: 4px;
+}
+.study-view-header-button:hover {
+    cursor: pointer;
 }
 .qtip-content .dataTables_filter {
     width: 100%;
@@ -256,17 +193,7 @@
 .qtip-content td {
     white-space: nowrap;
 }
-#dataTable_info {
-    float: left;
-    width: auto;
-    margin-left: 3px;
-}
-/* CLASS styles */
 .study-view-header{    
-    //border-style: solid;
-    //border-width: 1px;
-    //border-color: lightgrey;
-    //border-radius: 5px;
     margin: 0;
     position: absolute;
     z-index: 21;
@@ -292,11 +219,6 @@
     -o-transition: All 0.3s ease;
     -ms-transition: All 0.3s ease;
     transition: All 0.3s ease;
-    /*
-    -moz-box-shadow: 0 0 5px #ccc inset;
-    -webkit-box-shadow: 0 0 5px #ccc inset;
-    box-shadow: 0 0 5px #ccc inset;
-    */
 }
 .boxLeft {
     //box-shadow: 2px 2px 2px lightgrey;
@@ -311,7 +233,6 @@
     display: block;
 }
 .pieLabel {
-    /*width: 75px;*/
     height: 15px;
     border-spacing: 0px;
 }
@@ -370,23 +291,10 @@
 .study-view-pdf-svg-side {
     position: absolute;
     //width: 35px;
-    /*left: 130px;*/
     right: 0;
     top: 15px;
-/*    border: 1px solid lightgrey;
-    left: 180px;
-    top: 15px;
-    z-index: 20;
-    padding: 2px 2px 4px 0;
-    background-color: white;
-    border-left-width: 0;*/
-    /*float: left;*/
     width: 14px;
     display: none;
-}
-.study-view-pdf-svg-side.bar {
-    /*left: 375px;*/
-    /*left: 325px;*/
 }
 .w1 {
     width: 180px;
@@ -406,7 +314,6 @@
 .w6{
     width:1130px;
 }
-
 .w4{
     width:750px;
 }
@@ -486,7 +393,6 @@
     font-size:10px;
     display: none;
 }
-
 .study-view-drag-icon {
     width:10px;
     height:10px;
@@ -544,23 +450,6 @@
 .heightlightRow {
     background-color: lightgrey !important;
 }
-/*.study-view-expand-icon {
-    width:9px;
-    height:9px;
-    margin-top:6px;
-    margin-right:4px;
-    margin-left:1px;
-    float:left;
-}
-.study-view-contract-icon {
-    width:9px;
-    height:9px;
-    margin-top:6px;
-    margin-right:4px;
-    margin-left:1px;
-    float:left;
-    display: none;
-}*/
 .pvalMatixTable {
     background-color: white;
 }
@@ -585,16 +474,6 @@
     display: block;
     clear: left;
     white-space: nowrap;
-}
-chartTitleH4{
-    font-size: 10px;
-    color: black;
-    font-weight: bold;
-    padding-left: 5px;
-}
-pieH3{
-    font-size: 10px;
-    color: blue;
 }
 .data-pie-chart {
     width:100px;
@@ -674,30 +553,6 @@ pieH3{
     color: #3182bd;
     font-weight: bold;
 }
-.study-view-middle-button{
-    background-color: white;
-    color: #2986e2;
-    border: 1px solid #2986e2;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    cursor:pointer;
-}
-.study-view-middle-button:hover:enabled{
-    background-color: #2986e2;
-    color:white;
-    -webkit-transition: All 0.3s ease;
-    -moz-transition: All 0.3s ease;
-    -o-transition: All 0.3s ease;
-    -ms-transition: All 0.3s ease;
-    transition: All 0.3s ease;
-}
-.study-view-middle-button:disabled {
-    background-color:lightgray;
-}
-.study-view-middle-button:hover:disabled{
-    cursor: default;
-}
 .brush .extent {
     stroke: #fff;
     fill-opacity: .125;
@@ -706,10 +561,6 @@ pieH3{
 } 
 .row_selected{
     background-color: lightgray;
-}
-.dataTableTop {
-    float: left;
-    width: 100%;
 }
 .dataTableReset {
     float: left;
@@ -736,7 +587,9 @@ pieH3{
 .qtip {
     max-width: 1000px;
 }
-//Show/Hide columns related classes
+
+/*Show/Hide columns related classes
+-----------------------------------*/
 .ColVis_collection {
     width: 500px;
 }
@@ -746,11 +599,6 @@ pieH3{
 .ColVis_Button.TableTools_Button.ColVis_MasterButton{
     outline: none;
     background-color: white;
-/*    color: #2986e2;
-    border: 1px solid #2986e2;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;*/
     cursor: pointer;
     height: 23px;
     padding: 0;
@@ -758,65 +606,12 @@ pieH3{
 .ColVis_Button.TableTools_Button.ColVis_MasterButton span{
     padding: 2px 6px 3px 6px;
 }
-/*.ColVis_Button.TableTools_Button.ColVis_MasterButton :hover{
-    background-color: #2986e2;
-    color:white;
-    -webkit-transition: All 0.3s ease;
-    -moz-transition: All 0.3s ease;
-    -o-transition: All 0.3s ease;
-    -ms-transition: All 0.3s ease;
-    transition: All 0.3s ease;    
-}
-
-Style for search box in dataTable of Summaery Tab
-.dataTables_filter input{
-    border: 1px solid #2986e2;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-}*/
+/*
 #content ul{
     margin-bottom: 0;
 }
 #content li a{
     outline: none;
-}
-/*
-.ui-widget-content {
-    border: 0;
-}
-.ui-widget-header {
-    border: 0;
-    background: white;
-}
-.ui-tabs .ui-tabs-nav {
-    padding: 0;
-}
-.ui-state-default.ui-corner-top.ui-tabs-active.ui-state-active{
-    border: 1px solid #aaaaaa;
-    border-bottom: 0;
-    background: white;
-    color: #2986e2;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    -moz-box-shadow: 0 0 5px lightgrey inset;
-    -webkit-box-shadow: 0 0 5px lightgrey inset;
-    box-shadow: 0 0 5px lightgrey inset;
-}
-
-.ui-state-default.ui-corner-top.ui-state-hover {
-    border: 1px solid #aaaaaa;
-    border-bottom: 0;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    -moz-box-shadow: 0 0 5px lightgrey inset;
-    -webkit-box-shadow: 0 0 5px lightgrey inset;
-    box-shadow: 0 0 5px lightgrey inset;
-}
-.ui-state-default.ui-corner-top{
-    border: 1px;
-    border-color: white;
-    background: white;
 }*/
 .study-view-survival-label-font-1{
     font-size: 9px;
@@ -851,11 +646,6 @@ Style for search box in dataTable of Summaery Tab
     height: 22px;
     margin-bottom: 5px;
 }
-.study-view-survival-plot-select {
-    font-size:10px;
-    margin-right:5px;
-    width: 130px;
-}
 .study-view-survival-plot-body-label {
     width: auto;
     overflow-y: auto;
@@ -872,9 +662,6 @@ Style for search box in dataTable of Summaery Tab
 .study-view-survival-plot-body-label svg{
     float: left;
 }
-.study-view-menu-icon:hover{
-    cursor: pointer;
-}
 .study-view-loader {
     width: 100%;
     display:none;
@@ -882,92 +669,17 @@ Style for search box in dataTable of Summaery Tab
     top: 30%;
 }
 
-/* These five styles are designed for study view tabs. 
-#dc-plots {
-    border: 1px solid #aaaaaa;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-}
-#clinical-plots {
-    border: 1px solid #aaaaaa;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-}
-#mutations {
-    border: 1px solid #aaaaaa;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-}
-#clinical {
-    border: 1px solid #aaaaaa;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-}
-#cna {
-    border: 1px solid #aaaaaa;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-}*/
 
-/* tag styles */
-/*
-ul {
-    list-style-type: none;
+
+/* All Tag Styles  
+---------------------------------------------------*/
+chartTitleH4{
+    font-size: 10px;
+    color: black;
+    font-weight: bold;
+    padding-left: 5px;
 }
-ul li{
-    cursor:pointer;
-    margin: 2px 0px 0px 0px;
-}
-ul li a {
-    display:block;
-}
-ul li a:hover, ul li a:focus {
-    color:skyblue;
-}
-*/
-#data-table-chart table.dataTable{
-    width:100%;
-    font-size:12px;
-}
-#data-table-chart table#dataTable>tbody:hover{
-    cursor: pointer;
-}
-#data-table-chart table.dataTable>thead>tr>th:nth-child(1) {background-color: white; white-space: nowrap;}
-#data-table-chart table.dataTable>thead>tr>th {
-    //white-space:nowrap;
-    //-webkit-transform: rotate(315deg);  
-    //-moz-transform: rotate(315deg);
-    //-ms-transform: rotate(315deg);
-   // -o-transform: rotate(315deg);
-    border-style: hidden;
-    text-align: center;
-    vertical-align: middle;
-    word-wrap:break-word;
-    max-width: 200px;
-    min-width: 60px;
-}#data-table-chart table.dataTable>tbody>tr>td:nth-child(1) {
-    text-align: center;
-    white-space: nowrap;
-}
-#data-table-chart table.dataTable>tbody>tr>td {
-    max-width: 200px;
-    min-width: 60px;
-}
-#data-table-chart table.dataTable>tfoot>tr>th {
-    max-width: 200px;
-    min-width: 60px;
-    border-top: 0;
-}
-/* Used for leftcolumnWrapper of the datatable in summary page*/
-#data-table-chart .DTFC_LeftBodyWrapper {
-    background-color: white;
-}
-#data-table-chart .DTFC_LeftBodyLiner {
-    overflow-y: hidden
-}
-#data-table-chart .DTFC_LeftHeadWrapper {
-    background-color: white;
-}
-#clinical_table_wrapper table.dataTable>tbody>tr>td {
-    white-space: nowrap;
+pieH3{
+    font-size: 10px;
+    color: blue;
 }

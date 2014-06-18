@@ -95,30 +95,6 @@ var BarChart = function(){
         });
     }
     
-    function showHideDivision(_listenedDiv, _targetDiv, _time){
-        var _targetLength = _targetDiv.length;
-        for ( var i = 0; i < _targetLength; i++) {
-            $(_targetDiv[i]).css('display', 'none');
-        }
-        $(_listenedDiv).hover(function(){
-            $(_listenedDiv).css('z-index', '1');
-            for ( var i = 0; i < _targetLength; i++) {
-                $(_targetDiv[i]).stop().fadeIn(_time, function(){
-                    $(this).css('display', 'block');
-                });
-            }
-//            $("#"+DIV.chartDiv +"-title-wrapper").width('85%');
-        }, function(){
-            $(_listenedDiv).css('z-index', '0');
-            for ( var i = 0; i < _targetLength; i++) {
-                $(_targetDiv[i]).stop().fadeOut(_time, function(){
-                    $(this).css('display', 'none');
-                });
-            }
-//            $("#"+DIV.chartDiv +"-title-wrapper").width('100%');
-        });
-    }
-    
     //Add all listener events
     function addEvents() {
         $('#' + DIV.chartDiv + '-download-icon').qtip('destroy', true);
@@ -181,10 +157,8 @@ var BarChart = function(){
             }
         });
         
-        showHideDivision("#"+DIV.mainDiv, 
-                            ["#"+DIV.chartDiv+"-side"], 0);
-        showHideDivision("#"+DIV.mainDiv, 
-                            ["#"+DIV.chartDiv+"-header"], 0);
+        StudyViewUtil.showHideDivision(   "#"+DIV.mainDiv, 
+                            "#"+DIV.chartDiv+"-header", 0);
     
         if(param.plotDataButtonFlag){
             $("#"+DIV.chartDiv+"-plot-data").click(function(){
@@ -464,8 +438,6 @@ var BarChart = function(){
        }
         
         if(param.plotDataButtonFlag) {
-//            _plotDataDiv = "<input type='button' id='"+DIV.chartDiv+"-plot-data' "+
-//                "style='clear:right;float:right;font-size:10px' value='Survival' />";
             _plotDataDiv = "<img id='"+
                                 DIV.chartDiv+"-plot-data' class='study-view-survival-icon' src='images/survival_icon.svg'/>";
         }else {
@@ -475,11 +447,6 @@ var BarChart = function(){
         var contentHTML = "<div id='"+DIV.chartDiv +"-title-wrapper' "+
                 "style='height: 18px; width: 100%'><div style='float:right' "+
                 "id='"+DIV.chartDiv+"-header'>"+
-//                "<a href='javascript:StudyViewInitCharts.getChartsByID("+ 
-//                param.chartID +").getChart().filterAll();" +
-//                "dc.redrawAll();'>"+
-//                "<span title='Reset Chart' class='study-view-dc-chart-change'>"+
-//                "RESET</span></a>"+
                 "<img id='"+ DIV.chartDiv +"-reload-icon' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
                 _logCheckBox +
                 _plotDataDiv +
@@ -491,18 +458,6 @@ var BarChart = function(){
                 "\" class='"+ param.className +"'  oValue='" + param.selectedAttr + "," + 
                 param.selectedAttrDisplay + ",bar'>"+
                 "<div id='"+DIV.chartDiv+"-side' class='study-view-pdf-svg-side bar'>"+
-                
-//                "<form style='clear:right;float:right;display:inline-block;' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-pdf'>"+
-//                "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-pdf-value'>"+
-//                "<input type='hidden' name='filetype' value='pdf'>"+
-//                "<input type='hidden' id='"+DIV.chartDiv+"-pdf-name' name='filename' value='"+StudyViewParams.params.studyId + "_" +param.selectedAttr+".pdf'>"+
-//                "<input type='submit' style='font-size:10px' value='PDF'>"+          
-//                "</form>"+
-//                "<form style='clear:right;float:right;display:inline-block' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-svg'>"+
-//                "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-svg-value'>"+
-//                "<input type='hidden' name='filetype' value='svg'>"+
-//                "<input type='hidden' id='"+DIV.chartDiv+"-svg-name' name='filename' value='"+StudyViewParams.params.studyId + "_" +param.selectedAttr+".svg'>"+
-//                "<input type='submit' style='font-size:10px' value='SVG'></form>"+
                 "</div></div>"+
                 "<div style='width:100%; float:center;text-align:center;'>"+
                 "<chartTitleH4>" + param.selectedAttrDisplay + "</chartTitleH4></div>";

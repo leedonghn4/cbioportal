@@ -60,22 +60,13 @@ var StudyViewInitScatterPlot = (function() {
             scatterPlot.jointClickCallback(scatterPlotClickCallBack);
             
             if(scatterPlotDataAttr.max_x > 1000){
-//                $("#" + scatterPlotOptions.names.log_scale_x).attr('checked',true);
                 scatterPlot.setAxisXLogFlag(true);
                 scatterPlot.updateScaleX(scatterPlotOptions.names.log_scale_x);
             }
             if(scatterPlotDataAttr.max_y > 1000){
-//                $("#" + scatterPlotOptions.names.log_scale_y).attr('checked',true);
                 scatterPlot.setAxisYLogFlag(true);
                 scatterPlot.updateScaleY(scatterPlotOptions.names.log_scale_y);
             }
-           
-//            $("#" + scatterPlotOptions.names.log_scale_x).change(function() {
-//                scatterPlot.updateScaleX(scatterPlotOptions.names.log_scale_x);
-//            });
-//            $("#" + scatterPlotOptions.names.log_scale_y).change(function() {
-//                scatterPlot.updateScaleY(scatterPlotOptions.names.log_scale_y);
-//            });
             
             StudyViewUtil
                     .showHideDivision("#study-view-scatter-plot", 
@@ -128,34 +119,6 @@ var StudyViewInitScatterPlot = (function() {
                     }
                 }
             });
-            
-            
-//            $("#study-view-scatter-plot-menu-icon").unbind("click");
-//            $("#study-view-scatter-plot-menu-icon").click(function() {
-//                var _side = $("#study-view-scatter-plot-side");
-//                var _display = _side.css('display');
-//                if (_display === "none") {
-//                    StudyViewUtil.changePosition("#study-view-scatter-plot", 
-//                                    "#study-view-scatter-plot-side",
-//                                    "#dc-plots");
-//                    _side.css('display', 'block');
-//                } else {
-//                    _side.css('display', 'none');
-//                }
-//            });
-            
-//            $("#study-view-scatter-plot-pdf").submit(function(){
-//                setSVGElementValue("study-view-scatter-plot-body-svg",
-//                    "study-view-scatter-plot-pdf-value",
-//                    scatterPlotOptions,
-//                    _title);
-//            });
-//            $("#study-view-scatter-plot-svg").submit(function(){
-//                setSVGElementValue("study-view-scatter-plot-body-svg",
-//                    "study-view-scatter-plot-svg-value",
-//                    scatterPlotOptions,
-//                    _title);
-//            });
         }else{
             $('#study-view-scatter-plot').css('display','none');
         }
@@ -255,20 +218,17 @@ var StudyViewInitScatterPlot = (function() {
                             styleDatum.strokeWidth = '0';
                             styleDatum.size = '60';
                         }
-//                        styleDatum.opacity = '1';
                     }else{
                         if(_hasFilterFlag){
                             styleDatum.fill = '#2986e2';
                             styleDatum.stroke = '#2986e2';
                             styleDatum.strokeWidth = '0';
                             styleDatum.size = '60';
-//                            styleDatum.opacity = '0.6';
                         }else {
                             styleDatum.fill = '#2986e2';
                             styleDatum.stroke = '#2986e2';
                             styleDatum.strokeWidth = '0';
                             styleDatum.size = '60';
-//                            styleDatum.opacity = '1';
                         }
                     }
                 }else if(_selectedCaseIds.length === 0){
@@ -276,13 +236,11 @@ var StudyViewInitScatterPlot = (function() {
                     styleDatum.stroke = '#2986e2';
                     styleDatum.strokeWidth = '0';
                     styleDatum.size = '60';
-//                    styleDatum.opacity = '1';
                 }else{
                     styleDatum.fill = 'red';
                     styleDatum.stroke = 'red';
                     styleDatum.strokeWidth = '0';
                     styleDatum.size = '60';
-//                    styleDatum.opacity = '1';
                 }
                 _style.push(styleDatum);
             }
@@ -298,19 +256,6 @@ var StudyViewInitScatterPlot = (function() {
         if(_brushedCaseIds.length === 0 || (shiftClickedCaseIds.length === 1 && _brushedCaseIds.indexOf(shiftClickedCaseIds[0]) === -1)){
             shiftClickedCaseIds = [];
             clickedCaseId = '';
-            
-//            var oTable = $("#dataTable").dataTable();
-//
-//            $(oTable.fnSettings().aoData).each(function (){
-//                if($(this.nTr).hasClass('row_selected')){
-//                    $(this.nTr).removeClass('row_selected');
-//                    if($(this.nTr).hasClass('odd')){
-//                       $(this.nTr).css('background-color','#E2E4FF'); 
-//                    }else{
-//                        $(this.nTr).css('background-color','white');
-//                    }
-//                }
-//            });
         }
         
         

@@ -39,8 +39,6 @@ var LoadingJS = (function(){
                 ],
                 view: [
                     'StudyViewInitCharts', 
-                    'StudyViewInitDataTable',
-                    'StudyViewInitMiddleComponents',
                     'StudyViewInitTopComponents',
                     'StudyViewInitScatterPlot',
                     'StudyViewInitIntroJS',

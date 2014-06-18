@@ -271,7 +271,6 @@ var StudyViewInitCharts = (function(){
                     caseIds: _unselectedCases,
                     color: "#2986e2"
                 }
-                //,ALL_CASES: _allCases
             };
         }else{
             _passedCases = {
@@ -453,17 +452,6 @@ var StudyViewInitCharts = (function(){
                 for(var j=0; j< _itemElemsLength; j++){
                     $("#" + _itemElems[j].id).css('z-index','1');
                 }
-                
-//                //if label of survival opened, close it in here
-//                StudyViewSurvivalPlotView.detectLabelPosition();
-                
-                //Detect Scatter Plot
-                if($("#study-view-scatter-plot-side").css('display') === 'block'){
-                    StudyViewUtil.changePosition(
-                            '#study-view-scatter-plot',
-                            '#study-view-scatter-plot-side',
-                            "#dc-plots");
-                }
             });
             
             // bind Draggabilly events to Packery
@@ -540,13 +528,6 @@ var StudyViewInitCharts = (function(){
            
             $($(this).parent().parent().parent()).css('display','none');
             $('#study-view-add-chart').css('display','block');
-//            $('#study-view-add-chart ul')
-//                    .append($('<li></li>')
-//                        .attr('id','survival-' + _plotId)
-//                        .text(_title));
-//            
-//            $('#study-view-add-chart ul').stop().hide();
-//            $('#study-view-add-chart ul').css('height','100%');
             $('#study-view-add-chart')
                     .append($('<option></option>')
                         .attr('id','survival-' + _plotId)
@@ -570,13 +551,6 @@ var StudyViewInitCharts = (function(){
         $(".study-view-scatter-plot-delete").click(function (){
             $("#study-view-scatter-plot").css('display','none');
             $('#study-view-add-chart').css('display','block');
-//            $('#study-view-add-chart ul')
-//                    .append($('<li></li>')
-//                        .attr('id','mutationCNA')
-//                        .text('Number of Mutation vs Fraction of copy number altered genome'));
-//                
-//            $('#study-view-add-chart ul').stop().hide();
-//            $('#study-view-add-chart ul').css('height','100%');
             $('#study-view-add-chart')
                     .append($('<option></option>')
                         .attr('id','mutationCNA')
@@ -930,11 +904,6 @@ var StudyViewInitCharts = (function(){
             redrawSpecialPlots();
         }
         dc.deregisterChart(varChart[_chartID].getChart());
-//        $('#study-view-add-chart ul')
-//                .append($('<li></li>').attr('id',_value[0]).text(_value[1]));
-//        
-//        $('#study-view-add-chart ul').stop().hide();
-//        $('#study-view-add-chart ul').css('height','100%');
         $('#study-view-add-chart')
                 .append($('<option></option>').attr('id',_value[0]).text(_value[1]));     
         
@@ -1141,7 +1110,6 @@ var StudyViewInitCharts = (function(){
                 $('#study-view-dc-chart-'+ _chartID +'-header .study-view-dc-chart-delete').click(function(event){
                     var _ID = _chartID;
                     var valueA = $("#study-view-dc-chart-" + _ID).attr("oValue").split(',');
-//                    var valueA = $(this).parent().parent().parent().find().attr("oValue").split(',');
                     deleteChart(_chartID,valueA);
                     AddCharts.bindliClickFunc();
                     bondDragForLayout();
@@ -1160,15 +1128,11 @@ var StudyViewInitCharts = (function(){
 
             bondDragForLayout();
 
-//            $('#study-view-add-chart ul').find('li[id="' + _selectedAttr + '"]').remove();
             $('#study-view-add-chart').find('option[id="' + _selectedAttr + '"]').remove();
-//            if($('#study-view-add-chart ul').find('li').length === 0 ){
             if($('#study-view-add-chart').find('option').length === 1 && 
                     $('#study-view-add-chart').find('option').attr('id') === ''){
                 $('#study-view-add-chart').css('display','none');
             }
-            
-//            $('#study-view-add-chart ul').css('height','100%');
         }
     }
     
@@ -1177,7 +1141,6 @@ var StudyViewInitCharts = (function(){
             initData(_data);
             initCharts(_data);
             createLayout();
-//            updateDataTableCallbackFuncs();
             filterCharts();
         },
         

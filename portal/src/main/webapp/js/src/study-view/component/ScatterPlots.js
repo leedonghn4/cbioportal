@@ -320,16 +320,15 @@ var ScatterPlots = function() {
     }
 
     function appendAxisTitleY() {
+        var _yTitle = "",
+            _checked = "";
+
         d3.select("#" + names.body).select(".plots-title-y").remove();
         d3.select("#" + names.body).select(".plots-title-y-help").remove();
         d3.select("#" + names.body).select("#plots-title-y-checkbox").remove();
-        var _yTitle = "",
-            _checked = "";
-//        if (_applyLogScale) {
-//            _yTitle = text.yTitle + " (log)";
-//        } else {
-            _yTitle = text.yTitle;
-//        }
+            
+        _yTitle = text.yTitle;
+
         elem.axisTitleGroup.append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", (canvas.yTop - canvas.yBottom) / 2 - canvas.yTop)
@@ -555,10 +554,6 @@ var ScatterPlots = function() {
                 .duration(600)
                 .delay(100)
                 .attr("d", d3.svg.symbol().size(size).type(style.shape));
-        
-//            elem.dotsGroup.selectAll("path").each(function(d) {
-//                changePointSize(this);
-//            });
         };
         //Click has three status: 1. Click; 2. ShiftClick; 3. Both
         var click = function(){
@@ -612,36 +607,25 @@ var ScatterPlots = function() {
         switch(_clickType){
             case 'clicked':
                 $(_element).attr('stroke-width','3')
-                            .attr('fill',style.fill)
-                            .attr('stroke','red');
-//                            .attr('opacity','1');
+                    .attr('fill',style.fill)
+                    .attr('stroke','red');
                 break;
             case 'shiftClicked':
                 $(_element).attr('stroke-width','0')
-                            .attr('fill','red')
-                            .attr('stroke','red');
-//                            .attr('opacity','1');
+                    .attr('fill','red')
+                    .attr('stroke','red');
                 break;
             case 'both':
                 $(_element).attr('stroke-width','3')
-                            .attr('fill','red')
-                            .attr('stroke',style.stroke);
-//                            .attr('opacity','1');
+                    .attr('fill','red')
+                    .attr('stroke',style.stroke);
                 break;
 
             //default: withOutClick
             default:
-//                if(brushedCases.length !== 0){
-//                    $(_element).attr('stroke-width','0')
-//                            .attr('fill',style.fill)
-//                            .attr('stroke',style.stroke)
-//                            .attr('opacity','0.6');
-//                }else {
-                    $(_element).attr('stroke-width','0')
-                            .attr('fill',style.fill)
-                            .attr('stroke',style.stroke);
-//                            .attr('opacity','1');
-//                }
+                $(_element).attr('stroke-width','0')
+                    .attr('fill',style.fill)
+                    .attr('stroke',style.stroke);
         } 
     }
     
@@ -930,8 +914,6 @@ var ScatterPlots = function() {
     }
     
     function updateScaleX() {
-//        var _applyLogScale = document.getElementById(_divName).checked;
-            
         if (axisXLogFlag) {
             updateAxisScaleX();
             initLogAxisX();
@@ -1120,7 +1102,6 @@ var ScatterPlots = function() {
                     var _index = _caseIdList.indexOf(d.case_id);
                     $(this).attr("fill", _datumArr[_index].fill);
                     $(this).attr("stroke", _datumArr[_index].stroke);
-//                    $(this).attr("opacity", _datumArr[_index].opacity);
                     $(this).attr("d", d3.svg.symbol().size(_datumArr[_index].size).type(style.shape));
                     $(this).attr("stroke-width", _datumArr[_index].strokeWidth);
                     if(_datumArr[_index].fill === style.fill && _datumArr[_index].stroke === 'red'){

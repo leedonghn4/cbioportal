@@ -29,31 +29,6 @@ var StudyViewSurvivalPlotView = (function() {
 
     var curveInfo = {};
 
-    /*This color will be used for ALL_CASES, SELECTED_CASES AND UNSELECTED_CASES*/
-//    var uColor = ["#000000", "#dc3912", "#2986e2"];
-//    var reserveName = ["ALL_CASES", "SELECTED_CASES", "UNSELECTED_CASES"];
-//    var reserveDisplayName = ["All cases", "Selected cases", "Unselected cases"];
-
-    /*Store data for unique curves: the color of these will be changed when user
-     * saving them, in that case, the survival plot needs to redraw this curve*/
-//    var uColorCurveData = {};
-
-    //Saved curve information is identified based on the curve name,
-    //in other words, the name of each curve is identical. 
-    var savedCurveInfo = {};
-
-    /**
-     * @param {type} _id cureve id
-     * @returns {Array} return name array of saved curves
-     */
-    function getSavedCurveName(_id) {
-        if (savedCurveInfo.hasOwnProperty(_id)) {
-            return Object.keys(savedCurveInfo[_id]);
-        } else {
-            return [];
-        }
-    }
-
     function getInitStatus() {
         return initStatus;
     }
@@ -263,7 +238,6 @@ var StudyViewSurvivalPlotView = (function() {
             show: {event: "mouseover", delay: 0},
             hide: {fixed:true, delay: 100, event: "mouseout"},
             position: {my:'left top',at:'top right', viewport: $(window)},
-//            content: $("#" + opts[_plotKey].divs.bodyLabel).html(),
             content:$("#" + opts[_plotKey].divs.pvalMatrix).html(),
             events: {
                 render: function(event, api) {
@@ -273,13 +247,6 @@ var StudyViewSurvivalPlotView = (function() {
 
                     $('img', api.elements.tooltip).unbind('click');
                     $('img', api.elements.tooltip).click(function() {
-//                        if ($(this).attr('name') === 'pin') {
-//
-//                            //The following functions will be excuted after user inputting
-//                            //the curve name, so we need to give it a call back function.
-//                            nameCurveDialog(this, saveCurveInfoFunc, _plotKey);
-//
-//                        } else if ($(this).attr('name') === 'close') {
                             var _parent = $(this).parent(),
                                 _color = _parent.parent().find('rect').attr('fill'),
                                 _index = _parent.parent().index();
@@ -287,22 +254,9 @@ var StudyViewSurvivalPlotView = (function() {
                             $('table tfoot th', api.elements.tooltip).remove(":nth-child("+(_index+3)+")");
                             _parent.parent().remove();
                             removeCurveFunc(_index, _plotKey);
-//                            redrawLabel(_plotKey);
                             survivalPlot[_plotKey].removeCurve(_color.toString().substring(1) + "-" + _plotKey);
-//                        } else if ($(this).attr('name') === 'saved-close') {
-//                            var _parent = $(this).parent(),
-//                                _name = $(_parent).find('text').attr('oValue');
-//
-//                            $(_parent).remove();
-//                            undoSavedCurve(_name, _plotKey);
-//                            removeSavedCurveFunc(_name, _plotKey);
-//                            redrawLabel(_plotKey);
-//                        } else {
-//                            //TODO: Add more function
-//                        }
                     });
 
-                    //$('#' + _opts.divs.main + ' svg rect').unbind('hover');
                     $('svg rect', api.elements.tooltip).hover(function() {
                         $(this).css('cursor', 'pointer');
                     });
@@ -407,134 +361,10 @@ var StudyViewSurvivalPlotView = (function() {
         $("#" + _curveId + "-line").css('stroke-width', '');
     }
 
-    //Save all related information with this curve. The saved curve(s) will be
-    //showed again when redrawing survival plots
-    function saveCurveInfoFunc(_this, _plotKey) {
-        var _selectedIndex = $($(_this).parent()).index(),
-                _selectedCurveInfo = curveInfo[_plotKey][_selectedIndex];
-        if (!savedCurveInfo.hasOwnProperty(_plotKey)) {
-            savedCurveInfo[_plotKey] = {};
-        }
-        /*
-         if (StudyViewUtil.arrayFindByValue(uColor, _selectedCurveInfo.color)) {
-         var _color = colorSelection('');
-         
-         //If no more color available, have to set the color here
-         if (!_color) {
-         _color = '#111111';
-         }
-         var _data = uColorCurveData[_selectedCurveInfo.color];
-         
-         survivalPlot[_opts.index].removeCurve(_selectedCurveInfo.color.toString().substring(1));
-         _data.settings.line_color = _color;
-         _data.settings.mouseover_color = _color;
-         _data.settings.curveId = _color.toString().substring(1);
-         survivalPlot[_opts.index].addCurve(_data);
-         _selectedCurveInfo.color = _color;
-         }*/
-        savedCurveInfo[_plotKey][_selectedCurveInfo.name] = _selectedCurveInfo;
-        removeElement($(_this).parent());
-
-        //After saving curve, the related curve info should be delete from 
-        //curvesInfo
-        StudyViewUtil.arrayDeleteByIndex(curveInfo[_plotKey], _selectedIndex);
-        redrawLabel(_plotKey);
-    }
-
-    function removeElement(_this) {
-        $(_this).remove();
-    }
-
-    //Move saved curve infomation back to curveInfo
-    function undoSavedCurve(_curveName, _plotKey) {
-        var _targetCurve = savedCurveInfo[_plotKey][_curveName];
-        curveInfo[_plotKey].push(_targetCurve);
-    }
-
-    function removeSavedCurveFunc(_curveName, _plotKey) {
-        delete savedCurveInfo[_plotKey][_curveName];
-    }
-
     function removeCurveFunc(_index, _plotKey) {
         curveInfo[_plotKey].splice(_index, 1);
     }
-
-    //When user click pin icon, this dialog will be popped up and remind user
-    //input the curve name.
-    function nameCurveDialog(_this, _callBackFunc, _plotKey) {
-        var _parent = $(_this).parent(),
-            _value = $(_parent).find("text:first").attr('oValue'),
-            _qtipContent = '<input type="text" style="float:left" value="'+
-                _value+'"/><button style="float:left">OK</button>';
-        
-        $(_this).qtip({
-            content: {
-                text: $(_qtipContent), // Create an input (style it using CSS)
-                title: 'Please name your curve',
-                button: 'Close'
-            },
-            position: {
-                my: 'left bottom',
-                at: 'top right',
-                target: $(_this),
-                viewport: $(window)
-            },
-            show: {
-                ready: true
-            },
-            hide: false,
-            style: {
-                tip: true,
-                classes: 'qtip-blue'
-            },
-            events: {
-                render: function(event, api) {
-                    // Apply an event to the input element so we can close the tooltip when needed
-                    $('button', api.elements.tooltip).bind('click', function() {
-                        var _curveName = $('input', api.elements.tooltip).val();
-                        var _modifiedName = _curveName;
-
-                        if (_curveName === '') {
-                            var _qtip = jQuery.extend(true, {}, StudyViewBoilerplate.warningQtip);
-
-                            _qtip.content.text = $("<span>No Name Inputed</span>");
-                            _qtip.position.target = $(_this);
-                            $(_parent).qtip(_qtip);
-                        } else if (getSavedCurveName().indexOf(_curveName) !== -1) {
-                            var _qtip = jQuery.extend(true, {}, StudyViewBoilerplate.warningQtip);
-
-                            _qtip.content.text = $("<span>The curve name exists</span>");
-                            _qtip.position.target = $(_this);
-                            $(_parent).qtip(_qtip);
-                        } else {
-                            var _index = _parent.find('text').attr('id');
-                            //Destroy previous qtip first
-                            $('#' + _index).qtip('destroy', true);
-
-                            if (_curveName.length > 7) {
-                                var _qtip = jQuery.extend(true, {}, StudyViewBoilerplate.pieLabelQtip);
-                                _qtip.content.text = _curveName;
-                                _qtip.position.my = "left bottom";
-                                _qtip.position.at = "top right";
-                                $('#' + _index).qtip(_qtip);
-                                _modifiedName = _curveName.substring(0, 5) + "...";
-                            }
-                            _parent.find('text')
-                                    .text(_modifiedName)
-                                    .attr('value', _curveName);
-
-                            //Update curve name with user inputted name
-                            curveInfo[_plotKey][$($(_this).parent()).index()].name = _curveName;
-                            _callBackFunc(_this, _plotKey);
-                        }
-                        //Set to True: call .hide() before destroy
-                        api.destroy(true);
-                    });
-                }
-            }
-        });
-    }
-
+    
     /* 
      * Generate survival plot division 
      * @param {object} _opt
@@ -630,39 +460,6 @@ var StudyViewSurvivalPlotView = (function() {
     }
 
     /*
-     * Put all cases into groups based on keys in _seperateAttr, if no _seoerateAttr
-     * inputted, the _casesInfo will not be changed.
-     * 
-     * @param {object}  _casesInfo cases information object, if _seperateAttr
-     *                  initialized, the _casesInfo only include group name and
-     *                  group color. If not initalzied, it includes all information.
-     * @param {string} _seperateAttr    The unique attribute, like 'OS_MONTHS'
-     */
-    function grouping(_casesInfo, _seperateAttr) {
-        //If seperation attribute has been defined, the data will be put in
-        //different group based on this attribute.
-        var _trimedCasesInfo =  jQuery.extend(true, {}, _casesInfo);
-        /*
-        if (_seperateAttr !== '' && _seperateAttr) {
-            for (var i = 0; i < oDataLength; i++) {
-                var _arr = oData[i][_seperateAttr],
-                        _caseID = oData[i].CASE_ID;
-                if (!_trimedCasesInfo.hasOwnProperty(_arr)) {
-                    if (_trimedCasesInfo.hasOwnProperty('NA')) {
-                        _trimedCasesInfo['NA'].caseIds.push(_caseID);
-                    } else {
-                        //TODO: User may only draw survial based on current groups.
-                        //StudyViewUtil.echoWarningMessg("Unexpected attribute: " + _arr);
-                    }
-                } else {
-                    _trimedCasesInfo[_arr].caseIds.push(_caseID);
-                }
-            }
-        }*/
-        return _trimedCasesInfo;
-    }
-
-    /*
      * Initilize all options for current survival plot
      * @param _index The survival plot identifier
      * @return _opts The initilized option object
@@ -731,7 +528,6 @@ var StudyViewSurvivalPlotView = (function() {
         inputArr = [];
         kmEstimator = new KmEstimator();
         logRankTest = new LogRankTest();
-        //confidenceIntervals = new ConfidenceIntervals();
         curveInfo[_plotKey] = [];
         
         if(_selectedAttrType === 'bar') {
@@ -798,10 +594,6 @@ var StudyViewSurvivalPlotView = (function() {
                     instance.settings = instanceSettings;
                     inputArr.push(instance);
 
-//                    if (StudyViewUtil.arrayFindByValue(reserveName, key)) {
-//                        uColorCurveData[uColor[reserveName.indexOf(key)]] = instance;
-//                    }
-
                     var _curveInfoDatum = {
                         name: key,
                         color: _color,
@@ -862,11 +654,6 @@ var StudyViewSurvivalPlotView = (function() {
                     instance.data = instanceData;
                     instance.settings = instanceSettings;
                     inputArr.push(instance);
-
-//                    if (StudyViewUtil.arrayFindByValue(reserveName, key)) {
-//                        uColorCurveData[uColor[reserveName.indexOf(key)]] = instance;
-//                    }
-
                     var _curveInfoDatum = {
                         name: key,
                         color: _color,
@@ -906,8 +693,7 @@ var StudyViewSurvivalPlotView = (function() {
             logRankTest = "";
             delete curveInfo[key];
 
-            var _tmpCasesInfo = grouping(_casesInfo, _selectedAttr[0]);
-            redrawView(key, _tmpCasesInfo, _selectedAttr[0]);
+            redrawView(key, _casesInfo, _selectedAttr[0]);
             drawLabels(key);
             if (typeof _selectedAttr !== 'undefined') {
                 StudyViewUtil.changeTitle("#" + opts[key].divs.main + " chartTitleH4", _selectedAttr[1], false);
@@ -924,10 +710,7 @@ var StudyViewSurvivalPlotView = (function() {
     function drawLabels(_plotKey) {
         var _svg = '',
             _curveInfo = curveInfo[_plotKey],
-            _savedCurveInfo = savedCurveInfo[_plotKey],
-            _newLabelsLength = _curveInfo.length,
-            _savedLabelsLength = getSavedCurveName(_plotKey).length,
-            _numOfLabels = _newLabelsLength + _savedLabelsLength,
+            _numOfLabels = _curveInfo.length,
             _width = 0,
             _height = _numOfLabels * 20 - 5;
         
@@ -938,26 +721,15 @@ var StudyViewSurvivalPlotView = (function() {
         } else {
             //TODO: this width is calculated by maximum name length multiply
             //a constant, need to be changed later
-            for (var i = 0; i < _newLabelsLength; i++) {
+            for (var i = 0; i < _numOfLabels; i++) {
                 if (_curveInfo[i].name.length * 10 > _width) {
                     _width = _curveInfo[i].name.length * 10;
                 }
             }
 
-            for (var key in _savedCurveInfo) {
-                if (_savedCurveInfo[key].name.length * 10 > _width) {
-                    _width = _savedCurveInfo[key].name.length * 10;
-                }
-            }
-
-            //_width += 45;
             _width += 30;
             
             $("#" + opts[_plotKey].divs.bodyLabel + " svg").remove();
-
-            if (_savedLabelsLength > 0) {
-                _height += 20;
-            }
 
             _svg = d3.select("#" + opts[_plotKey].divs.bodyLabel)
                     .append("svg")
@@ -965,60 +737,6 @@ var StudyViewSurvivalPlotView = (function() {
                     .attr("height", _height);
 
             drawNewLabels(_plotKey, _svg, 0, _width);
-
-            if (_savedLabelsLength > 0) {
-                //separator's height is 20px;
-                drawSeparator(_svg, _newLabelsLength * 20, _width);
-                drawSavedLabels(_plotKey, _svg, (_newLabelsLength + 1) * 20, _width);
-            }
-        }
-    }
-    
-    /**
-     * Draw 'Saved Curves' and black line between new labels and saved labels
-     * 
-     * @param _svg the svg container.
-     * @param _yPosition the vertical position of this separator
-     * @param _width the width of svg
-     */
-    function drawSeparator(_svg, _yPosition, _width) {
-        var _g = _svg.append("g").attr('transform', 'translate(0, ' + _yPosition + ')');
-
-        _g.append("text")
-                .attr('x', _width / 2)
-                .attr('y', 12)
-                .attr('fill', 'black')
-                .attr('text-anchor', 'middle')
-                .attr('class', 'study-view-survival-label-font-1')
-                .text('Saved Curves');
-
-        _g.append("line")
-                .attr('x1', 0)
-                .attr('y1', 16)
-                .attr('x2', _width)
-                .attr('y2', 16)
-                .attr('stroke', 'black')
-                .attr('stroke-width', '2px');
-    }
-    
-    /**
-     * Draw saved labels if have any
-     * 
-     * @param _plotKey the plot identifier
-     * @param _svg
-     * @param _startedIndex
-     * @param _svgWidth
-     */
-    function drawSavedLabels(_plotKey, _svg, _startedIndex, _svgWidth) {
-        var _savedLabelsLength = getSavedCurveName(_plotKey).length,
-                _savedCurveInfo = savedCurveInfo[_plotKey];
-
-        if (_savedLabelsLength > 0) {
-            var _index = 0;
-            for (var key in _savedCurveInfo) {
-                drawLabelBasicComponent(_plotKey, _svg, _index + _startedIndex, _savedCurveInfo[key].color, _savedCurveInfo[key].name, 'close', _svgWidth);
-                _index++;
-            }
         }
     }
 
@@ -1053,15 +771,6 @@ var StudyViewSurvivalPlotView = (function() {
                 .text(_textName);
 
         if (_iconType === 'pin') {
-//            Temporary disable save curve function
-//            var _image = _g.append("image")
-//                    .attr('x', _svgWidth - 30)
-//                    .attr('y', '0')
-//                    .attr('height', '10px')
-//                    .attr('width', '10px');
-//
-//            _image.attr('xlink:href', 'images/pushpin.svg');
-//            _image.attr('name', 'pin');
 
             var _image = _g.append("image")
                     .attr('x', _svgWidth - 15)
@@ -1141,8 +850,6 @@ var StudyViewSurvivalPlotView = (function() {
     }
 
     function plotBasicFuncs(_index, _key) {
-        var _casesInfo;
-
         aData[_key] = {};
         opts[_key] = {};
         aData[_key] = dataProcess(plotsInfo[_key]);
@@ -1160,8 +867,7 @@ var StudyViewSurvivalPlotView = (function() {
         if (Object.keys(aData[_key]).length !== 0) {
             opts[_key] = initOpts(_index, _key);
             createDiv(opts[_key]);
-            _casesInfo = grouping(plotsInfo[_key].caseLists, '');
-            initView(_casesInfo, aData[_key], _key);
+            initView(plotsInfo[_key].caseLists, aData[_key], _key);
             drawLabels(_key);
             addEvents(_key);
         } else {
