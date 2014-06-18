@@ -63,7 +63,7 @@
                     <div id="plots_one_gene">
                         <h4>Plot Parameters</h4>
                         <h5>Gene</h5>
-                        <select id='gene' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
+                        <select id='one_gene' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
                         <div id='menu_err_msg'></div>
                         <div id='one_gene_type_specification'>
                             <h5>Plot Type</h5>
@@ -79,9 +79,9 @@
                     <div id="plots_two_genes">
                         <h4>Plot Parameters</h4>
                         <h5>Genes</h5>
-                        x Axis<select id='geneX' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
+                        x Axis<select id='two_genes_geneX' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
                         <br>
-                        y Axis<select id='geneY' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
+                        y Axis<select id='two_genes_geneY' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
                         <h5>Plot Type</h5>
                         <select id='two_genes_plots_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
                         <h5>Platform</h5>
