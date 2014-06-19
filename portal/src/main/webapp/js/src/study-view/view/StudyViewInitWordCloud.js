@@ -35,17 +35,78 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 var StudyViewInitWordCloud = (function() {
     //The length of words should be same with the length of fontSize.
     var words = [],
-        fontSize = [];
-    var WIDTH = 180,
-        HEIGHT = 180;
+        fontSize = [],
+        percentage = [];
+    var WIDTH = 150,
+        HEIGHT = 150;
     
     var initStatus = false;
     
     function initData(_data){
         words = _data.names;
         fontSize = _data.size;
+        percentage = _data.percentage;
     }
     
+    var DIV = {
+        mainDiv : "study-view-word-cloud-main",
+        titleDiv: "study-view-word-cloud-title",
+        chartDiv : "study-view-word-cloud"
+    };
+
+    function addQtip() {
+        $('#' + DIV.chartDiv + '-download-icon').qtip('destroy', true);
+        $('#' + DIV.chartDiv + '-download-icon-wrapper').qtip('destroy', true);
+        
+        //Add qtip for download icon when mouse over
+        $('#' + DIV.chartDiv + '-download-icon-wrapper').qtip({
+            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
+            show: {event: "mouseover", delay: 0},
+            hide: {fixed:true, delay: 300, event: "mouseout"},
+            position: {my:'bottom left',at:'top right', viewport: $(window)},
+            content: {
+                text:   "Download"
+            }
+        });
+        
+        //Add qtip for download icon when mouse click
+        $('#' + DIV.chartDiv + '-download-icon').qtip({
+            id: '#' + DIV.chartDiv + "-download-icon-qtip",
+            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
+            show: {event: "click", delay: 0},
+            hide: {fixed:true, delay: 300, event: "mouseout"},
+            position: {my:'top center',at:'bottom center', viewport: $(window)},
+            content: {
+                text:   "<form style='display:inline-block;float:left;margin: 0 2px' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-pdf'>"+
+                        "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-pdf-value'>"+
+                        "<input type='hidden' name='filetype' value='pdf'>"+
+                        "<input type='hidden' id='"+DIV.chartDiv+"-pdf-name' name='filename' value='"+StudyViewParams.params.studyId + "_word_cloud.pdf'>"+
+                        "<input type='submit' style='font-size:10px;' value='PDF'>"+          
+                        "</form>"+
+                        "<form style='display:inline-block;float:left;margin: 0 2px' action='svgtopdf.do' method='post' id='"+DIV.chartDiv+"-svg'>"+
+                        "<input type='hidden' name='svgelement' id='"+DIV.chartDiv+"-svg-value'>"+
+                        "<input type='hidden' name='filetype' value='svg'>"+
+                        "<input type='hidden' id='"+DIV.chartDiv+"-svg-name' name='filename' value='"+StudyViewParams.params.studyId + "_word_cloud.svg'>"+
+                        "<input type='submit' style='font-size:10px;clear:right;float:right;' value='SVG'></form>"
+            },
+            events: {
+                show: function() {
+                    $('#' + DIV.chartDiv + '-download-icon-wrapper').qtip('api').hide();
+                },
+                render: function(event, api) {
+                    $("#"+DIV.chartDiv+"-pdf", api.elements.tooltip).submit(function(){
+                        setSVGElementValue(DIV.chartDiv,
+                            DIV.chartDiv+"-pdf-value");
+                    });
+                    $("#"+DIV.chartDiv+"-svg", api.elements.tooltip).submit(function(){
+                        setSVGElementValue(DIV.chartDiv,
+                            DIV.chartDiv+"-svg-value");
+                    });
+                }
+            }
+        });
+    }
+
     function initDiv(){
         $("#study-view-charts").append(StudyViewBoilerplate.wordCloudDiv);
         $("#study-view-word-cloud-pdf-name").val("Word_Cloud_"+ StudyViewParams.params.studyId +".pdf");
@@ -54,23 +115,13 @@ var StudyViewInitWordCloud = (function() {
     
     //Add all listener events
     function addEvents() {
-        $("#study-view-word-cloud-pdf").submit(function(){
-            setSVGElementValue("study-view-word-cloud",
-               "study-view-word-cloud-pdf-value");
-        });
-        $("#study-view-word-cloud-svg").submit(function(){
-            setSVGElementValue("study-view-word-cloud",
-                "study-view-word-cloud-svg-value");
-        });
-        
-        StudyViewUtil.showHideDivision(
-                "#study-view-word-cloud", 
-                "#study-view-word-cloud-side"
-        );
-                                    
-        StudyViewUtil.showHideDivision(
-                "#study-view-word-cloud", 
-                "#study-view-word-cloud .study-view-drag-icon"
+        StudyViewUtil.showHideTitle(
+            "#"+DIV.mainDiv, 
+            "#"+DIV.chartDiv+"-header",
+            0,
+            "Mutated Genes",
+            30,
+            30
         );
     }
     
@@ -92,10 +143,12 @@ var StudyViewInitWordCloud = (function() {
         var fill = d3.scale.category20();
         var startX = 0, startY = 0;
         
-        d3.select("#study-view-word-cloud").append("svg")
+
+        var _svg = d3.select("#study-view-word-cloud").append("svg")
             .attr("width", WIDTH)
-            .attr("height", HEIGHT)
-          .append("g")
+            .attr("height", HEIGHT);
+
+        _svg.append("g")
             .attr("transform", "translate(10,40)")
           .selectAll("text")
             .data(words)
@@ -113,7 +166,7 @@ var StudyViewInitWordCloud = (function() {
                 var _translate = "translate(" + [startX, startY] + ")";
                 
                 //d.width - d.size is so called constant divider for width
-                var _width = d.width - d.size;
+                var _width = (d.width * (3 / 4));
                 
                 startX += _width;
                 
@@ -121,7 +174,7 @@ var StudyViewInitWordCloud = (function() {
                     startX = 0;
                     
                     //1.3 is so called constant divider for height 
-                    startY += d.y1 * 1.3;
+                    startY += d.y1 * 1.7;
                     _translate = "translate(" + [startX, startY] + ")";
                     startX += _width;
                 }
@@ -129,18 +182,17 @@ var StudyViewInitWordCloud = (function() {
                 return _translate;
               //return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
-            
             .text(function(d) { return d.text; });
-            
-            $("#study-view-word-cloud svg text").click(function(){
-                var _text = $(this).text();
-                window.open("index.do?Action=Submit&"+
-                            "genetic_profile_ids="+StudyViewParams.params.mutationProfileId+"&" +
-                            "case_set_id="+StudyViewParams.params.caseSetId+"&" +
-                            "cancer_study_id="+StudyViewParams.params.studyId+"&" +
-                            "gene_list="+ _text +"&tab_index=tab_visualize&" +
-                            "#mutation_details");
-            });
+      
+        $("#study-view-word-cloud svg text").click(function(){
+            var _text = $(this).text();
+            window.open("index.do?Action=Submit&"+
+                        "genetic_profile_ids="+StudyViewParams.params.mutationProfileId+"&" +
+                        "case_set_id="+StudyViewParams.params.caseSetId+"&" +
+                        "cancer_study_id="+StudyViewParams.params.studyId+"&" +
+                        "gene_list="+ _text +"&tab_index=tab_visualize&" +
+                        "#mutation_details");
+        });
     }
     
     //Changed based on Jason's example file.
@@ -168,6 +220,7 @@ var StudyViewInitWordCloud = (function() {
             initData(_data);
             initDiv();
             initD3Cloud();
+            addQtip();
             addEvents();
             initStatus = true;
         },

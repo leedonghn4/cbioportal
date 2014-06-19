@@ -217,7 +217,7 @@ var StudyViewInitCharts = (function(){
     }
     
     function initSpecialCharts(_arr){
-        //var _trimedData = wordCloudDataProcess(mutatedGenes);
+        var _trimedData = wordCloudDataProcess(mutatedGenes);
         
         if(     (StudyViewUtil.arrayFindByValue(varName, 'OS_MONTHS') && 
                 StudyViewUtil.arrayFindByValue(varName, 'OS_STATUS') &&
@@ -239,13 +239,13 @@ var StudyViewInitCharts = (function(){
             initScatterPlot(_arr);
         }
         
-        /*
+        
         if(!( 
                 _trimedData.names.length === 1 && 
                 _trimedData.names[0] === 'No Mutated Gene')){
         
             initWordCloud(_trimedData);
-        }*/
+        }
     }
     function redrawSurvival() {
         var _unselectedCases= [],
@@ -308,15 +308,18 @@ var StudyViewInitCharts = (function(){
                 for( i = 0; i < dataLength; i++){
                     _selectedGeneMutatedInfo.push(a1[i]);
                 }
+
                 _filteredMutatedGenes = wordCloudDataProcess(_selectedGeneMutatedInfo);
                 StudyViewInitWordCloud.redraw(_filteredMutatedGenes);
                 callBackFunctions();
                 $("#study-view-word-cloud-loader").css('display', 'none');
+                $("#study-view-word-cloud").css('opacity', '1');
             });
         }else{
             _filteredMutatedGenes = wordCloudDataProcess([]);
             StudyViewInitWordCloud.redraw(_filteredMutatedGenes);
             $("#study-view-word-cloud-loader").css('display', 'none');
+            $("#study-view-word-cloud").css('opacity', '1');
         }     
     }
     
@@ -353,7 +356,7 @@ var StudyViewInitCharts = (function(){
         if(_mutatedGenes.length !== 0){
             _mutatedGenes.sort(sortNumMuts);
         }
-        
+
         if(_dataLength < 10){
             _mutatedGenesLength = _dataLength;
         }else{
@@ -365,37 +368,35 @@ var StudyViewInitCharts = (function(){
             _topGenes.size = [15];
         }else{
             _topGenes.names = [];
-            _topGenes.size = [];
+            _topGenes.percentage = [];
 
             for( i = 0; i< _mutatedGenesLength; i++){
                 _topGenes.names.push(_mutatedGenes[i][0]);
-                _topGenes.size.push(_mutatedGenes[i][1]);
+                _topGenes.percentage.push(_mutatedGenes[i][1]);
             }
-            _topGenes.size = calculateWordSize(_topGenes.size);
+            
+            _topGenes.size = calculateWordSize(_topGenes.percentage);
         }
-        
         return _topGenes;
     }
-    
+
     function calculateWordSize(_genes) {
-        var i,
-            _geneLength = _genes.length,
-            _percental = [],
-            _totalMuts = 0;
-        
-        for( i = 0; i < _geneLength; i++){
-            _totalMuts += _genes[i];
-        }
-        
-        for( i = 0; i < _geneLength; i++){
-            var _size = (_genes[i] / _totalMuts) * WORDCLOUDTEXTSIZECONSTANT;
-            if(_size > 40){
-                _size = 40;
+        var _fontSize = 20,
+            _size = [20],
+            _geneLength = _genes.length;
+
+        for (var i = 1; i < _geneLength; i++) {
+            if(_genes[i] !== _genes[i-1]) {
+                if(_fontSize < 15) {
+                    _fontSize -= 0.5;
+                }else {
+                    _fontSize -= 1;
+                }
             }
-            _percental.push(_size);
-        }
-        
-        return _percental;
+            _size.push(_fontSize);
+        };
+
+        return _size;
     }
     
     function sortNumMuts(a, b) {
@@ -703,13 +704,6 @@ var StudyViewInitCharts = (function(){
             //redrawSurvival has been added in redrawWordCloud as callback func
             redrawWordCloud();
         }else if(StudyViewSurvivalPlotView.getInitStatus()){
-            var _length = StudyViewSurvivalPlotView.getNumOfPlots();
-            
-            for(var i = 0; i < _length; i++){
-                $("#study-view-survival-plot-body-" + i).css('opacity', '0.3');
-                $("#study-view-survival-plot-loader-" + i).css('display', 'block');
-            }
-            
             //The timeout is set equal to the transition duration of dc charts.
             setTimeout(function() {
                 redrawSurvival();
@@ -719,8 +713,9 @@ var StudyViewInitCharts = (function(){
     
     
     function redrawSpecialPlots(_casesInfo, _selectedAttr){
-        var _scatterInit = StudyViewInitScatterPlot.getInitStatus();
-        var _timeout = 0;
+        var _scatterInit = StudyViewInitScatterPlot.getInitStatus(),
+            _wordCloudInit = StudyViewInitWordCloud.getInitStatus(),
+            _timeout = 0;
         
         if(StudyViewSurvivalPlotView.getInitStatus()) {
             var _length = StudyViewSurvivalPlotView.getNumOfPlots();
@@ -737,6 +732,11 @@ var StudyViewInitCharts = (function(){
         if(_scatterInit){
             $("#study-view-scatter-plot-loader").css('display', 'block');
             $("#study-view-scatter-plot-body").css('opacity', '0.3');
+        }
+
+        if(_wordCloudInit) {
+            $("#study-view-word-cloud-loader").css('display', 'block');
+            $("#study-view-word-cloud").css('opacity', '0.3');
         }
         
         //When redraw plots, the page will be stuck before loader display, 
@@ -848,7 +848,7 @@ var StudyViewInitCharts = (function(){
     }
     
     function removeContentsAndStartLoading(){
-        $("#study-view-word-cloud svg").remove();
+        $("#study-view-word-cloud").css('opacity', '0.3');
         $("#study-view-word-cloud-loader").css('display', 'block');
         if(StudyViewSurvivalPlotView.getInitStatus()) {
             var _length = StudyViewSurvivalPlotView.getNumOfPlots();

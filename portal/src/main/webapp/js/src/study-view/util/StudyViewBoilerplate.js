@@ -339,32 +339,26 @@ var StudyViewBoilerplate ={
             "<img src='images/ajax-loader.gif'/></div>"+
             "<div id='study-view-scatter-plot-control-panel'></div>"+
             "</div>",
-    
+
     wordCloudDiv:
-            "<div id='study-view-word-cloud' "+
-            "class='study-view-dc-chart study-view-word-cloud'>" +
-            "<div id='study-view-word-cloud-side' class='study-view-pdf-svg-side'>"+
-            "<form style='display:inline-block;' action='svgtopdf.do' method='post' id='study-view-word-cloud-pdf'>"+
-            "<input type='hidden' name='svgelement' id='study-view-word-cloud-pdf-value'>"+
-            "<input type='hidden' name='filetype' value='pdf'>"+
-            "<input type='hidden' id='study-view-word-cloud-pdf-name' name='filename' value=''>"+
-            "<input type='submit' style='font-size:10px' value='PDF'>"+          
-            "</form>"+
-            "<form style='display:inline-block' action='svgtopdf.do' method='post' id='study-view-word-cloud-svg'>"+
-            "<input type='hidden' name='svgelement' id='study-view-word-cloud-svg-value'>"+
-            "<input type='hidden' name='filetype' value='svg'>"+
-            "<input type='hidden' id='study-view-word-cloud-svg-name' name='filename' value=''>"+
-            "<input type='submit' style='font-size:10px' value='SVG'>"+    
-            "</form></div>"+
-            "<div id='study-view-word-cloud-title'>" +
-            "<chartTitleH4>Mutated Genes</chartTitleH4>" +
-            "<span class='study-view-chart-cloud-delete study-view-word-cloud-delete' "+
-            "style = 'float:right;'>x</span><div style='width:14px; height:16px;float:right'>"+
-            "<img style='width:10px; height:10px;margin-top:4px; margin-right:4px;' class='study-view-drag-icon' src='images/move.svg'/>"+
-            "</div></div>" +
-            "<div id='study-view-word-cloud-loader' style='width: 100%; display:none; text-align:center'>"+
-            "<img src='images/ajax-loader.gif'/></div>"+
-            "</div>",
+        "<div id='study-view-word-cloud-main' class='study-view-dc-chart study-view-word-cloud h1'>"+
+            "<div id='study-view-word-cloud-title-wrapper'style='height: 16px; width:100%; float:left; text-align:center;'>"+
+                "<div style='height:16px;float:right;' id='study-view-word-cloud-header'>"+
+                    "<img id='study-view-word-cloud-reload-icon' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
+                    "<div id='study-view-word-cloud-download-icon-wrapper' class='study-view-download-icon'>" +
+                        "<img id='study-view-word-cloud-download-icon' style='float:left' src='images/in.svg'/>"+
+                    "</div>"+
+                    "<img class='study-view-drag-icon' src='images/move.svg'/>"+
+                    "<span chartID='study-view-word-cloud' class='study-view-dc-chart-delete'>x</span>"+
+                "</div>"+
+                "<chartTitleH4 id='study-view-word-cloud-title'>Mutated Genes</chartTitleH4>" +
+            "</div>"+
+            "<div id='study-view-word-cloud'>"+
+                "<div style='width:180px;float:left;text-align:center'></div>"+
+            "</div>"+
+            "<div id='study-view-word-cloud-loader' class='study-view-loader' style='top:20%;left:20%'><img src='images/ajax-loader.gif'/></div>"+
+        "</div>",
+
     dataTableDiv: 
             "<table id='dataTable'>"+
             "<tfoot>"+
@@ -372,5 +366,4 @@ var StudyViewBoilerplate ={
             "</tr>"+
             "</tfoot>"+
             "</table>"
-    
 };
