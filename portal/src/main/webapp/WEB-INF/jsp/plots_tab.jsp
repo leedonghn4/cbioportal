@@ -57,36 +57,36 @@
             <td>
                 <div id="plots-menus" class="plots plots-menus">
                     <ul>
-                        <li><a href="#plots_one_gene" title="Single Gene Query" class="plots-tabs-ref"><span>One Gene</span></a></li>
-                        <li><a href="#plots_two_genes" title="Cross Gene Query" class="plots-tabs-ref"><span>Two Genes</span></a></li>
+                        <li><a href="#one_gene" title="Single Gene Query" class="plots-tabs-ref"><span>One Gene</span></a></li>
+                        <li><a href="#two_genes" title="Cross Gene Query" class="plots-tabs-ref"><span>Two Genes</span></a></li>
                         <li><a href="#plots_custom" title="Advanced Cross Gene Query" class="plots-tabs-ref"><span>Custom</span></a></li>
                     </ul>
-                    <div class="one_gene">
+                    <div class="one_gene" id="one_gene">
                         <h4>Plot Parameters</h4>
                         <h5>Gene</h5>
-                        <select id='gene_list' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
+                        <select id='one_gene_gene_list' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
                         <div id='menu_err_msg'></div>
                         <div id='type'>
                             <h5>Plot Type</h5>
-                            <select id='plot_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
+                            <select id='one_gene_plot_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
                             <h5>Data Type</h5>
-                            <div id='data_type'></div>
+                            <div id='one_gene_data_type'></div>
                         </div>
                         <div id="search_div">
                             <h5>Search case(s)</h5>
                             <input type="text" id="search" placeholder="Case ID..." onkeyup="Plots.searchPlots('one_gene');">
                         </div>
                     </div>
-                    <div id="two_genes">
+                    <div id="two_genes" id="two_genes">
                         <h4>Plot Parameters</h4>
                         <h5>Genes</h5>
-                        x Axis<select id='gene_list_x' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select><br>
-                        y Axis<select id='gene_list_y' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
+                        x Axis<select id='two_genes_gene_list_x' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select><br>
+                        y Axis<select id='two_genes_gene_list_y' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
                         <div id='type_div'>
                             <h5>Plot Type</h5>
-                            <select id='plot_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
+                            <select id='two_genes_plot_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
                             <h5>Data Type</h5>
-                            <div id='data_type_div'></div>
+                            <div id='two_genes_data_type_div'></div>
                             <div id='log_scale_div_x'></div>
                             <div id='log_scale_div_y'></div>
                             <br>                            

@@ -35,14 +35,15 @@
             e.style.display = 'none';
         }
 
-        function generateGeneList(className, id, geneList) {
-            var select = document.getElementbyClassName(className).getElementById(id);
+        function generateGeneList(elemId, geneList) {
+            var select = document.getElementById(elemId);
             geneList.forEach(function(gene) {
                 var el = document.createElement("option");
-                el.textContent = option;
-                el.value = option;
+                el.textContent = gene;
+                el.value = gene;
                 select.appendChild(el);                
             });
+
         }
 
         function dataIsDiscretized(profileText) {
@@ -60,7 +61,7 @@
             toggleVisibilityX: toggleVisibilityX,
             toggleVisibilityY: toggleVisibilityY,
             toggleVisibilityHide: toggleVisibilityHide,
-            generateList: generateList,
+            generateGeneList: generateGeneList,
             mergeList: mergeList,
             dataIsDiscretized: dataIsDiscretized
         };
