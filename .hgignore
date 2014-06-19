@@ -6,12 +6,14 @@ portal/Portal.iml
 portal/portal.log
 portal/nbproject
 portal/build
+business/target/
 portal/.idea
 portal/.DS_Store
 portal/Portal.ipr
 portal/Portal.iws
 portal/checkstyle_report.xml
 core/nbactions.xml
+logs
 importer/nbactions.xml
 portal/nb-configuration.xml
 portal/nbactions.xml

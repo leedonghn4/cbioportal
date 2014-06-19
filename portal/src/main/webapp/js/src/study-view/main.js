@@ -7,11 +7,12 @@ $(document).ready(function(){
         caseIds: caseIds,
         cnaProfileId: cnaProfileId,
         mutationProfileId: mutationProfileId,
-        caseSetId: caseSetId
+        caseSetId: caseSetId,
+        hasMutSig: hasMutSig
     };
     
     var loadingJSCallBackFunc = function(){
-        StudyViewControl.init(parObject);
+        StudyViewMainController.init(parObject);
     };
     
     require(['util/LoadingJS'],function(){

@@ -1,10 +1,11 @@
+<%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
 <!DOCTYPE HTML>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 
-		<script type="text/javascript" src="js/lib/jsmol/JSmol.min.js"></script>
-		<script type="text/javascript" src="js/src/cbio-util.js"></script>
+		<script type="text/javascript" src="js/lib/jsmol/JSmol.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
+		<script type="text/javascript" src="js/src/cbio-util.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 		<script type="text/javascript">
 
@@ -26,10 +27,10 @@
 				if (event.data.type == "script")
 				{
 					// run the script on the JSmol object
-					Jmol.script(_applet, event.data.content);
+					Jmol.scriptWait(_applet, event.data.content);
 
 					// send a message to parent window to indicate that execution is completed
-					_sendMessage({type: "done"});
+					_sendMessage({type: "done", scriptId: event.data.scriptId});
 				}
 				else if (event.data.type == "init")
 				{

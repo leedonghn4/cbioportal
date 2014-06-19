@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 // package
 package org.mskcc.cbio.portal.util;
@@ -61,16 +51,12 @@ public class DataSetsUtil {
 	// ref to our list of cancer study stats & total num of samples
 	private List<CancerStudyStats> cancerStudyStats;
 
-	// ref to case list DAO
-	private DaoCaseList daoCaseList;
-
 	/**
 	 * Constructor (private).
 	 */
 	public DataSetsUtil() {
 
 		try {
-			daoCaseList = new DaoCaseList();
 			// totalNumberOfSamples will be set while computing stats
 			totalNumberOfSamples = 0;
 			cancerStudyStats = computeCancerStudyStats();
@@ -125,7 +111,7 @@ public class DataSetsUtil {
                         }
 			// get genetic profiles
 			int sequenced = getCount(cancerStudy, "_sequenced");
-			int aCGH = getCount(cancerStudy, "_acgh");
+			int cna = getCount(cancerStudy, "_cna");
 			int RNASEQ = getCount(cancerStudy, "_rna_seq_v2_mrna");
 			int tumorMRNA = getCount(cancerStudy, "_mrna");
 			int normal = getCount(cancerStudy, "_normal_mrna");
@@ -138,7 +124,7 @@ public class DataSetsUtil {
 			// add to return list
 			toReturn.add(new CancerStudyStats(cancerStudy.getCancerStudyStableId(), 
 											  cancerStudy.getName(), citation, all, sequenced,
-											  aCGH, RNASEQ, tumorMRNA, normal, tumorMIRNA,
+											  cna, RNASEQ, tumorMRNA, normal, tumorMIRNA,
 											  methylationHM27, rppa, complete));
 		}
 
@@ -158,7 +144,7 @@ public class DataSetsUtil {
 	private int getCount(CancerStudy cancerStudy, String caseListSuffix) throws DaoException {
 		
 		String caseListID = cancerStudy.getCancerStudyStableId() + caseListSuffix;
-		CaseList desiredCaseList = daoCaseList.getCaseListByStableId(caseListID);
+		CaseList desiredCaseList = DaoCaseList.getCaseListByStableId(caseListID);
 		
 		// outta here
 		return (desiredCaseList != null) ? desiredCaseList.getCaseList().size() : 0;

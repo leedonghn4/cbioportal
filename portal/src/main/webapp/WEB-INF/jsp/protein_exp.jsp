@@ -9,8 +9,8 @@
 %>
 
 <style type="text/css" title="currentStyle"> 
-        @import "css/data_table_jui.css";
-        @import "css/data_table_ColVis.css";
+        @import "css/data_table_jui.css?<%=GlobalProperties.getAppVersion()%>";
+        @import "css/data_table_ColVis.css?<%=GlobalProperties.getAppVersion()%>";
         #protein_exp .ColVis {
                 float: left;
                 margin-bottom: 0
@@ -35,7 +35,7 @@
         }
 </style>
 
-<script type="text/javascript" src="js/src/protein_exp.js"></script>
+<script type="text/javascript" src="js/src/protein_exp.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <script type="text/javascript">
     function parsePValue(str) {
@@ -43,25 +43,25 @@
     }
     
     jQuery.fn.dataTableExt.oSort['num-nan-col-asc']  = function(a,b) {
-	var x = parsePValue(a);
-	var y = parsePValue(b);
-        if (isNaN(x)) {
-            return isNaN(y) ? 0 : 1;
-        }
-        if (isNaN(y))
-            return -1;
-	return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+    	var x = parsePValue(a);
+    	var y = parsePValue(b);
+            if (isNaN(x)) {
+                return isNaN(y) ? 0 : 1;
+            }
+            if (isNaN(y))
+                return -1;
+    	return ((x < y) ? -1 : ((x > y) ?  1 : 0));
     };
 
     jQuery.fn.dataTableExt.oSort['num-nan-col-desc'] = function(a,b) {
-	var x = parsePValue(a);
-	var y = parsePValue(b);
-        if (isNaN(x)) {
-            return isNaN(y) ? 0 : 1;
-        }
-        if (isNaN(y))
-            return -1;
-	return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
+    	var x = parsePValue(a);
+    	var y = parsePValue(b);
+            if (isNaN(x)) {
+                return isNaN(y) ? 0 : 1;
+            }
+            if (isNaN(y))
+                return -1;
+    	return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
     };
     
     function getProteinArrayTypes() {
@@ -73,17 +73,16 @@
         return ret;
     }
 
-    function fnCreateSelect(aData, id, defaultOpt)
-    {
-            var r='<select id="'+id+'">', i, iLen=aData.length;
-            for ( i=0 ; i<iLen ; i++ )
-            {
-                if (defaultOpt!=null && aData[i]==defaultOpt)
-                    r += '<option value="'+aData[i]+'" selected="selected">'+aData[i]+'</option>';
-                else
-                    r += '<option value="'+aData[i]+'">'+aData[i]+'</option>';
-            }
-            return r+'</select>';
+    function fnCreateSelect(aData, id, defaultOpt) {
+        var r='<select id="'+id+'">', i, iLen=aData.length;
+        for ( i=0 ; i<iLen ; i++ )
+        {
+            if (defaultOpt!=null && aData[i]==defaultOpt)
+                r += '<option value="'+aData[i]+'" selected="selected">'+aData[i]+'</option>';
+            else
+                r += '<option value="'+aData[i]+'">'+aData[i]+'</option>';
+        }
+        return r+'</select>';
     }
 
     /**

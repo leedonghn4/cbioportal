@@ -62,7 +62,6 @@ var ScatterPlots = function() {
         brushedCases = [];
 
     var axis_edge = 0.1;
-        log_scale_threshold = 0.17677669529;
 
     var updateBrushCallback = "",
         clickCallback = "",
@@ -72,6 +71,14 @@ var ScatterPlots = function() {
         axisYLogFlag = false;
 
     var shiftKeyDown = false;
+    
+    var hasZeroX = false,
+        zeroMappedLogValX = 0,
+        minValX = 100000;
+
+    var hasZeroY = false,
+        zeroMappedLogValY = 0,
+        minValY = 100000;
 
     function initSettings(options, _dataAttr) { //Init with options
         style = jQuery.extend(true, {}, options.style);
@@ -88,9 +95,27 @@ var ScatterPlots = function() {
         //convert json to array, and filter out null 
         $.each(_dataArr, function(index, obj) {
             if (!isNaN(parseFloat(obj.x_val)) && !isNaN(parseFloat(obj.y_val))) { //filter nan data points
+                if (obj.x_val !== 0 && minValX > obj.x_val) {
+                    minValX = obj.x_val;
+                } else if(obj.x_val === 0) {
+                    hasZeroX = true;
+                }
+                if (obj.y_val!== 0 && minValY > obj.y_val) {
+                    minValY = obj.y_val;
+                } else if(obj.y_val === 0) {
+                    hasZeroY = true;
+                }
                 dataArr.push(obj);
             }
         });
+        
+        if(hasZeroX) {
+            zeroMappedLogValX = parseInt(Math.log(minValX) / Math.log(10)) -1;
+        }
+        
+        if(hasZeroY) {
+            zeroMappedLogValY = parseInt(Math.log(minValY) / Math.log(10)) -0.5;
+        }
     }
 
     function initSvgCanvas(divName, _brushOn) {
@@ -137,6 +162,7 @@ var ScatterPlots = function() {
         elem.xAxis = d3.svg.axis()
             .scale(elem.xScale)
             .orient("bottom")
+            .ticks(5)
             .tickSize(6, 0, 0);
     }
 
@@ -144,15 +170,46 @@ var ScatterPlots = function() {
         elem.yAxis = d3.svg.axis()
             .scale(elem.yScale)
             .orient("left")
+            .ticks(5)
             .tickSize(6, 0, 0);
+    }
+    
+    function initLogAxisY() {
+        elem.yAxis = d3.svg.axis()
+            .scale(elem.yScale)
+            .orient("left")
+            .ticks(5)
+            .tickSize(6, 0, 0)
+            .tickFormat(function(v) {
+                if(hasZeroY && v === zeroMappedLogValY) {
+                    return 0;
+                }else {
+                    return parseInt(Math.pow(10, v));
+                }
+            });
+    }
+    
+    function initLogAxisX() {
+        elem.xAxis = d3.svg.axis()
+            .scale(elem.xScale)
+            .orient("bottom")
+            .ticks(5)
+            .tickSize(6, 0, 0)
+            .tickFormat(function(v) {
+                if(hasZeroX && v === zeroMappedLogValX) {
+                    return 0;
+                }else {
+                    return cbio.util.toPrecision(Math.pow(10, v),1,0.001);
+                }
+            });
     }
 
     function generateAxisX() {
         d3.select("#" + names.body).select(".plots-x-axis").remove();
         elem.axisGroup.append("g")
-            .style("stroke-width", 2)
+            .style("stroke-width", 1)
             .style("fill", "none")
-            .style("stroke", "grey")
+            .style("stroke", "black")
             .style("shape-rendering", "crispEdges")
             .attr("class", "plots-x-axis")
             .attr("transform", "translate(0, " + canvas.yBottom + ")")
@@ -164,9 +221,9 @@ var ScatterPlots = function() {
             .style("stroke", "black")
             .style("fill", "black");
         elem.axisGroup.append("g")
-            .style("stroke-width", 2)
+            .style("stroke-width", 1)
             .style("fill", "none")
-            .style("stroke", "grey")
+            .style("stroke", "black")
             .style("shape-rendering", "crispEdges")
             .attr("transform", "translate(0, " + canvas.yTop + ")")
             .call(elem.xAxis.orient("bottom").ticks(0));
@@ -175,9 +232,9 @@ var ScatterPlots = function() {
     function generateAxisY() {
         d3.select("#" + names.body).select(".plots-y-axis").remove();
         elem.axisGroup.append("g")
-            .style("stroke-width", 2)
+            .style("stroke-width", 1)
             .style("fill", "none")
-            .style("stroke", "grey")
+            .style("stroke", "black")
             .style("shape-rendering", "crispEdges")
             .attr("class", "plots-y-axis")
             .attr("transform", "translate(" + canvas.xLeft + ", 0)")
@@ -189,9 +246,9 @@ var ScatterPlots = function() {
             .style("stroke", "black")
             .style("fill", "black");
         elem.axisGroup.append("g")
-            .style("stroke-width", 2)
+            .style("stroke-width", 1)
             .style("fill", "none")
-            .style("stroke", "grey")
+            .style("stroke", "black")
             .style("shape-rendering", "crispEdges")
             .attr("transform", "translate(" + canvas.xRight + ", 0)")
             .call(elem.yAxis.orient("left").ticks(0));
@@ -200,27 +257,29 @@ var ScatterPlots = function() {
     function appendAxisTitleX(_applyLogScale) {
         d3.select("#" + names.body).select(".plots-title-x").remove();
         d3.select("#" + names.body).select(".plots-title-x-help").remove();
-        var _xTitle = "";
+        d3.select("#" + names.body).select("#plots-title-x-checkbox").remove();
+        var _xTitle = "",
+            _checked = "";
         if (_applyLogScale) {
-            _xTitle = text.xTitle + " (log2)";
+            _xTitle = text.xTitle + " (log)";
         } else {
             _xTitle = text.xTitle;
         }
         elem.axisTitleGroup.append("text")
-            .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2)
+            .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 - 15)
             .attr("y", canvas.yBottom + 60)
             .style("text-anchor", "middle")
-            .style("font-size", "12px")
+            .style("font-size", "11px")
             .style("font-weight", "bold") 
             .attr("class", "plots-title-x")
             .text(_xTitle);
         elem.axisTitleGroup.append("svg:image")
-            .attr("xlink:href", "images/help.png")
+            .attr("xlink:href", "images/info.png")
             .attr("class", "plots-title-x-help")
-            .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 - _xTitle.length / 2 * 8.5)
+            .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 - _xTitle.length / 2 * 8 - 15)
             .attr("y", canvas.yBottom + 48)
-            .attr("width", "16")
-            .attr("height", "16");
+            .attr("width", "14")
+            .attr("height", "14");
         elem.svg.select(".plots-title-x-help").each(
             function() {
                 $(this).qtip(
@@ -229,38 +288,64 @@ var ScatterPlots = function() {
                         style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
                         show: {event: "mouseover"},
                         hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {viewport: $(window)}
+                        position: {my:'right bottom', at:'top left', viewport: $(window)}
                     }
                 );
             }
         );
+
+        if(axisXLogFlag) {
+            _checked = "checked";
+        }else {
+            _checked = "";
+        }
+        
+        elem.axisTitleGroup.append("svg:foreignObject")
+            .attr("id", "plots-title-x-checkbox")
+            .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 + _xTitle.length / 2 * 8 - 35)
+            .attr("y", canvas.yBottom + 48)
+            .attr("width", "50")
+            .attr("height", "15")
+            .append("xhtml:body")
+            .style({"font-size": "11px", "margin": "0"})
+            .html("<input id='study-view-scatter-plot-log-scale-x' type='checkbox' style='float:left' "+_checked+"/><span style='float:left; margin-top: 2px; font-size-adjust: 0.5;'>Log</span>");
+        $("#study-view-scatter-plot-log-scale-x").change(function() {
+            if($(this).prop("checked")){
+                axisXLogFlag = true;
+            }else {
+                axisXLogFlag = false;
+            }
+            updateScaleX();
+        });
     }
 
-    function appendAxisTitleY(_applyLogScale) {
+    function appendAxisTitleY() {
         d3.select("#" + names.body).select(".plots-title-y").remove();
         d3.select("#" + names.body).select(".plots-title-y-help").remove();
-        var _yTitle = "";
-        if (_applyLogScale) {
-            _yTitle = text.yTitle + " (log2)";
-        } else {
+        d3.select("#" + names.body).select("#plots-title-y-checkbox").remove();
+        var _yTitle = "",
+            _checked = "";
+//        if (_applyLogScale) {
+//            _yTitle = text.yTitle + " (log)";
+//        } else {
             _yTitle = text.yTitle;
-        }
+//        }
         elem.axisTitleGroup.append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", (canvas.yTop - canvas.yBottom) / 2 - canvas.yTop)
             .attr("y", canvas.xLeft - 60)
             .style("text-anchor", "middle")
-            .style("font-size", "12px")
+            .style("font-size", "11px")
             .style("font-weight", "bold")
             .attr("class", "plots-title-y") 
             .text(_yTitle);
         elem.axisTitleGroup.append("svg:image")
-            .attr("xlink:href", "images/help.png")
+            .attr("xlink:href", "images/info.png")
             .attr("class", "plots-title-y-help")
             .attr("x", canvas.xLeft - 72)
-            .attr("y", canvas.yBottom - (canvas.yBottom - canvas.yTop) / 2 - _yTitle.length / 2 * 8 - 20)
-            .attr("width", "16")
-            .attr("height", "16");
+            .attr("y", canvas.yBottom - (canvas.yBottom - canvas.yTop) / 2 + _yTitle.length / 2 * 8 - 5)
+            .attr("width", "14")
+            .attr("height", "14");
         elem.svg.select(".plots-title-y-help").each(
             function() {
                 $(this).qtip(
@@ -269,11 +354,37 @@ var ScatterPlots = function() {
                         style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
                         show: {event: "mouseover"},
                         hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {viewport: $(window)}
+                        position: {my:'right bottom', at:'top left', viewport: $(window)}
                     }
                 );
             }
         );
+        
+        if(axisYLogFlag) {
+            _checked = "checked";
+        }else {
+            _checked = "";
+        }
+        
+        elem.axisTitleGroup.append("svg:foreignObject")
+            .attr("id", "plots-title-y-checkbox")
+            .attr("transform", "rotate(-90)")
+            .attr("x", (canvas.yTop - canvas.yBottom) / 2 + _yTitle.length / 2 * 8 - 15)
+            .attr("y", canvas.xLeft - 72)
+            .attr("width", "50")
+            .attr("height", "15")
+            .append("xhtml:body")
+            .style({"font-size": "11px", "margin": "0"})
+            .html("<input id='study-view-scatter-plot-log-scale-y' type='checkbox' style='float:left' "+_checked+"/><span style='float:left; margin-top: 2px; font-size-adjust: 0.5;'>Log</span>");
+        
+        $("#study-view-scatter-plot-log-scale-y").change(function() {
+            if($(this).prop("checked")){
+                axisYLogFlag = true;
+            }else {
+                axisYLogFlag = false;
+            }
+            updateScaleY();
+        });
     }
 
     function drawPlots(_dataArr) {
@@ -372,7 +483,7 @@ var ScatterPlots = function() {
             .attr("class", "legend")
             .attr("transform", function(d, i) {
                 return "translate(" + (canvas.xRight + 10) + ", " + (24 + i * 14) + ")";
-            })
+            });
         
         legend.append("path")
             .attr("d", d3.svg.symbol()
@@ -417,10 +528,10 @@ var ScatterPlots = function() {
                 $(this).qtip(
                     {
                         content: {text: d.qtip},
-                        style: { classes: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-lightyellow' },
+                        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'  },
                         show: {event: "mouseover"},
                         hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {viewport: $(window)}
+                        position: {my:'right bottom', at:'top left', viewport: $(window)}
                     }
                 );
             }
@@ -445,9 +556,9 @@ var ScatterPlots = function() {
                 .delay(100)
                 .attr("d", d3.svg.symbol().size(size).type(style.shape));
         
-            elem.dotsGroup.selectAll("path").each(function(d) {
-                changePointSize(this);
-            });
+//            elem.dotsGroup.selectAll("path").each(function(d) {
+//                changePointSize(this);
+//            });
         };
         //Click has three status: 1. Click; 2. ShiftClick; 3. Both
         var click = function(){
@@ -472,7 +583,7 @@ var ScatterPlots = function() {
                 return style.size;
                 break;
             default:
-                return style.size*2;
+                return style.size;
         }
     }
     function changePointSize(_element) {
@@ -480,13 +591,13 @@ var ScatterPlots = function() {
         
         switch(_clickType){
             case 'clicked':
-                $(_element).attr("d", d3.svg.symbol().size(style.size*10).type(style.shape));
+                $(_element).attr("d", d3.svg.symbol().size(style.size).type(style.shape));
                 break;
             case 'shiftClicked':
-                $(_element).attr("d", d3.svg.symbol().size(style.size*2).type(style.shape));
+                $(_element).attr("d", d3.svg.symbol().size(style.size).type(style.shape));
                 break;
             case 'both':
-                $(_element).attr("d", d3.svg.symbol().size(style.size*2).type(style.shape));
+                $(_element).attr("d", d3.svg.symbol().size(style.size).type(style.shape));
                 break;
             
             //default: withOutClick
@@ -497,30 +608,41 @@ var ScatterPlots = function() {
     //Added in Study View especially
     function changeClickStyle(_element){
         var _clickType = pointClickType(_element);
-        
+
         switch(_clickType){
             case 'clicked':
                 $(_element).attr('stroke-width','3')
                             .attr('fill',style.fill)
                             .attr('stroke','red');
+//                            .attr('opacity','1');
                 break;
             case 'shiftClicked':
                 $(_element).attr('stroke-width','0')
                             .attr('fill','red')
                             .attr('stroke','red');
+//                            .attr('opacity','1');
                 break;
             case 'both':
                 $(_element).attr('stroke-width','3')
                             .attr('fill','red')
                             .attr('stroke',style.stroke);
+//                            .attr('opacity','1');
                 break;
-            
+
             //default: withOutClick
             default:
-                $(_element).attr('stroke-width',style.stroke_width)
+//                if(brushedCases.length !== 0){
+//                    $(_element).attr('stroke-width','0')
+//                            .attr('fill',style.fill)
+//                            .attr('stroke',style.stroke)
+//                            .attr('opacity','0.6');
+//                }else {
+                    $(_element).attr('stroke-width','0')
                             .attr('fill',style.fill)
                             .attr('stroke',style.stroke);
-        }
+//                            .attr('opacity','1');
+//                }
+        } 
     }
     
     //Added in Study View especially
@@ -543,38 +665,38 @@ var ScatterPlots = function() {
         //UPdate click point style
         if(_attrType === 'both'){
             $(_element).attr('clicked','shiftClicked');
-            changeClickStyle(_element);
         }else if(_attrType === 'clicked'){
             $(_element).removeAttr('clicked');
-            changeClickStyle(_element);
         }else{
             elem.dotsGroup.selectAll("path").each(function(d) {
                 var _subAttrType = pointClickType(this);
                 if(_subAttrType === 'both'){
                     $(this).attr('clicked','shiftClicked');
-                    changeClickStyle(this);
-                }if(_subAttrType === 'clicked'){
+                }else if(_subAttrType === 'clicked'){
                     $(this).removeAttr('clicked');
-                    changeClickStyle(this);
                 }
+                changeClickStyle(this);
             });
             if(_attrType === 'shiftClicked'){
                 $(_element).attr('clicked','both');
-                changeClickStyle(_element);
             }else{
                 $(_element).attr('clicked','clicked');
-                changeClickStyle(_element);
             }
         }
+        changeClickStyle(_element);
         
         //Find the clicked point ID
+        brushedCases.length = 0;
         elem.dotsGroup.selectAll("path").each(function(d) {
             var _subTyleAttr = pointClickType(this);
             if (_subTyleAttr === 'clicked' || _subTyleAttr === 'both') {
                 _clickedCase = d.case_id;
             }
+            if (_subTyleAttr === 'shiftClicked' || _subTyleAttr === 'both'){
+                brushedCases.push(d.case_id);
+            }
+            changeClickStyle(this);
         });
-        
         clickCallback(_clickedCase);
     }
     
@@ -582,17 +704,14 @@ var ScatterPlots = function() {
     function shiftclicked(_element){
         var _shiftClickedCases = [],
             _attrType = pointClickType(_element);
-    
+        
         //UPdate click point style
         if(_attrType === 'shiftClicked' || _attrType === 'both'){
             $(_element).removeAttr('clicked');
-            changeClickStyle(_element);
         }else if(_attrType === 'clicked'){
             $(_element).attr('clicked','shiftClicked');
-            changeClickStyle(_element);
         }else{
             $(_element).attr('clicked','shiftClicked');
-            changeClickStyle(_element);
         }
         
         elem.dotsGroup.selectAll("path").each(function(d) {
@@ -601,15 +720,20 @@ var ScatterPlots = function() {
                 _shiftClickedCases.push(d.case_id);
                 if(_subAttrType === 'both'){
                     $(this).attr('clicked','shiftClicked');
-                    changeClickStyle(this);
                 }
             }else if(_subAttrType === 'clicked' ){
                 $(this).attr('clicked','shiftClicked');
-                changeClickStyle(this);
                 _shiftClickedCases.push(d.case_id);
             }
         });
-        clickCallback(_shiftClickedCases);
+        
+        brushedCases = _shiftClickedCases;
+        
+        elem.dotsGroup.selectAll("path").each(function(d) {
+            changeClickStyle(this);
+        });
+            
+        clickCallback(brushedCases);
     }
     
     //This functions has been modified from original template.
@@ -619,78 +743,75 @@ var ScatterPlots = function() {
         
         var extent = elem.brush.extent();
         
-        _brushedCases.length = 0;
+        elem.dotsGroup.selectAll("path").each(function(d) {
+            var _x = $(this).attr("x_val"),
+                _y = $(this).attr("y_val");
         
-        if(shiftKeyDown){
-            elem.dotsGroup.selectAll("path").each(function(d) {
-                var _attrType = pointClickType(this),
-                    _x = $(this).attr("x_val"),
-                    _y = $(this).attr("y_val");    
+            if (_x > extent[0][0] && _x < extent[1][0] &&
+                        _y > extent[0][1] && _y < extent[1][1]) {
+                _totalHighlightIds.push(d.case_id);
+            }     
+        });
+        
+        
+        
+        if(_totalHighlightIds.length > 0) {
+            _totalHighlightIds = [];
+            _brushedCases.length = 0;
 
-                if (_x > extent[0][0] && _x < extent[1][0] &&
-                    _y > extent[0][1] && _y < extent[1][1]) {
-                    if(_attrType === 'shiftClicked'){
-                        $(this).removeAttr('clicked');
-                    }else{
+            if(shiftKeyDown){
+                elem.dotsGroup.selectAll("path").each(function(d) {
+                    var _attrType = pointClickType(this),
+                        _x = $(this).attr("x_val"),
+                        _y = $(this).attr("y_val");    
+
+                    if (_x > extent[0][0] && _x < extent[1][0] &&
+                        _y > extent[0][1] && _y < extent[1][1]) {
+                        if(_attrType === 'shiftClicked'){
+                            $(this).removeAttr('clicked');
+                        }else{
+                            $(this).attr('clicked','shiftClicked');
+                            _brushedCases.push(d.case_id);
+                        }
+                    }
+                    if(_attrType === 'clicked'){
                         $(this).attr('clicked','shiftClicked');
                         _brushedCases.push(d.case_id);
                     }
-                    changeClickStyle(this);
-                }
-                if(_attrType === 'clicked'){
-                    $(this).attr('clicked','shiftClicked');
-                    changeClickStyle(this);
-                    _brushedCases.push(d.case_id);
-                }
 
-                _attrType = pointClickType(this);
-                if(_attrType !== 'none'){
-                    _totalHighlightIds.push(d.case_id);
-                }
-            });
-            
-        }else{
-            elem.dotsGroup.selectAll("path").each(function(d) {
-                var _attrType = pointClickType(this),
-                    _x = $(this).attr("x_val"),
-                    _y = $(this).attr("y_val");    
-
-                if (_x > extent[0][0] && _x < extent[1][0] &&
-                    _y > extent[0][1] && _y < extent[1][1]) {
-                    //TODO: does not work with log scale applied scenario
-                    $(this).attr('clicked','shiftClicked');
                     changeClickStyle(this);
-                    _brushedCases.push(d.case_id);
-                }else{
+                    _attrType = pointClickType(this);
                     if(_attrType !== 'none'){
-                        $(this).removeAttr('clicked');
-                        changeClickStyle(this);
+                        _totalHighlightIds.push(d.case_id);
                     }
-                }
-                
-                _totalHighlightIds = _brushedCases;
-            });
-        }
-        
-        brushedCases = _brushedCases;
-        
-        if(_totalHighlightIds.length === 0){
-            elem.dotsGroup.selectAll("path").each(function(d) {
-                var _attrType = pointClickType(this);
-                if(_attrType !== 'none'){
-                    $(this).removeAttr('clicked');
+                });
+
+            }else{
+                elem.dotsGroup.selectAll("path").each(function(d) {
+                    var _attrType = pointClickType(this),
+                        _x = $(this).attr("x_val"),
+                        _y = $(this).attr("y_val");    
+
+                    if (_x > extent[0][0] && _x < extent[1][0] &&
+                        _y > extent[0][1] && _y < extent[1][1]) {
+                        //TODO: does not work with log scale applied scenario
+                        $(this).attr('clicked','shiftClicked');
+                        _brushedCases.push(d.case_id);
+                    }else{
+                        if(_attrType !== 'none'){
+                            $(this).removeAttr('clicked');
+                        }
+                    }
                     changeClickStyle(this);
-                }
-                _totalHighlightIds = [];
-            });
+                    _totalHighlightIds = _brushedCases;
+                });
+            }
+            brushedCases = _totalHighlightIds;
+
+            updateBrushCallback(_totalHighlightIds);
         }
-        
-        elem.dotsGroup.selectAll("path").each(function(d) {
-            changePointSize(this);
-        });
         
         d3.select(".brush").call(elem.brush.clear());
-        updateBrushCallback(_totalHighlightIds);
     }
 
     function updatePlotsLogScale(_axis, _applyLogScale) {
@@ -699,24 +820,30 @@ var ScatterPlots = function() {
             .attr("transform", function() {
                 if (_applyLogScale) {
                     if (_axis === "x") {
-                        if (parseFloat(d3.select(this).attr("x_val")) <= log_scale_threshold) {
-                            var _post_x = elem.xScale(Math.log(log_scale_threshold) / Math.log(2));
-                        } else {
-                            var _post_x = elem.xScale(Math.log(d3.select(this).attr("x_val")) / Math.log(2));
+                        var _post_x_val = "";
+                        
+                        if(d3.select(this).attr("x_val") === '0') {
+                            _post_x_val = zeroMappedLogValX;
+                        }else {
+                            _post_x_val = Math.log(d3.select(this).attr("x_val")) / Math.log(10);
                         }
+                        var _post_x = elem.xScale(_post_x_val);
                         var _post_y = d3.select(this).attr("y_pos");
                         
-                        d3.select(this).attr("x_val",Math.log(d3.select(this).attr("x_val")) / Math.log(2));
+                        d3.select(this).attr("x_val",Math.log(d3.select(this).attr("x_val")) / Math.log(10));
                         axisXLogFlag = true;
                         
                     } else if (_axis === "y") {
                         var _post_x = d3.select(this).attr("x_pos");
-                        if (parseFloat(d3.select(this).attr("y_val")) <= log_scale_threshold) {
-                            var _post_y = elem.yScale(Math.log(log_scale_threshold) / Math.log(2));
-                        } else {
-                            var _post_y = elem.yScale(Math.log(d3.select(this).attr("y_val")) / Math.log(2));
+                        var _post_y_val = "";
+                        
+                        if(d3.select(this).attr("y_val") === '0') {
+                            _post_y_val = zeroMappedLogValY;
+                        }else {
+                            _post_y_val = Math.log(d3.select(this).attr("y_val")) / Math.log(10);
                         }
-                        d3.select(this).attr("y_val",Math.log(d3.select(this).attr("y_val")) / Math.log(2));
+                        var _post_y = elem.yScale(_post_y_val);
+                        d3.select(this).attr("y_val",_post_y_val);
                         axisYLogFlag = true;
                     }
                     d3.select(this).attr("x_pos", _post_x);
@@ -724,12 +851,12 @@ var ScatterPlots = function() {
                     return "translate(" + _post_x + ", " + _post_y + ")";
                 } else {
                     if (_axis === "x") {
-                        d3.select(this).attr("x_val",Math.pow(2,d3.select(this).attr("x_val")));
+                        d3.select(this).attr("x_val",Math.pow(10,d3.select(this).attr("x_val")));
                         var _post_x = elem.xScale(d3.select(this).attr("x_val"));
                         var _post_y = d3.select(this).attr("y_pos");
                         axisXLogFlag = false;
                     } else if (_axis === "y") {
-                        d3.select(this).attr("y_val",Math.pow(2,d3.select(this).attr("y_val")));
+                        d3.select(this).attr("y_val",Math.pow(10,d3.select(this).attr("y_val")));
                         var _post_x = d3.select(this).attr("x_pos");
                         var _post_y = elem.yScale(d3.select(this).attr("y_val"));
                         axisYLogFlag = false;
@@ -743,12 +870,12 @@ var ScatterPlots = function() {
 
     function updateAxisScaleX() {
         var _min_x, _max_x, _edge_x;
-        if (dataAttr.min_x <= log_scale_threshold) {
-            _min_x = Math.log(log_scale_threshold) / Math.log(2);
-        } else {
-            _min_x = Math.log(dataAttr.min_x) / Math.log(2);
+        if(hasZeroX) {
+            _min_x = zeroMappedLogValX;
+        } else{
+            _min_x = Math.log(dataAttr.min_x) / Math.log(10);
         }
-        _max_x = Math.log(dataAttr.max_x) / Math.log(2);
+        _max_x = Math.log(dataAttr.max_x) / Math.log(10);
         _edge_x = (_max_x - _min_x) * axis_edge;
         elem.xScale = d3.scale.linear()
             .domain([_min_x - _edge_x, _max_x + _edge_x])
@@ -757,12 +884,12 @@ var ScatterPlots = function() {
 
     function updateAxisScaleY() {
         var _min_y, _max_y, _edge_y;
-        if (dataAttr.min_y <= log_scale_threshold) {
-            _min_y = Math.log(log_scale_threshold) / Math.log(2);
-        } else {
-            _min_y = Math.log(dataAttr.min_y) / Math.log(2);
+        _max_y = Math.log(dataAttr.max_y) / Math.log(10);
+        if(hasZeroY) {
+            _min_y = zeroMappedLogValY;
+        } else{
+            _min_y = Math.log(dataAttr.min_y) / Math.log(10);
         }
-        _max_y = Math.log(dataAttr.max_y) / Math.log(2);
         _edge_y = (_max_y - _min_y) * axis_edge;
         elem.yScale = d3.scale.linear()
             .domain([_min_y - _edge_y, _max_y + _edge_y])
@@ -788,6 +915,54 @@ var ScatterPlots = function() {
         return _value;
     }
     
+    function log10Value(_value){
+        
+        if(typeof log_scale_threshold !== 'undefined'){
+            if(_value <= log_scale_threshold){
+                _value = Math.log(log_scale_threshold) / Math.log(10);
+            }else{
+                _value = Math.log(_value) / Math.log(10);
+            }
+        }else{
+            _value = Math.log(_value) / Math.log(10);
+        }
+        return _value;
+    }
+    
+    function updateScaleX() {
+//        var _applyLogScale = document.getElementById(_divName).checked;
+            
+        if (axisXLogFlag) {
+            updateAxisScaleX();
+            initLogAxisX();
+        } else {
+            initScaleX();
+            initAxisX();
+        }
+
+        if(brushOn){
+            updateBrush();
+        }
+        generateAxisX();
+        appendAxisTitleX();
+        updatePlotsLogScale("x", axisXLogFlag);
+    }
+    
+    function updateScaleY() {   //_applyLogScale: boolean, true for apply scale, false for  original value)
+        if (axisYLogFlag) {
+            updateAxisScaleY();
+            initLogAxisY();
+        } else {
+            initScaleY();
+            initAxisY();
+        }
+        if(brushOn)
+            updateBrush();
+        generateAxisY();
+        appendAxisTitleY();
+        updatePlotsLogScale("y", axisYLogFlag);
+    }
+        
     return {
         init: function(_options, _dataArr, _dataAttr, _brushOn) {    //Init with options
             initSettings(_options, _dataAttr);
@@ -807,33 +982,14 @@ var ScatterPlots = function() {
             addQtips();
         },
         // !!! Log Scale are only used by using RNA Seq Profile
-        updateScaleX: function(_divName) {   //_applyLogScale: boolean, true for apply scale, false for  original value)
-            var _applyLogScale = document.getElementById(_divName).checked;
-            if (_applyLogScale) {
-                updateAxisScaleX();
-            } else {
-                initScaleX();
-            }
-            if(brushOn)
-                updateBrush();
-            initAxisX();
-            generateAxisX();
-            appendAxisTitleX(_applyLogScale);
-            updatePlotsLogScale("x", _applyLogScale);
+        updateScaleX: updateScaleX,
+        
+        updateScaleY: updateScaleY,
+        setAxisXLogFlag: function(_flag) {
+            axisXLogFlag = _flag;
         },
-        updateScaleY: function(_divName) {   //_applyLogScale: boolean, true for apply scale, false for  original value)
-            var _applyLogScale = document.getElementById(_divName).checked;
-            if (_applyLogScale) {
-                updateAxisScaleY();
-            } else {
-                initScaleY();
-            }
-            if(brushOn)
-                updateBrush();
-            initAxisY();
-            generateAxisY();
-            appendAxisTitleY(_applyLogScale);
-            updatePlotsLogScale("y", _applyLogScale);
+        setAxisYLogFlag: function(_flag) {
+            axisYLogFlag = _flag;
         },
         getBrushedCases: function() {
             return brushedCases;
@@ -901,34 +1057,56 @@ var ScatterPlots = function() {
             
             if(axisXLogFlag && axisYLogFlag){
                 for(var i=0; i<dataCopy.length; i++){
-                    dataCopy[i].x_val = log2Value(dataCopy[i].x_val);
-                    dataCopy[i].y_val = log2Value(dataCopy[i].y_val);
+                    if(dataCopy[i].x_val === 0) {
+                        dataCopy[i].x_val = zeroMappedLogValX;
+                    }else {
+                        dataCopy[i].x_val = log10Value(dataCopy[i].x_val);
+                    }
+                    if(dataCopy[i].y_val === 0) {
+                        dataCopy[i].y_val = zeroMappedLogValY;
+                    }else {
+                        dataCopy[i].y_val = log10Value(dataCopy[i].y_val);
+                    }
                 }
             }else if(axisXLogFlag){
                 for(var i=0; i<dataCopy.length; i++){
-                    dataCopy[i].x_val = log2Value(dataCopy[i].x_val);
+                    if(dataCopy[i].x_val === 0) {
+                        dataCopy[i].x_val = zeroMappedLogValX;
+                    }else {
+                        dataCopy[i].x_val = log10Value(dataCopy[i].x_val);
+                    }
                 }
             }else if(axisYLogFlag){
                 for(var i=0; i<dataCopy.length; i++){
-                    dataCopy[i].y_val = log2Value(dataCopy[i].y_val);
-                }
-            }
-            
-            for(var i=0 ; i< dataCopy.length ; i++){
-                for(var j=0 ; j< _datumArr.length ; j++){
-                    if(_datumArr[j].case_id === dataCopy[i].case_id && _datumArr[j].fill !== 'red'){
-                        _tmpDataArr.push(dataCopy[i]);
-                    }
-                }
-            }
-            for(var i=0 ; i< dataCopy.length ; i++){
-                for(var j=0 ; j< _datumArr.length ; j++){
-                    if(_datumArr[j].case_id === dataCopy[i].case_id && _datumArr[j].fill === 'red'){
-                        _tmpDataArr.push(dataCopy[i]);
+                    if(dataCopy[i].y_val === 0) {
+                        dataCopy[i].y_val = zeroMappedLogValY;
+                    }else {
+                        dataCopy[i].y_val = log10Value(dataCopy[i].y_val);
                     }
                 }
             }
             
+            for(var j=0 ; j< _datumArr.length ; j++){
+                if(_datumArr[j].fill !== 'red') {
+                    for(var i=0 ; i< dataCopy.length ; i++){
+                        if(_datumArr[j].case_id === dataCopy[i].case_id){
+                            _tmpDataArr.push(dataCopy[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            for(var j=0 ; j< _datumArr.length ; j++){
+                if(_datumArr[j].fill === 'red') {
+                    for(var i=0 ; i< dataCopy.length ; i++){
+                        if(_datumArr[j].case_id === dataCopy[i].case_id ){
+                            _tmpDataArr.push(dataCopy[i]);
+                            break;
+                        }
+                    }
+                }
+            }
             dataCopy = _tmpDataArr;
             drawPlots(dataCopy);
             addQtips();
@@ -942,6 +1120,7 @@ var ScatterPlots = function() {
                     var _index = _caseIdList.indexOf(d.case_id);
                     $(this).attr("fill", _datumArr[_index].fill);
                     $(this).attr("stroke", _datumArr[_index].stroke);
+//                    $(this).attr("opacity", _datumArr[_index].opacity);
                     $(this).attr("d", d3.svg.symbol().size(_datumArr[_index].size).type(style.shape));
                     $(this).attr("stroke-width", _datumArr[_index].strokeWidth);
                     if(_datumArr[_index].fill === style.fill && _datumArr[_index].stroke === 'red'){
@@ -955,8 +1134,8 @@ var ScatterPlots = function() {
             });            
         }
 
-    }
-}
+    };
+};
 
 
 

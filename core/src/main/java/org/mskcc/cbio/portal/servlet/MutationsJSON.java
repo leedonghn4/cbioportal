@@ -281,6 +281,18 @@ public class MutationsJSON extends HttpServlet {
             mutationProfile = DaoGeneticProfile.getGeneticProfileByStableId(mutationProfileId);
             if (mutationProfile!=null) {
                 count = DaoMutation.countMutationEvents(mutationProfile.getGeneticProfileId(),caseIds);
+                CaseList caseList = DaoCancerStudy.getCancerStudyByInternalId(mutationProfile.getCancerStudyId()).getSequencedCaseList();
+                if (caseList!=null) {
+                    List<String> sequencedCases = caseList.getCaseList();
+                    if (caseIds!=null) {
+                        sequencedCases.retainAll(caseIds);
+                    }
+                    for (String caseId : sequencedCases) {
+                        if (!count.containsKey(caseId)) {
+                            count.put(caseId, 0);
+                        }
+                    }
+                }
             }
         } catch (DaoException ex) {
             throw new ServletException(ex);

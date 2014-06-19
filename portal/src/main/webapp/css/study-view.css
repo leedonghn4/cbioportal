@@ -1,4 +1,5 @@
 /* main style */
+/*
 #study-view-add-chart li{
     color: white;
     text-align: center;
@@ -16,13 +17,26 @@
     float:right;
     padding: 0 0 5px 0;
 }
+*/
+#study-view-top-wrapper {
+    width: 100%;
+    float: left;
+    height: 40px;
+}
 #study-view-add-chart {
-    right:120px;
+    right:43px;
+    top: 0;
     position: absolute;
     z-index:21;
     display: inline-block;
     vertical-align: middle;
-    line-height: 50px;
+    line-height: 30px;
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    border: 1px solid #d3d3d3;
+    background: #e6e6e6;
+    font-weight: normal;
+    color: #555555;
 }
 #study-view-tutorial {
     right: 0;
@@ -31,25 +45,48 @@
     z-index:21;
 }
 #study-view-header-left-0 {
-    left: 0;
+/*    left: 0;*/
+    float: left;
     width: 160px;
-    height: 50px;
+    margin: 0 5px 0 0;
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    border: 1px solid #d3d3d3;
+    background: #e6e6e6;
+    font-weight: normal;
+    color: #555555;
 }
 #study-view-header-left-1 {
-    left: 0;
-    width: 190px;
-    height: 50px;
+    /*left: 0;*/
+    float: left;
+    margin: 0 5px 0 0;
+    /*width: 190px;*/
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    border: 1px solid #d3d3d3;
+    background: #e6e6e6;
+    font-weight: normal;
+    color: #555555;
+    //height: 30px;
 }
 #study-view-header-left-2 {
-    left: 210px;
-    height: 50px;
+    /*left: 210px;*/
+    float: left;
+    margin: 0 5px 0 0;
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    border: 1px solid #d3d3d3;
+    background: #e6e6e6;
+    font-weight: normal;
+    color: #555555;
 }
 #study-view-header-left-3 {
-    position: absolute;
-    left: 410px;
-    height: 30px;
-    line-height: 30px;
-    top: 12px;
+    /*position: absolute;*/
+    /*left: 410px;*/
+/*    height: 30px;
+    line-height: 30px;*/
+    /*top: 2px;*/
+    float: left;
     border: 0;
     font-size: 13px;
     margin: 0;
@@ -58,11 +95,31 @@
     padding: 0 10px;
     background-color: white;
     width: auto;
-    color: #2986e2;
+    /*color: #2986e2;*/
+    color: black;
     text-align: center;
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    margin-top: 4px;
+}
+#study-view-header-left-4 {
+    font-size: 1.1em;
 }
 #study-view-header-left-3:hover{
     cursor: default;
+}
+.study-view-header-button {
+    float: left;
+    margin: 0 5px 0 0;
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    border: 1px solid #d3d3d3;
+    background: #e6e6e6;
+    font-weight: normal;
+    color: #555555;
+}
+.study-view-header-button:hover {
+    cursor: pointer;
 }
 #study-view-main {
     margin-left: auto;
@@ -142,19 +199,35 @@
     position: absolute;
     top: 60px;
     width: 1200px;
-    height: 50px;
+    height: 30px;
     background-color: white;
     z-index: 20;
     -webkit-backface-visibility: hidden;
 }
 #study-view-scatter-plot-header {
-    float: left;
+    float: right;
     margin-top: 2px;
 }
 #study-view-scatter-plot-title {
     float: left;
-    margin: 5px 40px 0 5px;
-}/*
+    margin: 5px 0 0 5px;
+}
+
+#study-view-scatter-plot-side {
+    border: 1px solid lightgray;
+    border-left-width: 0;
+    position: absolute;
+    width: auto;
+    left: 375px;
+    top: 22px;
+    background: white;
+    display: none;
+    z-index: 1;
+}
+#clinical_table_info {
+    float: left;
+}
+/*
 #study-view-scatter-plot-body-top-chart {
     width: 100%;
     height: 80px;
@@ -182,6 +255,20 @@
     width:auto;
     float: right;
 }
+.study-view-pie-label .dataTables_filter {
+    width: 100%;
+    text-align: left;
+    padding-top: 4px;
+}
+.qtip-content .dataTables_filter {
+    width: 100%;
+}
+.qtip-content .dataTables_wrapper {
+    margin: 10px 5px;
+}
+.qtip-content td {
+    white-space: nowrap;
+}
 #dataTable_info {
     float: left;
     width: auto;
@@ -207,12 +294,17 @@
     font-weight: bold;
     text-align: center;
     display: inline-block;
-    line-height: 50px;
+    line-height: 30px;
 }
 .study-view-header:hover{    
     cursor: pointer !important;
     background-color: #2986e2 !important;
     color: white !important;
+    -webkit-transition: All 0.3s ease;
+    -moz-transition: All 0.3s ease;
+    -o-transition: All 0.3s ease;
+    -ms-transition: All 0.3s ease;
+    transition: All 0.3s ease;
     /*
     -moz-box-shadow: 0 0 5px #ccc inset;
     -webkit-box-shadow: 0 0 5px #ccc inset;
@@ -228,8 +320,11 @@
 .hidden {
     display: none;
 }
+.show {
+    display: block;
+}
 .pieLabel {
-    width: 75px;
+    /*width: 75px;*/
     height: 15px;
     border-spacing: 0px;
 }
@@ -237,9 +332,6 @@
     margin: 5px 10px 0px 0px; 
     color: grey;
     font-size: 10px;
-}
-.study-view-bar-chart rect{
-    fill: #2986e2;
 }
 .study-view-bar-chart g.brush rect.extent {
     fill: #2986e2;
@@ -261,20 +353,23 @@
 }
 .study-view-pie-chart {
     height:150px;
-    width:180px;
+    width:100%;
     //padding-left: 15px;
     float:left;
 }
 .study-view-pie-chart svg{
     margin-left: 25px;
+    margin-right: 10px;
+    float: left;
 }
 .study-view-pie-label {
     height:55px;
-    width:150px;
+    width:95%;
     float:left;
-    margin-left:25px;
+    padding: 0 10px;
+    display: none;
 }
-.study-view-pie-label table td:hover{
+.pieLabel:hover{
     cursor: pointer;
 }
 .study-view-word-cloud {
@@ -287,45 +382,69 @@
 }
 .study-view-pdf-svg-side {
     position: absolute;
-    width: 35px;
-    border: 1px solid lightgrey;
+    //width: 35px;
+    /*left: 130px;*/
+    right: 0;
+    top: 15px;
+/*    border: 1px solid lightgrey;
     left: 180px;
     top: 15px;
     z-index: 20;
-    padding: 2px 2px 3px 2px;
+    padding: 2px 2px 4px 0;
     background-color: white;
-    border-left-width: 0;
+    border-left-width: 0;*/
+    /*float: left;*/
+    width: 14px;
+    display: none;
 }
 .study-view-pdf-svg-side.bar {
-    left: 370px;
+    /*left: 375px;*/
+    /*left: 325px;*/
+}
+.w1 {
+    width: 180px;
 }
 .w2{
-    width:370px;
+    width:375px;
 }
-
 .w3{
-    width:560px;
+    width:570px;
+}
+.w4{
+    width:750px;
+}
+.w5{
+    width:940px;
+}
+.w6{
+    width:1130px;
 }
 
 .w4{
     width:750px;
 }
 .h1{
-    height:220px;
+    height:165px;
+}
+.h1half{
+    height:340px;
 }
 .h2{
-    height:450px;
+    height:455px;
+}
+.h3{
+    height:680px;
 }
 .study-view-bar-main {
     float:left;
-    width:370px;
-    height:220px;
+    width:375px;
+    height:165px;
     border:1px;
     border-color:lightgrey;
     border-style:solid;
 }
 .study-view-bar-x-log {
-    float: right;
+    float: left;
     margin-right: 2px;
     margin-top: 3px;
 }
@@ -337,7 +456,7 @@
 .study-view-pie-main {
     float:left;
     width:180px;
-    height:220px;
+    height:165px;
     border:1px;
     border-color:lightgrey;
     border-style:solid;
@@ -347,18 +466,18 @@
     cursor: move;
 }
 .study-view-dc-chart-delete {
-    float: right;
+    float: left;
     margin-right: 5px;
-    color: lightgray;
+    color: grey;
     cursor: pointer;
 }
-.study-view-scatter-plot-delete{  
+.study-view-chart-plot-delete{  
     margin-right: 5px;
-    color: lightgray;
+    color: grey;
     cursor: pointer;
     float: right;
 }
-.study-view-word-cloud-delete{  
+.study-view-chart-cloud-delete{  
     margin-right: 5px;
     color: lightgray;
     cursor: pointer;
@@ -366,19 +485,125 @@
 }
 .study-view-dc-chart {
     background-color: white;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 .study-view-dc-chart-change {
-    float: right;
+    float: left;
     margin-right: 10px;
     margin-top: 3px;
     cursor: pointer;
     font-size:10px;
     display: none;
 }
+
+.study-view-drag-icon {
+    width:10px;
+    height:10px;
+    margin-top:4px;
+    margin-right:4px;
+    float:left;
+}
+.study-view-drag-icon:hover{
+    cursor: move;
+}
+.study-view-survival-icon {
+    width:10px;
+    height:12px;
+    margin-top:2px;
+    margin-right:2px;
+    float:left;
+}
+.study-view-survival-icon:hover{
+    cursor: pointer;
+}
+.study-view-download-icon {
+    width:10px;
+    height:10px;
+    margin-top:4px;
+    margin-right:4px;
+    float:left;
+}
+.study-view-title-icon {
+    width:12px;
+    height:12px;
+    margin-top:2px;
+    margin-right:4px;
+    float:left;
+}
+.study-view-table-icon {
+    width:11px;
+    margin-top:3px;
+    margin-right:5px;
+}
+#study-view-transfer-icon {
+    width:9px;
+    height:9px;
+    margin-top:6px;
+    margin-right:4px;
+    margin-left:1px;
+    float:left;
+}
+.hover:hover{
+    cursor: pointer;
+}
+.study-view-arrow-icon {
+    width: 13px;
+    margin: 0 auto;
+}
+.heightlightRow {
+    background-color: lightgrey !important;
+}
+/*.study-view-expand-icon {
+    width:9px;
+    height:9px;
+    margin-top:6px;
+    margin-right:4px;
+    margin-left:1px;
+    float:left;
+}
+.study-view-contract-icon {
+    width:9px;
+    height:9px;
+    margin-top:6px;
+    margin-right:4px;
+    margin-left:1px;
+    float:left;
+    display: none;
+}*/
+.pvalMatixTable {
+    background-color: white;
+}
+.pvalMatixTable td:not(:nth-child(2)) {
+    border: 1px solid white;
+    text-align: center;
+}
+.pvalMatixTable th:not(:first-child) {
+    border: 1px solid white;
+}
+.study-view-bar-chart path {
+    shape-rendering: crispEdges
+}
+.study-view-bar-chart .tick line {
+    shape-rendering: crispEdges
+}
+.study-view-download-icon:hover{
+    cursor: pointer;
+}
+.study-view-side-item {
+    float: left;
+    display: block;
+    clear: left;
+    white-space: nowrap;
+}
 chartTitleH4{
     font-size: 10px;
     color: black;
     font-weight: bold;
+    padding-left: 5px;
 }
 pieH3{
     font-size: 10px;
@@ -396,6 +621,12 @@ pieH3{
     fill:none;
     stroke:black;
     stroke-width:1px;
+    font-size:9px;
+}
+.dc-chart .axis text{
+    fill:black;
+    stroke:black;
+    stroke-width:0.5px;
     font-size:9px;
 }
 .study-view-bar-chart {
@@ -456,30 +687,28 @@ pieH3{
     color: #3182bd;
     font-weight: bold;
 }
-.study-view-header-button{
-    color:white;
-    outline: none;
-    background-color:#2986e2;
-    border: none;
-    /*
-    border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    */
+.study-view-middle-button{
+    background-color: white;
+    color: #2986e2;
+    border: 1px solid #2986e2;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
     cursor:pointer;
-    -webkit-transition: All 0.5s ease;
-    -moz-transition: All 0.5s ease;
-    -o-transition: All 0.5s ease;
-    -ms-transition: All 0.5s ease;
-    transition: All 0.5s ease;
 }
-.study-view-header-button:hover:enabled{
-    background-color: #3366cc;
+.study-view-middle-button:hover:enabled{
+    background-color: #2986e2;
+    color:white;
+    -webkit-transition: All 0.3s ease;
+    -moz-transition: All 0.3s ease;
+    -o-transition: All 0.3s ease;
+    -ms-transition: All 0.3s ease;
+    transition: All 0.3s ease;
 }
-.study-view-header-button:disabled {
+.study-view-middle-button:disabled {
     background-color:lightgray;
 }
-.study-view-header-button:hover:disabled{
+.study-view-middle-button:hover:disabled{
     cursor: default;
 }
 .brush .extent {
@@ -511,21 +740,61 @@ pieH3{
 .clickable:hover{
     cursor: pointer;
 }
-
+.forceZindex {
+    z-index: 14800 !important;
+}
+.qtip-max-width {
+    max-width: 1000px;
+}
+.qtip {
+    max-width: 1000px;
+}
 //Show/Hide columns related classes
+.ColVis_collection {
+    width: 500px;
+}
 .ColVis_Button {
     white-space: nowrap;
 }
 .ColVis_Button.TableTools_Button.ColVis_MasterButton{
-    outline: none
+    outline: none;
+    background-color: white;
+/*    color: #2986e2;
+    border: 1px solid #2986e2;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;*/
+    cursor: pointer;
+    height: 23px;
+    padding: 0;
+}
+.ColVis_Button.TableTools_Button.ColVis_MasterButton span{
+    padding: 2px 6px 3px 6px;
+}
+/*.ColVis_Button.TableTools_Button.ColVis_MasterButton :hover{
+    background-color: #2986e2;
+    color:white;
+    -webkit-transition: All 0.3s ease;
+    -moz-transition: All 0.3s ease;
+    -o-transition: All 0.3s ease;
+    -ms-transition: All 0.3s ease;
+    transition: All 0.3s ease;    
 }
 
+Style for search box in dataTable of Summaery Tab
+.dataTables_filter input{
+    border: 1px solid #2986e2;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}*/
 #content ul{
     margin-bottom: 0;
 }
 #content li a{
     outline: none;
 }
+/*
 .ui-widget-content {
     border: 0;
 }
@@ -561,7 +830,72 @@ pieH3{
     border: 1px;
     border-color: white;
     background: white;
+}*/
+.study-view-survival-label-font-1{
+    font-size: 9px;
+    font-weight: bold;
 }
+
+.study-view-survival-plot {
+    position: relative;
+    top: 1em;
+    right: 1em;
+    text-align:center;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgrey;
+}
+
+.study-view-survival-plot-header {
+    float: left;
+    margin-top: 2px;
+    height: 22px;
+}
+.study-view-survival-plot-title {
+    float: left;
+    margin: 5px 0 0 5px;
+}
+.study-view-survival-plot-body {
+    width: 100%;
+}
+.study-view-survival-plot-header-wrapper {
+    float:right;
+    width: 100%;
+    height: 22px;
+    margin-bottom: 5px;
+}
+.study-view-survival-plot-select {
+    font-size:10px;
+    margin-right:5px;
+    width: 130px;
+}
+.study-view-survival-plot-body-label {
+    width: auto;
+    overflow-y: auto;
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: 375px;
+    border: 1px solid lightgray;
+    border-left-width: 0;
+    background-color: white;
+    z-index: 1;
+    max-height: 280px;
+}
+.study-view-survival-plot-body-label svg{
+    float: left;
+}
+.study-view-menu-icon:hover{
+    cursor: pointer;
+}
+.study-view-loader {
+    width: 100%;
+    display:none;
+    position: absolute;
+    top: 30%;
+}
+
+/* These five styles are designed for study view tabs. 
 #dc-plots {
     border: 1px solid #aaaaaa;
     border-radius: 5px;
@@ -582,6 +916,11 @@ pieH3{
     border-radius: 5px;
     border-top-left-radius: 0;
 }
+#cna {
+    border: 1px solid #aaaaaa;
+    border-radius: 5px;
+    border-top-left-radius: 0;
+}*/
 
 /* tag styles */
 /*
@@ -631,4 +970,17 @@ ul li a:hover, ul li a:focus {
     max-width: 200px;
     min-width: 60px;
     border-top: 0;
+}
+/* Used for leftcolumnWrapper of the datatable in summary page*/
+#data-table-chart .DTFC_LeftBodyWrapper {
+    background-color: white;
+}
+#data-table-chart .DTFC_LeftBodyLiner {
+    overflow-y: hidden
+}
+#data-table-chart .DTFC_LeftHeadWrapper {
+    background-color: white;
+}
+#clinical_table_wrapper table.dataTable>tbody>tr>td {
+    white-space: nowrap;
 }

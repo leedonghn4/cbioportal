@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
- **
- ** This library is free software; you can redistribute it and/or modify it
- ** under the terms of the GNU Lesser General Public License as published
- ** by the Free Software Foundation; either version 2.1 of the License, or
- ** any later version.
- **
- ** This library is distributed in the hope that it will be useful, but
- ** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
- ** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
- ** documentation provided hereunder is on an "as is" basis, and
- ** Memorial Sloan-Kettering Cancer Center
- ** has no obligations to provide maintenance, support,
- ** updates, enhancements or modifications.  In no event shall
- ** Memorial Sloan-Kettering Cancer Center
- ** be liable to any party for direct, indirect, special,
- ** incidental or consequential damages, including lost profits, arising
- ** out of the use of this software and its documentation, even if
- ** Memorial Sloan-Kettering Cancer Center
- ** has been advised of the possibility of such damage.  See
- ** the GNU Lesser General Public License for more details.
- **
- ** You should have received a copy of the GNU Lesser General Public License
- ** along with this library; if not, write to the Free Software Foundation,
- ** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
- **/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.servlet;
 
@@ -41,9 +31,14 @@ import org.json.simple.JSONValue;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.mskcc.cbio.portal.util.CoExpUtil;
+import org.mskcc.cbio.portal.util.XssRequestWrapper;
 
 /**
  * Get the top co-expressed genes for queried genes
@@ -82,6 +77,10 @@ public class GetCoExpressionJSON extends HttpServlet  {
 
         String cancerStudyIdentifier = httpServletRequest.getParameter("cancer_study_id");
         String geneSymbol = httpServletRequest.getParameter("gene");
+        if (httpServletRequest instanceof XssRequestWrapper) {
+            geneSymbol = ((XssRequestWrapper)httpServletRequest).getRawParameter("gene");
+        }
+        String profileId = httpServletRequest.getParameter("profile_id");
 	      String caseSetId = httpServletRequest.getParameter("case_set_id");
         String caseIdsKey = httpServletRequest.getParameter("case_ids_key");
         boolean isFullResult = Boolean.parseBoolean(httpServletRequest.getParameter("is_full_result"));
@@ -94,9 +93,9 @@ public class GetCoExpressionJSON extends HttpServlet  {
         Long queryGeneId = geneObj.getEntrezGeneId();
 
         if (!isFullResult) {
-          ArrayList<JSONObject> fullResultJson = new ArrayList<JSONObject>();
-          ArrayList<JSONObject> resultJson = new ArrayList<JSONObject>();
-          GeneticProfile final_gp = CoExpUtil.getPreferedGeneticProfile(cancerStudyIdentifier);
+          ArrayList<JsonNode> fullResultJson = new ArrayList<JsonNode>();
+          ObjectMapper mapper = new ObjectMapper();
+          GeneticProfile final_gp = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
           if (final_gp != null) {
             try {
                 Map<Long,double[]> map = CoExpUtil.getExpressionMap(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey);
@@ -107,33 +106,49 @@ public class GetCoExpressionJSON extends HttpServlet  {
                     long compared_gene_id = genes.get(i);
                     double[] compared_gene_exp = map.get(compared_gene_id);
                     if (compared_gene_exp != null && query_gene_exp != null) {
-                        double pearson = pearsonsCorrelation.correlation(query_gene_exp, compared_gene_exp);
-                        if ((pearson >= coExpScoreThreshold || pearson <= (-1) * coExpScoreThreshold ) &&
-                           (compared_gene_id != queryGeneId)){
+                      //Filter out cases with empty value on either side
+                      int min_length = query_gene_exp.length < compared_gene_exp.length ? query_gene_exp.length : compared_gene_exp.length;
+                      ArrayList<Double> new_query_gene_exp_arrlist = new ArrayList<Double>();
+                      ArrayList<Double> new_compared_gene_exp_arrlist = new ArrayList<Double>();
+                      for (int k = 0; k < min_length; k++) {
+                        if (!Double.isNaN(query_gene_exp[k]) && !Double.isNaN(compared_gene_exp[k])) {
+                          new_query_gene_exp_arrlist.add(query_gene_exp[k]);
+                          new_compared_gene_exp_arrlist.add(compared_gene_exp[k]);
+                        }
+                      }
+                      Double[] _new_query_gene_exp = new_query_gene_exp_arrlist.toArray(new Double[0]);
+                      Double[] _new_compared_gene_exp = new_compared_gene_exp_arrlist.toArray(new Double[0]);
+                      //convert double object to primitive data
+                      double[] new_query_gene_exp = new double[_new_query_gene_exp.length];
+                      double[] new_compared_gene_exp = new double[_new_compared_gene_exp.length];
+                      for (int m = 0; m < _new_query_gene_exp.length; m++) {
+                        new_query_gene_exp[m] = _new_query_gene_exp[m].doubleValue();
+                        new_compared_gene_exp[m] = _new_compared_gene_exp[m].doubleValue();
+                      }
+
+                      if (new_query_gene_exp.length != 0 && new_compared_gene_exp.length != 0) {
+                        double pearson = pearsonsCorrelation.correlation(new_query_gene_exp, new_compared_gene_exp);
+                        if ((pearson >= coExpScoreThreshold || 
+                             pearson <= (-1) * coExpScoreThreshold ) &&
+                             (compared_gene_id != queryGeneId)){
                             //Only calculate spearman with high scored pearson gene pairs.
-                            double spearman = spearmansCorrelation.correlation(query_gene_exp, compared_gene_exp);
+                            double spearman = spearmansCorrelation.correlation(new_query_gene_exp, new_compared_gene_exp);
                             if ((spearman >= coExpScoreThreshold || spearman <= (-1) * coExpScoreThreshold) &&
                                ((spearman > 0 && pearson > 0) || (spearman < 0 && pearson < 0))) {
                               CanonicalGene comparedGene = daoGeneOptimized.getGene(compared_gene_id);
-                              JSONObject _scores = new JSONObject();
+                              ObjectNode _scores = mapper.createObjectNode();
                               _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
                               _scores.put("pearson", pearson);
                               _scores.put("spearman", spearman);
                               fullResultJson.add(_scores);                             
                             }
-
                         }
+                      }
                     }
                 }
-                fullResultJson = CoExpUtil.sortJsonArr(fullResultJson, "pearson");
-                //int _len = (fullResultJson.size() > resultLength ? resultLength : fullResultJson.size());
-                //for (int i = 0; i < _len; i++) {
-                //    resultJson.add(fullResultJson.get(i));
-                //}
                 httpServletResponse.setContentType("application/json");
                 PrintWriter out = httpServletResponse.getWriter();
-                //JSONValue.writeJSONString(resultJson, out);
-                JSONValue.writeJSONString(fullResultJson, out);
+                mapper.writeValue(out, fullResultJson);
             } catch (DaoException e) {
                 System.out.println(e.getMessage());
             }
@@ -141,12 +156,12 @@ public class GetCoExpressionJSON extends HttpServlet  {
             JSONObject emptyResult = new JSONObject();
             httpServletResponse.setContentType("application/json");
             PrintWriter out = httpServletResponse.getWriter();
-            JSONValue.writeJSONString(emptyResult, out);            
+            mapper.writeValue(out, emptyResult);
           }
         } else {
           StringBuilder fullResutlStr = new StringBuilder();
           fullResutlStr.append("Gene Symbol\tPearson Score\tSpearman Score\n");
-          GeneticProfile final_gp = CoExpUtil.getPreferedGeneticProfile(cancerStudyIdentifier);
+          GeneticProfile final_gp = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
           if (final_gp != null) {
             try {
               Map<Long,double[]> map = CoExpUtil.getExpressionMap(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey);
@@ -156,20 +171,39 @@ public class GetCoExpressionJSON extends HttpServlet  {
                   double[] query_gene_exp = map.get(queryGeneId);
                   long compared_gene_id = genes.get(i);
                   double[] compared_gene_exp = map.get(compared_gene_id);
-                  if (compared_gene_exp != null && query_gene_exp != null) {
-                      double pearson = pearsonsCorrelation.correlation(query_gene_exp, compared_gene_exp);
-                      if(compared_gene_id != queryGeneId){
-                        double spearman = spearmansCorrelation.correlation(query_gene_exp, compared_gene_exp);
-                        CanonicalGene comparedGene = daoGeneOptimized.getGene(compared_gene_id);
-                        fullResutlStr.append(
-                          comparedGene.getHugoGeneSymbolAllCaps() + "\t" + 
-                          (double)Math.round(pearson * 100) / 100 + "\t" + 
-                          (double)Math.round(spearman * 100) / 100  + "\n"
-                        );
+                  if (compared_gene_exp != null && query_gene_exp != null) {        
+                      //Filter out cases with empty value on either side
+                      int min_length = (query_gene_exp.length<compared_gene_exp.length)?query_gene_exp.length:compared_gene_exp.length;
+                      ArrayList<Double> new_query_gene_exp_arrlist = new ArrayList<Double>();
+                      ArrayList<Double> new_compared_gene_exp_arrlist = new ArrayList<Double>();
+                      for (int k = 0; k < min_length; k++) {
+                        if (!Double.isNaN(query_gene_exp[k]) && !Double.isNaN(compared_gene_exp[k])) {
+                          new_query_gene_exp_arrlist.add(query_gene_exp[k]);
+                          new_compared_gene_exp_arrlist.add(compared_gene_exp[k]);
+                        }
                       }
+                      Double[] _new_query_gene_exp = new_query_gene_exp_arrlist.toArray(new Double[0]);
+                      Double[] _new_compared_gene_exp = new_compared_gene_exp_arrlist.toArray(new Double[0]);
+                      //convert double object to primitive data
+                      double[] new_query_gene_exp = new double[_new_query_gene_exp.length];
+                      double[] new_compared_gene_exp = new double[_new_compared_gene_exp.length];
+                      for (int m = 0; m < _new_query_gene_exp.length; m++) {
+                        new_query_gene_exp[m] = _new_query_gene_exp[m].doubleValue();
+                        new_compared_gene_exp[m] = _new_compared_gene_exp[m].doubleValue();
+                      }
+                      if (new_query_gene_exp.length != 0 && new_compared_gene_exp.length != 0 &&
+                          compared_gene_id != queryGeneId) {
+                          double pearson = pearsonsCorrelation.correlation(new_query_gene_exp, new_compared_gene_exp);
+                          double spearman = spearmansCorrelation.correlation(new_query_gene_exp, new_compared_gene_exp);
+                          CanonicalGene comparedGene = daoGeneOptimized.getGene(compared_gene_id);
+                          fullResutlStr.append(
+                            comparedGene.getHugoGeneSymbolAllCaps() + "\t" + 
+                            (double)Math.round(pearson * 100) / 100 + "\t" + 
+                            (double)Math.round(spearman * 100) / 100  + "\n"
+                          );
+                      }                        
                   }
               }
-
               //construct file name
               String fileName = "coexpression_" + geneSymbol + "_" + 
                 final_gp.getProfileName().replaceAll("\\s+", "_") + "_" + 

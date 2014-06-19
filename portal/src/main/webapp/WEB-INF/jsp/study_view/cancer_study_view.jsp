@@ -29,13 +29,13 @@ String jsonCaseIds = JSONValue.toJSONString(caseIds);
 GeneticProfile mutationProfile = (GeneticProfile)request.getAttribute(CancerStudyView.MUTATION_PROFILE);
 boolean hasMutation = mutationProfile!=null;
 
-boolean hasMutSig = cancerStudy.hasMutSigData();
+boolean hasMutSig = cancerStudy!=null && cancerStudy.hasMutSigData();
 boolean showMutationsTab = hasMutation;
 
 GeneticProfile cnaProfile = (GeneticProfile)request.getAttribute(CancerStudyView.CNA_PROFILE);
 boolean hasCNA = cnaProfile!=null;
 
-boolean hasGistic = cancerStudy.hasGisticData();
+boolean hasGistic = cancerStudy!=null && cancerStudy.hasGisticData();
 boolean showCNATab = hasGistic;
 
 String mutationProfileStableId = null;
@@ -47,7 +47,7 @@ if (cnaProfile!=null) {
     cnaProfileStableId = cnaProfile.getStableId();
 }
 
-boolean hasCnaSegmentData = cancerStudy.hasCnaSegmentData();
+boolean hasCnaSegmentData = cancerStudy!=null && cancerStudy.hasCnaSegmentData();
 
 if (cancerStudyViewError!=null) {
     out.print(cancerStudyViewError);
@@ -79,24 +79,20 @@ if (cancerStudyViewError!=null) {
 <div id="study-tabs">
     <ul>
         
-    <li id="li-1"><a href='#dc-plots' class='study-tab' title='Plots'>DC Plots</a></li>
-    <li><a href='#clinical-plots' class='study-tab' title='DC Plots'>Study Summary</a></li>
-    <li><a href='#clinical' class='study-tab' title='Clinical Data'>Clinical Data</a></li>
+    <li id="li-1"><a href='#dc-plots' id='study-tab-dc-plots-a' class='study-tab' title='Study Summary'>Study Summary</a></li>
+    <!--<li><a href='#clinical-plots' class='study-tab' title='DC Plots'>Study Summary</a></li>-->
+    <li><a href='#clinical' id='study-tab-clinical-a' class='study-tab' title='Clinical Data'>Clinical Data</a></li>
     
     <%if(showMutationsTab){%>
-    <li><a href='#mutations' class='study-tab' title='Mutations'>Mutated Genes</a></li>
+    <li><a href='#mutations' id='study-tab-mutations-a' class='study-tab' title='Mutations'>Mutated Genes</a></li>
     <%}%>
     
     <%if(showCNATab){%>
-    <li><a href='#cna' class='study-tab' title='Copy Number Alterations'>Copy Number Alterations</a></li>
+    <li><a href='#cna' id='study-tab-cna-a' class='study-tab' title='Copy Number Alterations'>Copy Number Alterations</a></li>
     <%}%>
     
     </ul>
-
-    <div class="study-section" id="clinical-plots">
-        <%@ include file="plots.jsp" %>
-    </div>
-
+    
     <div class="study-section" id="dc-plots">
         <%@ include file="dcplots.jsp" %>
     </div>
@@ -104,7 +100,7 @@ if (cancerStudyViewError!=null) {
     <div class="study-section" id="clinical">
         <%@ include file="clinical.jsp" %>
     </div>
-
+    
     <%if(showMutationsTab){%>
     <div class="study-section" id="mutations">
         <%@ include file="mutations.jsp" %>
@@ -137,8 +133,8 @@ if (cancerStudyViewError!=null) {
 <jsp:include page="../global/xdebug.jsp" flush="true" />    
 
 <style type="text/css">
-        @import "css/data_table_jui.css";
-        @import "css/data_table_ColVis.css";
+        @import "css/data_table_jui.css?<%=GlobalProperties.getAppVersion()%>";
+        @import "css/data_table_ColVis.css?<%=GlobalProperties.getAppVersion()%>";
         .ColVis {
                 float: left;
                 margin-bottom: 0
@@ -167,7 +163,7 @@ if (cancerStudyViewError!=null) {
         }
 </style>
 
-<script type="text/javascript" src="js/src/cancer-study-view/load-clinical-data.js"></script>
+<script type="text/javascript" src="js/src/cancer-study-view/load-clinical-data.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <script type="text/javascript">
 var cancerStudyId = '<%=cancerStudy.getCancerStudyStableId()%>';
@@ -177,6 +173,7 @@ var hasCnaSegmentData = <%=hasCnaSegmentData%>;
 var hasMutSig = <%=hasMutSig%>;
 var caseSetId = '<%=caseSetId%>';
 var caseIds = <%=jsonCaseIds%>;
+var cancer_study_id = cancerStudyId; //Some components using this as global ID
 
 $(document).ready(function(){
     setUpStudyTabs();

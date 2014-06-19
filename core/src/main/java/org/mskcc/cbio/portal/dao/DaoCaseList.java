@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.dao;
 
@@ -39,12 +29,13 @@ import org.mskcc.cbio.portal.model.CaseListCategory;
 /**
  * Data access object for Case_List table
  */
-public class DaoCaseList {
+public final class DaoCaseList {
+    private DaoCaseList() {}
 
 	/**
 	 * Adds record to case_list table.
 	 */
-    public int addCaseList(CaseList caseList) throws DaoException {
+    public static int addCaseList(CaseList caseList) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -79,7 +70,7 @@ public class DaoCaseList {
 	/**
 	 * Given a case list by stable Id, returns a case list.
 	 */
-    public CaseList getCaseListByStableId(String stableId) throws DaoException {
+    public static CaseList getCaseListByStableId(String stableId) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -105,7 +96,7 @@ public class DaoCaseList {
 	/**
 	 * Given a case list ID, returns a case list.
 	 */
-    public CaseList getCaseListById(int id) throws DaoException {
+    public static CaseList getCaseListById(int id) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -131,7 +122,7 @@ public class DaoCaseList {
 	/**
 	 * Given a cancerStudyId, returns all case list.
 	 */
-    public ArrayList<CaseList> getAllCaseLists( int cancerStudyId) throws DaoException {
+    public static ArrayList<CaseList> getAllCaseLists( int cancerStudyId) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -162,7 +153,7 @@ public class DaoCaseList {
 	/**
 	 * Returns a list of all case lists.
 	 */
-    public ArrayList<CaseList> getAllCaseLists() throws DaoException {
+    public static ArrayList<CaseList> getAllCaseLists() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -191,7 +182,7 @@ public class DaoCaseList {
     /**
 	 * Given a case id, determines if it exists
 	 */
-    public boolean caseIDExists(String caseID) throws DaoException {
+    public static boolean caseIDExists(String caseID) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -212,7 +203,7 @@ public class DaoCaseList {
 	/**
 	 * Clears all records from case list & case_list_list.
 	 */
-    public void deleteAllRecords() throws DaoException {
+    public static void deleteAllRecords() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -232,7 +223,7 @@ public class DaoCaseList {
 	/**
 	 * Given a case list, gets list id from case_list table
 	 */
-	private int getCaseListId(CaseList caseList) throws DaoException {
+	private static int getCaseListId(CaseList caseList) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -255,7 +246,7 @@ public class DaoCaseList {
 	/**
 	 * Adds record to case_list_list.
 	 */
-    private int addCaseListList(CaseList caseList, Connection con) throws DaoException {
+    private static int addCaseListList(CaseList caseList, Connection con) throws DaoException {
 		
 	// get case list id
 	int caseListId = getCaseListId(caseList);
@@ -287,7 +278,7 @@ public class DaoCaseList {
 	/**
 	 * Given a case list object (thus case list id) gets case list list.
 	 */
-	private ArrayList<String> getCaseListList(CaseList caseList, Connection con) throws DaoException {
+	private static ArrayList<String> getCaseListList(CaseList caseList, Connection con) throws DaoException {
 
         PreparedStatement pstmt  ;
         ResultSet rs = null;
@@ -311,7 +302,7 @@ public class DaoCaseList {
 	/**
 	 * Given a result set, creates a case list object.
 	 */
-    private CaseList extractCaseList(ResultSet rs) throws SQLException {
+    private static CaseList extractCaseList(ResultSet rs) throws SQLException {
         CaseList caseList = new CaseList();
         caseList.setStableId(rs.getString("STABLE_ID"));
         caseList.setCancerStudyId(rs.getInt("CANCER_STUDY_ID"));
