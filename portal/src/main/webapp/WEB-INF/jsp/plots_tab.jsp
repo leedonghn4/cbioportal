@@ -67,9 +67,9 @@
                         <div id='menu_err_msg'></div>
                         <div id='one_gene_type_specification'>
                             <h5>Plot Type</h5>
-                            <select id='plots_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
+                            <select id='one_gene_plot_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
                             <h5>Data Type</h5>
-                            <div id='one_gene_platform_select_div'></div>
+                            <div id='one_gene_data_type'></div>
                         </div>
                         <div id="inner-search-box-one-gene">
                             <h5>Search case(s)</h5>
@@ -83,9 +83,9 @@
                         <br>
                         y Axis<select id='two_genes_geneY' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
                         <h5>Plot Type</h5>
-                        <select id='two_genes_plots_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
-                        <h5>Platform</h5>
-                        <div id='two_genes_platform_select_div'></div>
+                        <select id='two_genes_plot_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
+                        <h5>Data Type</h5>
+                        <div id='two_genes_data_type'></div>
                         <div id='two_genes_apply_log_scale_div_x'></div>
                         <div id='two_genes_apply_log_scale_div_y'></div>
                         <br>
