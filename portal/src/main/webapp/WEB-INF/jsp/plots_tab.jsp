@@ -12,6 +12,7 @@
 <script type="text/javascript" src="js/src/plots-view/plots_custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/component/ControlPanel.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/component/BoxPlots.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/util/ControlPanelUtil.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <style>
     #plots .plots {
         height: 610px;
@@ -60,35 +61,37 @@
                         <li><a href="#plots_two_genes" title="Cross Gene Query" class="plots-tabs-ref"><span>Two Genes</span></a></li>
                         <li><a href="#plots_custom" title="Advanced Cross Gene Query" class="plots-tabs-ref"><span>Custom</span></a></li>
                     </ul>
-                    <div id="plots_one_gene">
+                    <div class="one_gene">
                         <h4>Plot Parameters</h4>
                         <h5>Gene</h5>
-                        <select id='one_gene' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
+                        <select id='gene_list' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
                         <div id='menu_err_msg'></div>
-                        <div id='one_gene_type_specification'>
+                        <div id='type'>
                             <h5>Plot Type</h5>
-                            <select id='one_gene_plot_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
+                            <select id='plot_type' onchange="PlotsMenu.updateDataType();PlotsView.init();"></select>
                             <h5>Data Type</h5>
-                            <div id='one_gene_data_type'></div>
+                            <div id='data_type'></div>
                         </div>
-                        <div id="inner-search-box-one-gene">
+                        <div id="search_div">
                             <h5>Search case(s)</h5>
-                            <input type="text" id="search_plots_one_gene" placeholder="Case ID..." onkeyup="Plots.searchPlots('one_gene');">
+                            <input type="text" id="search" placeholder="Case ID..." onkeyup="Plots.searchPlots('one_gene');">
                         </div>
                     </div>
-                    <div id="plots_two_genes">
+                    <div id="two_genes">
                         <h4>Plot Parameters</h4>
                         <h5>Genes</h5>
-                        x Axis<select id='two_genes_geneX' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
-                        <br>
-                        y Axis<select id='two_genes_geneY' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
-                        <h5>Plot Type</h5>
-                        <select id='two_genes_plot_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
-                        <h5>Data Type</h5>
-                        <div id='two_genes_data_type'></div>
-                        <div id='two_genes_apply_log_scale_div_x'></div>
-                        <div id='two_genes_apply_log_scale_div_y'></div>
-                        <br>
+                        x Axis<select id='gene_list_x' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select><br>
+                        y Axis<select id='gene_list_y' onchange="PlotsTwoGenesMenu.updateMenu();PlotsTwoGenesView.init();"></select>
+                        <div id='type_div'>
+                            <h5>Plot Type</h5>
+                            <select id='plot_type' onchange="PlotsTwoGenesMenu.updateDataType();PlotsTwoGenesView.init();"></select>
+                            <h5>Data Type</h5>
+                            <div id='data_type_div'></div>
+                            <div id='log_scale_div_x'></div>
+                            <div id='log_scale_div_y'></div>
+                            <br>                            
+                        </div>
+
                         <div id='two_genes_view_options'>
                             <h5>Options</h5>
                             <div id='two_genes_show_mutation_div'>
