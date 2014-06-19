@@ -1,4 +1,5 @@
-/** Copyright (c) 2014 Memorial Sloan-Kettering Cancer Center.
+/*
+ * Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
@@ -14,23 +15,10 @@
  * Memorial Sloan-Kettering Cancer Center 
  * has been advised of the possibility of such damage.
 */
-package org.mskcc.cbio.portal.persistence;
+package org.mskcc.cbio.importer.model;
 
-import org.mskcc.cbio.portal.model.*;
-
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
-
-public interface EntityAttributeMapper
+public class NCIcaDSREntry
 {
-	void insertEntityAttribute(EntityAttribute attribute);
-	void updateEntityAttribute(EntityAttribute attribute);
-	void insertAttributeMetadata(AttributeMetadata attributeMetadata);
-
-	EntityAttribute getEntityAttributeById(@Param("entityId") int entityId,
-	                                       @Param("attributeId") String attributeId);
-
-	List<AttributeMetadata> getAllAttributeMetadata();
-	AttributeMetadata getAttributeMetadataById(String attributeId);
+    public String preferredName;
+    public String preferredDefinition;
 }
