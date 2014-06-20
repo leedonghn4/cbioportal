@@ -368,16 +368,35 @@ var StudyViewInitCharts = (function(){
             _topGenes.size = [15];
         }else{
             _topGenes.names = [];
-            _topGenes.percentage = [];
+            _topGenes.mutationsPerNucletide = [];
 
             for( i = 0; i< _mutatedGenesLength; i++){
                 _topGenes.names.push(_mutatedGenes[i][0]);
-                _topGenes.percentage.push(_mutatedGenes[i][1]);
+                _topGenes.mutationsPerNucletide.push(_mutatedGenes[i][1]);
+                
             }
-            
-            _topGenes.size = calculateWordSize(_topGenes.percentage);
+            _topGenes.percentage  = calculatePercentage(_topGenes.mutationsPerNucletide);
+            _topGenes.size = calculateWordSize(_topGenes.mutationsPerNucletide);
         }
         return _topGenes;
+    }
+
+    function calculatePercentage(_genes) {
+        var i,
+            _geneLength = _genes.length,
+            _percental = [],
+            _totalMuts = 0;
+        
+        for( i = 0; i < _geneLength; i++){
+            _totalMuts += _genes[i];
+        }
+        
+        for( i = 0; i < _geneLength; i++){
+            var _percentage = (_genes[i] / _totalMuts);
+            _percental.push(_percentage);
+        }
+        
+        return _percental;
     }
 
     function calculateWordSize(_genes) {

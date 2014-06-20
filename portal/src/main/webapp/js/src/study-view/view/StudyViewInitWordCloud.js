@@ -148,41 +148,84 @@ var StudyViewInitWordCloud = (function() {
             .attr("width", WIDTH)
             .attr("height", HEIGHT);
 
-        _svg.append("g")
-            .attr("transform", "translate(10,40)")
-          .selectAll("text")
+        var _g = _svg.append("g")
+            .attr("transform", "translate(10,40)");
+
+        _g.selectAll("text")
             .data(words)
           .enter().append("text")
             .style("font-size", function(d) { return d.size + "px"; })
             .style("font-family", "Impact")
-            //.style("fill", function(d, i) { return fill(i); })
             .style("fill", 'green')
             .style('cursor', 'pointer')
-            //.attr("text-anchor", "middle")
             .attr("transform", function(d, i) {
                 //TODO: A constant didider for width and height of each text 
                 //are calculated based on multiple testing. This should be
                 //changed later.
                 var _translate = "translate(" + [startX, startY] + ")";
-                
-                //d.width - d.size is so called constant divider for width
                 var _width = (d.width * (3 / 4));
                 
                 startX += _width;
                 
                 if(startX > (WIDTH-10)){
                     startX = 0;
-                    
-                    //1.3 is so called constant divider for height 
                     startY += d.y1 * 1.7;
                     _translate = "translate(" + [startX, startY] + ")";
                     startX += _width;
                 }
                 
                 return _translate;
-              //return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
             .text(function(d) { return d.text; });
+
+        startX = 0;
+        startY = 0;
+        _g.selectAll("rect")
+            .data(words)
+          .enter().append("rect")
+            .attr("fill", "lightgrey")
+            .attr("width", "30px")
+            .attr("height", "6px")
+            .attr("transform", function(d, i) {
+                var _translate = "translate(" + [startX, startY+2] + ")";
+                var _width = (d.width * (3 / 4));
+                
+                startX += _width;
+                
+                if(startX > (WIDTH-10)){
+                    startX = 0;
+                    startY += d.y1 * 1.7;
+                    _translate = "translate(" + [startX, startY+2] + ")";
+                    startX += _width;
+                }
+                return _translate;
+            });
+
+        startX = 0;
+        startY = 0;
+        _g.selectAll()
+        .data(words)
+          .enter().append("rect")
+            .attr("fill", "red")
+            .attr("width", function(d, i) {
+                return (Number(d.percentage) * 30) + "px";
+            })
+            .attr("height", "6px")
+            .attr("transform", function(d, i) {
+                var _translate = "translate(" + [startX, startY+2] + ")";
+                var _width = (d.width * (3 / 4));
+                
+                startX += _width;
+                
+                if(startX > (WIDTH-10)){
+                    startX = 0;
+                    startY += d.y1 * 1.7;
+                    _translate = "translate(" + [startX, startY+2] + ")";
+                    startX += _width;
+                }
+                
+                return _translate;
+            });
       
         $("#study-view-word-cloud svg text").click(function(){
             var _text = $(this).text();
@@ -199,7 +242,7 @@ var StudyViewInitWordCloud = (function() {
     function initD3Cloud() {
         d3.layout.cloud().size([180, 180])
             .words(words.map(function(d, index) {
-                return {text: d, size: fontSize[index]};
+                return {text: d, size: fontSize[index], percentage: percentage[index]};
             }))
             .padding(0)
             .rotate(function() { return ~~0; })
