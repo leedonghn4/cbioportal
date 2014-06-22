@@ -45,20 +45,20 @@ var PlotsMenu = (function () {
                 MRNA_COPY_NO : {
                     value : "mrna_vs_copy_no",
                     text : "mRNA vs. Copy Number",
-                    dataTypeX: "MRNA", //put data type key here as the indicator of a profile
-                    dataTypeY: "COPY_NO"
+                    data_type_x: "MRNA", //put data type key here as the indicator of a profile
+                    data_type_y: "COPY_NO"
                 },
                 MRNA_METHYLATION : {
                     value : "mrna_vs_dna_methylation",
                     text : "mRNA vs. DNA Methylation",
-                    dataTypeX: "MRNA",
-                    dataTypeY: "METHYLATION"
+                    data_type_x: "MRNA", //put data type key here as the indicator of a profile
+                    data_type_y: "METHYLATION"
                 },
                 RPPA_MRNA : {
                     value : "rppa_vs_mrna",
                     text : "RPPA Protein Level vs. mRNA",
-                    dataTypeX: "RPPA",
-                    dataTypeY: "MRNA"
+                    data_type_x: "RPPA", //put data type key here as the indicator of a profile
+                    data_type_y: "MRNA"
                 }
             },
             data_type : {
@@ -214,8 +214,8 @@ var PlotsMenu = (function () {
         var _selectedDataTypeNames = [];
         for (var key in oneGene.plot_type) {
             if (currentPlotsType === oneGene.plot_type[key].value) { //Get the two selected data type
-                _selectedDataTypeNames[0] = oneGene.plot_type[key].dataTypeX;
-                _selectedDataTypeNames[1] = oneGene.plot_type[key].dataTypeY;
+                _selectedDataTypeNames[0] = oneGene.plot_type[key].data_type_x;
+                _selectedDataTypeNames[1] = oneGene.plot_type[key].data_type_y;
             }
         }
         $.each(_selectedDataTypeNames, function(index, dataTypeName) {
