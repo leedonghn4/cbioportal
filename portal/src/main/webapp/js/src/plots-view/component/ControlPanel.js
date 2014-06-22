@@ -27,7 +27,7 @@
 
  /*
   * Generate the control menu on the left side for the plots tab
-  *
+  * Contains three sub-views: one gene, two genes, and custom
   * Jun 2014
   * @Author: Yichao S/ Eduardo Velasco
   *
@@ -39,50 +39,51 @@ var PlotsMenu = (function () {
             ONE_GENE: "one_gene",
             TWO_GENES: "two_genes",
             CUSTOM: "custom"
-        },
-        values = {
-            MRNA : "mrna",
-            COPY_NO : "copy_no",
-            METHYLATION : "dna_methylation",
-            RPPA : "rppa",
-            MRNA_COPY_NO : "mrna_vs_copy_no", 
-            MRNA_METHYLATION : "mrna_vs_dna_methylation",
-            RPPA_MRNA : "rppa_vs_mrna"        
-        }; 
+        };
     var oneGene = {
             plot_type : {
                 MRNA_COPY_NO : {
-                    value : values.MRNA_COPY_NO,
-                    text : "mRNA vs. Copy Number"
+                    value : "mrna_vs_copy_no",
+                    text : "mRNA vs. Copy Number",
+                    dataTypeX: "MRNA", //put data type key here as the indicator of a profile
+                    dataTypeY: "COPY_NO"
                 },
                 MRNA_METHYLATION : {
-                    value : values.MRNA_METHYLATION,
-                    text : "mRNA vs. DNA Methylation"
+                    value : "mrna_vs_dna_methylation",
+                    text : "mRNA vs. DNA Methylation",
+                    dataTypeX: "MRNA",
+                    dataTypeY: "METHYLATION"
                 },
                 RPPA_MRNA : {
-                    value : values.RPPA_MRNA,
-                    text : "RPPA Protein Level vs. mRNA"
+                    value : "rppa_vs_mrna",
+                    text : "RPPA Protein Level vs. mRNA",
+                    dataTypeX: "RPPA",
+                    dataTypeY: "MRNA"
                 }
             },
             data_type : {
                 MRNA : {
+                    id: "one_gene_data_type_mrna",
                     label: "- mRNA -",
-                    value: values.MRNA,
+                    value: "mrna",
                     genetic_profile : []
                 },
                 COPY_NO : {
+                    id: "one_gene_data_type_copy_no",
                     label: "- Copy Number -",
-                    value: values.COPY_NO,
+                    value: "copy_no",
                     genetic_profile : []
                 },
                 METHYLATION : {
+                    id: "one_gene_data_type_methylation",
                     label: "- DNA Methylation -",
-                    value: values.METHYLATION,
+                    value: "dna_methylation",
                     genetic_profile : []
                 },
                 RPPA : {
+                    id: "one_gene_data_type_rppa",
                     label: "- RPPA Protein Level -",
-                    value: values.RPPA,
+                    value: "rppa",
                     genetic_profile : []
                 }                
             },
@@ -96,20 +97,24 @@ var PlotsMenu = (function () {
         twoGenes = {
             plot_type : {
                 MRNA : { 
-                    value : values.MRNA, 
-                    name :  "mRNA Expression" 
+                    value : "mrna", 
+                    name :  "mRNA Expression",
+                    data_type: "MRNA" //put data type key here as the indicator of a profile
                 },
                 COPY_NO : { 
-                    value : values.COPY_NO, 
-                    name :  "Copy Number Alteration" 
+                    value : "copy_no", 
+                    name :  "Copy Number Alteration",
+                    data_type: "COPY_NO" //put data type key here as the indicator of a profile
                 },
                 METHYLATION : { 
-                    value : values.METHYLATION, 
-                    name :  "DNA Methylation" 
+                    value : "methylation", 
+                    name :  "DNA Methylation",
+                    data_type: "METHYLATION" //put data type key here as the indicator of a profile
                 },
                 RPPA : { 
-                    value : values.RPPA, 
-                    name :  "RPPA Protein Level" 
+                    value : "rppa", 
+                    name :  "RPPA Protein Level",
+                    data_type: "RPPA" //put data type key here as the indicator of a profile
                 }                
             },
             data_type : {  //Only contain genetic profiles that has data available for both genes
@@ -117,168 +122,117 @@ var PlotsMenu = (function () {
                 //     genetic_profile : []
                 // },
                 MRNA : {
+                    value: "mrna",
                     genetic_profile : []
                 },
                 COPY_NO : {
+                    value: "copy_no",
                     genetic_profile : []
                 },
                 METHYLATION : {
+                    value: "methylation",
                     genetic_profile : []
                 },
                 RPPA : {
+                    value: "rppa",
                     genetic_profile : []
                 }                  
             }
         };
 
- 
-
-    function fetchContent(plotsType, selectedGenes) { 
-        if (plotsType === tabType.ONE_GENE) {
-            var selectedGene = selectedGenes.geneX;
-            oneGene.data_type.MRNA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_mrna;
-            oneGene.data_type.COPY_NO.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_copy_no;
-            oneGene.data_type.METHYLATION.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_dna_methylation;
-            oneGene.data_type.RPPA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_rppa;
-            oneGene.status.has_mrna = (oneGene.data_type.MRNA.genetic_profile.length !== 0);
-            oneGene.status.has_copy_no = (oneGene.data_type.COPY_NO.genetic_profile.length !== 0);
-            oneGene.status.has_dna_methylation = (oneGene.data_type.METHYLATION.genetic_profile.length !== 0);
-            oneGene.status.has_rppa = (oneGene.data_type.RPPA.genetic_profile.length !== 0);
-        } else if (plotsType === tabType.TWO_GENES) {
-            var geneX = selectedGenes.geneX, 
-                geneY = selectedGenes.geneY;
-            //content.genetic_profile_mutations = Plots.getGeneticProfiles(geneX).genetic_profile_mutations;
-            twoGenes.data_type.MRNA = ControlPanelUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_mrna,
-                Plots.getGeneticProfiles(geneY).genetic_profile_mrna
-            );
-            twoGenes.data_type.COPY_NO = ControlPanelUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_copy_no,
-                Plots.getGeneticProfiles(geneY).genetic_profile_copy_no
-            );
-            twoGenes.data_type.METHYLATION = ControlPanelUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_dna_methylation,
-                Plots.getGeneticProfiles(geneY).genetic_profile_dna_methylation
-            );
-            twoGenes.data_type.RPPA = ControlPanelUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_rppa,
-                Plots.getGeneticProfiles(geneY).genetic_profile_rppa
-            );
-        } else {
-            ///TODO: custom 
-        }
+    function fetchContentOneGene(selectedGene) {
+        oneGene.data_type.MRNA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_mrna;
+        oneGene.data_type.COPY_NO.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_copy_no;
+        oneGene.data_type.METHYLATION.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_dna_methylation;
+        oneGene.data_type.RPPA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_rppa;
+        oneGene.status.has_mrna = (oneGene.data_type.MRNA.genetic_profile.length !== 0);
+        oneGene.status.has_copy_no = (oneGene.data_type.COPY_NO.genetic_profile.length !== 0);
+        oneGene.status.has_dna_methylation = (oneGene.data_type.METHYLATION.genetic_profile.length !== 0);
+        oneGene.status.has_rppa = (oneGene.data_type.RPPA.genetic_profile.length !== 0);
     }
 
-    function drawGeneList() {
-        //-------One Gene---------
-        ControlPanelUtil.generateGeneList("one_gene", "gene_list", gene_list);
-        //-------Two Genes--------
-        ControlPanelUtil.generateGeneList("two_genes", "gene_list_x", gene_list);
-        var tmp_gene_list = jQuery.extend(true, [], gene_list);
-        var tmp_gene_holder = tmp_gene_list.pop(); //Move the last gene on the list to the first
-        tmp_gene_list.unshift(tmp_gene_holder);
-        ControlPanelUtil.generateGeneList("two_genes", "gene_list_y", tmp_gene_list);
+    function fetchContentTwoGenes(selectedGenes) {
+        var geneX = selectedGenes[0], 
+            geneY = selectedGenes[1];
+        //content.genetic_profile_mutations = Plots.getGeneticProfiles(geneX).genetic_profile_mutations;
+        twoGenes.data_type.MRNA.genetic_profile = ControlPanelUtil.mergeList(
+            Plots.getGeneticProfiles(geneX).genetic_profile_mrna,
+            Plots.getGeneticProfiles(geneY).genetic_profile_mrna
+        );
+        twoGenes.data_type.COPY_NO.genetic_profile = ControlPanelUtil.mergeList(
+            Plots.getGeneticProfiles(geneX).genetic_profile_copy_no,
+            Plots.getGeneticProfiles(geneY).genetic_profile_copy_no
+        );
+        twoGenes.data_type.METHYLATION.genetic_profile = ControlPanelUtil.mergeList(
+            Plots.getGeneticProfiles(geneX).genetic_profile_dna_methylation,
+            Plots.getGeneticProfiles(geneY).genetic_profile_dna_methylation
+        );
+        twoGenes.data_type.RPPA.genetic_profile = ControlPanelUtil.mergeList(
+            Plots.getGeneticProfiles(geneX).genetic_profile_rppa,
+            Plots.getGeneticProfiles(geneY).genetic_profile_rppa
+        );
     }
 
-    function drawMenuOneGene() {
-        //$("#one_gene").children("#type_div").show();
-        $("#one_gene").children("#type").empty();
-        //$("#one_gene").children("#plot_type_div").empty();
-        //$("#one_gene").children("#data_type_div").empty();
-        //----------Plot Type
+    function drawOneGeneGeneList() {
+        ControlPanelUtil.generateGeneList("one_gene_gene_list", gene_list);
+        $("#one_gene_gene_list").on("change", function() {
+            drawOneGenePlotType();
+            drawOneGeneDataType();    
+        } );
+    }
+
+    function drawOneGenePlotType() {
+        $("#one_gene_plot_type_div").empty();
+        $("#one_gene_plot_type_div").append("<select id='one_gene_plot_type'></select>");
+        $("#one_gene_plot_type").on("change", drawOneGeneDataType);
         if (oneGene.status.has_mrna && oneGene.status.has_copy_no) {
-            Util.appendDropDown(
-                '.one_gene > #plot_type',
+            ControlPanelUtil.appendDropDown(
+                '#one_gene_plot_type',
                 oneGene.plot_type.MRNA_COPY_NO.value,
                 oneGene.plot_type.MRNA_COPY_NO.text
             );
         }
         if (oneGene.status.has_mrna && oneGene.status.has_dna_methylation) {
-            Util.appendDropDown(
-                '.one_gene > #plot_type',
+            ControlPanelUtil.appendDropDown(
+                '#one_gene_plot_type',
                 oneGene.plot_type.MRNA_METHYLATION.value,
                 oneGene.plot_type.MRNA_METHYLATION.text
             );
         }
         if (oneGene.status.has_mrna && oneGene.status.has_rppa) {
-            Util.appendDropDown(
-                '.one_gene > #plot_type',
+            ControlPanelUtil.appendDropDown(
+                '#one_gene_plot_type',
                 oneGene.plot_type.RPPA_MRNA.value,
                 oneGene.plot_type.RPPA_MRNA.text
             );
         }
-        //----------Data Type : profiles
-        for (var key in oneGene.data_type) {
-            var _singleDataTypeObj = oneGene.data_type[key];
-            $(".one_gene > #data_type").append(
-                "<div id='" + _singleDataTypeObj.value + "_dropdown' style='padding:5px;'>" +
-                    "<label for='" + _singleDataTypeObj.value + "'>" + _singleDataTypeObj.label + "</label><br>" +
-                    "<select id='" + _singleDataTypeObj.value + "' onchange='PlotsView.init();PlotsMenu.updateLogScaleOption();' class='plots-select'></select></div>"
-            );
-            for (var index in _singleDataTypeObj.genetic_profile) { //genetic_profile is ARRAY!
-                var item_profile = _singleDataTypeObj.genetic_profile[index];
-                $("#" + _singleDataTypeObj.value).append(
+    }
+
+    function drawOneGeneDataType() {
+        $('#one_gene_data_type_div').empty();
+        var currentPlotsType = $('#one_gene_plot_type').val();
+        var _selectedDataTypeNames = [];
+        for (var key in oneGene.plot_type) {
+            if (currentPlotsType === oneGene.plot_type[key].value) { //Get the two selected data type
+                _selectedDataTypeNames[0] = oneGene.plot_type[key].dataTypeX;
+                _selectedDataTypeNames[1] = oneGene.plot_type[key].dataTypeY;
+            }
+        }
+        $.each(_selectedDataTypeNames, function(index, dataTypeName) {
+            var _dataTypeObj = oneGene.data_type[dataTypeName];
+            $("#one_gene_data_type_div").append(
+                "<label for='" + _dataTypeObj.id + "'>" + _dataTypeObj.label + "</label><br>" +
+                "<select id='" + _dataTypeObj.id + "' onchange='' class='plots-select'></select><br>"
+            );  
+            for (var index in _dataTypeObj.genetic_profile) { //genetic_profile is an ARRAY!
+                var item_profile = _dataTypeObj.genetic_profile[index];
+                $("#" + _dataTypeObj.id).append(
                     "<option value='" + item_profile[0] + "|" + item_profile[2] + "'>" + item_profile[1] + "</option>");
-            }
-        }
+            }          
+        });
     }
 
-    function drawMenuTwoGenes() {
-        $("#two_genes_plot_type").empty();
-        //----------Plot Type
-        Util.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.MRNA.value, twoGenes.plot_type.MRNA.name);
-        if (twoGenes.data_type.COPY_NO.length !== 0) {
-            var _flag = false;
-            $.each(twoGenes.data_type.COPY_NO, function(index, val) {
-                if (!Util.dataIsDiscretized(val[1])) {
-                    _flag = true;
-                }
-            });     //If contains continuous data type
-            if (_flag) {
-                Util.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.COPY_NO.value, twoGenes.plot_type.COPY_NO.name);
-            }
-        }
-        if (twoGenes.data_type.METHYLATION.length !== 0) {
-           Util.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.METHYLATION.value, twoGenes.plot_type.METHYLATION.name);
-        }
-        if (twoGenes.data_type.RPPA.length !== 0) {
-           Util.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.RPPA.value, twoGenes.plot_type.RPPA.name);
-        }
-        //----------Data Type : profiles
-        $("#two_genes_data_type_div").empty();
-        $("#two_genes_data_type_div").append(
-            "<select id='two_genes_data_type' onchange='PlotsTwoGenesView.init();PlotsTwoGenesMenu.updateLogScaleCheckBox();' class='plots-select'>");
-
-        if ($("#two_genes_plot_type").val() === values.MRNA) {
-            twoGenes.data_type.MRNA.forEach (function (profile) {
-                $("#two_genes_data_type")
-                    .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");
-            });
-            //setPlatFormDefaultSelection();
-        } else if ($("#two_genes_plot_type").val() === values.COPY_NO) {
-            twoGenes.data_type.COPY_NO.forEach (function (profile) {
-                if (!dataIsDiscretized(profile[1])) {
-                    $("#two_genes_data_type")
-                        .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");
-                }
-            });
-        } else if ($("#two_genes_plot_type").val() === values.METHYLATION) {
-            twoGenes.data_type.METHYLATION.forEach (function (profile) {
-                $("#two_genes_data_type")
-                    .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");
-            });
-        } else if ($("#two_genes_plot_type").val() === values.RPPA) {
-            twoGenes.data_type.RPPA.forEach (function (profile) {
-                $("#two_genes_data_type")
-                    .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");
-            });
-        }
-        $("#two_genes_data_type_div").append("</select>");        
-    }
-
-    function setDataTypeDefaultSelection() {
-
-        //--------------------------One Gene Tab--------------------------
+    function setOneGeneDataTypeSel() {
         //-----Copy No Priority List: discretized(gistic, rae), continuous
         $('#data_type_copy_no > option').each(function() {
             if (this.text.toLowerCase().indexOf("(rae)") !== -1) {
@@ -346,9 +300,65 @@ var PlotsMenu = (function () {
                 $(this).prop('selected', true);
                 return false;
             }
-        });
+        });        
+    }
 
-        //--------------------------Two Genes Tab--------------------------
+    function drawTwoGenesGeneList() {
+        ControlPanelUtil.generateGeneList("two_genes_gene_list_x", gene_list);
+        var tmp_gene_list = jQuery.extend(true, [], gene_list);
+        var tmp_gene_holder = tmp_gene_list.pop(); //Move the last gene on the list to the first
+        tmp_gene_list.unshift(tmp_gene_holder);
+        ControlPanelUtil.generateGeneList("two_genes_gene_list_y", tmp_gene_list);
+        $("#two_genes_gene_list_x").on("change", drawTwoGenesPlotType);
+        $("#two_genes_gene_list_x").on("change", drawTwoGenesDataType);
+        $("#two_genes_gene_list_y").on("change", drawTwoGenesPlotType);
+        $("#two_genes_gene_list_y").on("change", drawTwoGenesDataType);
+    }
+
+    function drawTwoGenesPlotType() {
+        $("#two_genes_plot_type_div").empty();
+        $("#two_genes_plot_type_div").append("<select id='two_genes_plot_type'></select>");
+        $("#two_genes_plot_type").on("change", drawTwoGenesDataType);
+        ControlPanelUtil.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.MRNA.value, twoGenes.plot_type.MRNA.name);
+        if (twoGenes.data_type.COPY_NO.genetic_profile.length !== 0) {
+            var _flag = false;
+            $.each(twoGenes.data_type.COPY_NO.genetic_profile, function(index, val) {
+                if (!ControlPanelUtil.dataIsDiscretized(val[1])) { //Only shown if having continous copy no genetic profile available
+                    _flag = true;
+                }
+            });     
+            if (_flag) {
+                ControlPanelUtil.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.COPY_NO.value, twoGenes.plot_type.COPY_NO.name);
+            }
+        }
+        if (twoGenes.data_type.METHYLATION.length !== 0) {
+           ControlPanelUtil.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.METHYLATION.value, twoGenes.plot_type.METHYLATION.name);
+        }
+        if (twoGenes.data_type.RPPA.length !== 0) {
+           ControlPanelUtil.appendDropDown("#two_genes_plot_type", twoGenes.plot_type.RPPA.value, twoGenes.plot_type.RPPA.name);
+        }
+    }
+
+    function drawTwoGenesDataType() {
+        $("#two_genes_data_type_div").empty();
+        $("#two_genes_data_type_div").append(
+            "<select id='two_genes_data_type' " + 
+            "onchange='' class='plots-select'>");
+        var _currentSelectedPlotType = $("#two_genes_plot_type").val();
+        for (var key in twoGenes.plot_type) {
+            if (_currentSelectedPlotType === twoGenes.plot_type[key].value) {
+                var _currentSelectedDataTypeKey = twoGenes.plot_type[key].data_type;
+                twoGenes.data_type[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
+                    if (!ControlPanelUtil.dataIsDiscretized(profile[1])) {
+                        $("#two_genes_data_type")
+                            .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
+                    }
+                }); 
+            }
+        }
+    }
+
+    function setTwoGenesDataTypeSel() {
         //----mRNA Priority List: RNA Seq V2, RNA Seq, Z-scores
         if ($("#two_genes_plot_type").val() === values.MRNA) {
             $("#two_genes_data_type > option").each(function() {
@@ -387,7 +397,6 @@ var PlotsMenu = (function () {
         $("#one_gene_type_specification").hide();
         $("#menu_err_msg").append("<h5>Profile data missing for generating this view.</h5>");
     }
-
 
     function setDefaultMrnaSelection() {
         var userSelectedMrnaProfile = "";  //from main query
@@ -483,35 +492,26 @@ var PlotsMenu = (function () {
         }
     }
 
-
-
-
-
     return {
         init: function () {
             $("#menu_err_msg").empty();
 
-            //Fetch the content from the result of the AJAX call
-            fetchContent(
-                tabType.ONE_GENE, 
-                {   
-                    geneX: gene_list[0], 
-                    geneY: gene_list[0]
-                }
-            );
-            fetchContent(
-                tabType.TWO_GENES, 
-                {   
-                    geneX: gene_list[0], 
-                    geneY: gene_list[1] //TODO: DOM doesn't work
-                }
-            );
-            
-            //------ Render Drop down Menus
-            //-------------- Gene List
-            drawGeneList();
-            //-------------- plot type & data type list
-            //drawMenuOneGene();
+            // ---- One Gene Sub Tab ----
+            drawOneGeneGeneList();
+            fetchContentOneGene(gene_list[0]);
+            drawOneGenePlotType();
+            drawOneGeneDataType();
+            setOneGeneDataTypeSel();
+
+            // ---- Two Genes Sub Tab ----
+            if (gene_list.length > 2) {
+                drawTwoGenesGeneList();               
+                fetchContentTwoGenes([gene_list[0], gene_list[1]]);
+                drawTwoGenesPlotType();
+                drawTwoGenesDataType();
+                setTwoGenesDataTypeSel();
+            }
+
             //drawMenuTwoGenes();
             // if (oneGene.status.has_mrna && 
             //    (oneGene.status.has_copy_no || 

@@ -35,9 +35,9 @@
             e.style.display = 'none';
         }
 
-        function generateGeneList(className, id, geneList) {
-            var select = document.getElementbyClassName(className).getElementById(id);
-            geneList.forEach(function(gene) {
+        function generateGeneList(elemId, options) {
+            var select = document.getElementById(elemId);
+            options.forEach(function(option) {
                 var el = document.createElement("option");
                 el.textContent = option;
                 el.value = option;
@@ -60,7 +60,7 @@
             toggleVisibilityX: toggleVisibilityX,
             toggleVisibilityY: toggleVisibilityY,
             toggleVisibilityHide: toggleVisibilityHide,
-            generateList: generateList,
+            generateGeneList: generateGeneList,
             mergeList: mergeList,
             dataIsDiscretized: dataIsDiscretized
         };
