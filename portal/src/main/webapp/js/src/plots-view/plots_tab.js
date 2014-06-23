@@ -756,9 +756,7 @@ var PlotsView = (function () {
                 }
                 analyseData();
             },
-            getCaseSetLength: function() { return caseSetLength; },
             getDotsGroup: function() { return dotsGroup; },
-            getDotsGroupLength: function() { return dotsGroup.length; },
             getDataStatus: function() { return status; },
             getDataAttr: function() { return attr; }
         };
@@ -1229,7 +1227,7 @@ var PlotsView = (function () {
                                     style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
                                     show: {event: "mouseover"},
                                     hide: {fixed:true, delay: 100, event: "mouseout"},
-                                    position: {my:'left bottom',at:'top right'}
+                                    position: {my:'left bottom',at:'top right', viewport: $(window)}
                                 }
                             );
                             if (Util.plotsTypeIsCopyNo()) {    //Handle special symbols
@@ -1815,14 +1813,14 @@ var PlotsView = (function () {
             } else if (Util.plotsTypeIsRPPA()) {
                 $('#view_title').append(userSelection.gene + ": RPPA protein level v. mRNA Expression ");
             }
-            var pdfConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' " +
+            var pdfConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' target='_blank' " +
                 "onsubmit=\"this.elements['svgelement'].value=loadPlotsSVG();\">" +
                 "<input type='hidden' name='svgelement'>" +
                 "<input type='hidden' name='filetype' value='pdf'>" +
                 "<input type='hidden' name='filename' value='correlation_plot-" + userSelection.gene + ".pdf'>" +
                 "<input type='submit' value='PDF'></form>";
             $('#view_title').append(pdfConverterForm);
-            var svgConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' " +
+            var svgConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' target='_blank'" +
                 "onsubmit=\"this.elements['svgelement'].value=loadPlotsSVG();\">" +
                 "<input type='hidden' name='svgelement'>" +
                 "<input type='hidden' name='filetype' value='svg'>" +

@@ -795,7 +795,7 @@ var PlotsTwoGenesView = (function(){
         var titleText = elt.options[elt.selectedIndex].text;
         $('#view_title').append(titleText + ": " + menu.geneX + " vs. " + menu.geneY);
 
-        var pdfConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' " +
+        var pdfConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' target='_blank' " +
             "onsubmit=\"this.elements['svgelement'].value=loadPlotsSVG();\">" +
             "<input type='hidden' name='svgelement'>" +
             "<input type='hidden' name='filetype' value='pdf'>" +
@@ -803,7 +803,7 @@ var PlotsTwoGenesView = (function(){
             "<input type='submit' value='PDF'></form>";
         $('#view_title').append(pdfConverterForm);
 
-        var svgConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' " +
+        var svgConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' target='_blank' " +
             "onsubmit=\"this.elements['svgelement'].value=loadPlotsSVG();\">" +
             "<input type='hidden' name='svgelement'>" +
             "<input type='hidden' name='filetype' value='svg'>" +
@@ -881,9 +881,9 @@ var PlotsTwoGenesView = (function(){
                     {
                         content: {text: content},
                         style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow' },
-	                    show: {event: "mouseover"},
+                        show: {event: "mouseover"},
                         hide: {fixed:true, delay: 100, event: "mouseout"},
-                        position: {my:'left bottom',at:'top right'}
+                        position: {my:'left bottom',at:'top right', viewport: $(window)}
                     }
                 );
 

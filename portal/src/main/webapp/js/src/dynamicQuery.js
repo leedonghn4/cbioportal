@@ -450,7 +450,8 @@ function updateCaseListSmart() {
                 },
                 position: {
                     my: 'left middle',
-                    at: 'middle right'
+                    at: 'middle right',
+                    viewport: $(window)
                 },
 	            show: "mouseover",
 	            hide: "mouseout"
@@ -495,7 +496,7 @@ function cancerStudySelected() {
         }
     }
     var cancerStudyForm = " <button type='button' onclick=\"window.location.replace('study.do?cancer_study_id="
-        +cancerStudyId+"')\">View details</button>";
+        +cancerStudyId+"')\">Study summary</button>";
     $("#cancer_study_desc").html("<p> " + cancer_study.description + citation + cancerStudyForm + "</p>");
 
     //  Iterate through all genomic profiles
@@ -530,7 +531,7 @@ function cancerStudySelected() {
     jQuery.each(cancer_study.case_sets,function(i, case_set) {
         $("#select_case_set").append("<option class='case_set_option' value='"
                 + case_set.id + "' title='"
-                + case_set.description + "'>" + case_set.name + "</option>");
+                + case_set.description + "'>" + case_set.name + " ("+ case_set.size +")" + "</option>");
     }); //  end for each case study loop
 
     //  Add the user-defined case list option

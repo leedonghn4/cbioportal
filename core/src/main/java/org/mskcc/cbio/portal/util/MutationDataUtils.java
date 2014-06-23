@@ -1,29 +1,20 @@
 /*
  * Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation; either version 2.1 of the License, or
- * any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
  * documentation provided hereunder is on an "as is" basis, and
- * Memorial Sloan-Kettering Cancer Center
+ * Memorial Sloan-Kettering Cancer Center 
  * has no obligations to provide maintenance, support,
  * updates, enhancements or modifications.  In no event shall
  * Memorial Sloan-Kettering Cancer Center
  * be liable to any party for direct, indirect, special,
  * incidental or consequential damages, including lost profits, arising
  * out of the use of this software and its documentation, even if
- * Memorial Sloan-Kettering Cancer Center
- * has been advised of the possibility of such damage.  See
- * the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
- */
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.util;
 
@@ -53,6 +44,8 @@ public class MutationDataUtils {
 	public static final String CASE_ID = "caseId";
 	public static final String LINK_TO_PATIENT_VIEW = "linkToPatientView";
 	public static final String CANCER_TYPE = "cancerType";
+	public static final String TUMOR_TYPE = "tumorType";
+	public static final String TUMOR_TYPE_CLINICAL_ATTR = "CANCER_TYPE";
 	public static final String CANCER_STUDY = "cancerStudy";
 	public static final String CANCER_STUDY_SHORT = "cancerStudyShort";
 	public static final String CANCER_STUDY_LINK = "cancerStudyLink";
@@ -84,6 +77,7 @@ public class MutationDataUtils {
 	public static final String REFSEQ_MRNA_ID = "refseqMrnaId";
 	public static final String CODON_CHANGE = "codonChange";
 	public static final String UNIPROT_ID = "uniprotId";
+	public static final String UNIPROT_ACC = "uniprotAcc";
 	public static final String PROTEIN_POS_START = "proteinPosStart";
 	public static final String PROTEIN_POS_END = "proteinPosEnd";
 	public static final String MUTATION_COUNT = "mutationCount";
@@ -130,9 +124,13 @@ public class MutationDataUtils {
             return mutationArray;
         }
 
-        Map<Long, Set<CosmicMutationFrequency>> cosmic = DaoCosmicData.getCosmicForMutationEvents(mutationList);
-
+	    CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(
+			    geneticProfile.getCancerStudyId());
+        Map<Long, Set<CosmicMutationFrequency>> cosmic =
+		        DaoCosmicData.getCosmicForMutationEvents(mutationList);
         Map<String, Integer> countMap = this.getMutationCountMap(mutationList);
+	    Map<String, ClinicalData> clinicalDataMap = getClinicalDataMap(
+			    targetCaseList, cancerStudy, TUMOR_TYPE_CLINICAL_ATTR);
         
         DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
         
@@ -151,24 +149,51 @@ public class MutationDataUtils {
 
             if (targetCaseList.contains(caseId))
             {
-                mutationArray.add(getMutationDataMap(mutation, geneticProfile, countMap,cnaDataMap, cosmic));
+                mutationArray.add(getMutationDataMap(
+		                mutation, geneticProfile, cancerStudy, countMap, cnaDataMap, cosmic, clinicalDataMap));
             }
         }
 
         return mutationArray;
     }
 
+	protected Map<String, ClinicalData> getClinicalDataMap(ArrayList<String> targetCaseList,
+			CancerStudy cancerStudy,
+			String attrId) throws DaoException
+	{
+		Map<String, ClinicalData> map = new HashMap<String, ClinicalData>();
+		ClinicalAttribute attr = DaoClinicalAttribute.getDatum(attrId);
+
+		// check if attrId is in the DB
+		if (attr != null)
+		{
+			List<ClinicalData> clinicalDataList = DaoClinicalData.getData(
+				cancerStudy.getCancerStudyStableId(),
+				targetCaseList,
+				attr);
+
+			// create the map using case id as a key
+			for (ClinicalData data : clinicalDataList)
+			{
+				map.put(data.getCaseId(), data);
+			}
+		}
+
+		return map;
+    }
+
     protected HashMap<String, Object> getMutationDataMap(
             ExtendedMutation mutation,
             GeneticProfile geneticProfile,
+			CancerStudy cancerStudy,
             Map<String, Integer> countMap,
             Map<String,Map<String,String>> cnaDataMap,
-            Map<Long, Set<CosmicMutationFrequency>> cosmic) throws DaoException
+            Map<Long, Set<CosmicMutationFrequency>> cosmic,
+			Map<String, ClinicalData> clinicalDataMap) throws DaoException
     {
         HashMap<String, Object> mutationData = new HashMap<String, Object>();
 
-        int cancerStudyId = geneticProfile.getCancerStudyId();
-        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId);
+
         String typeOfCancer = DaoTypeOfCancer.getTypeOfCancerById(cancerStudy.getTypeOfCancerId()).getName();
         String cancerStudyStableId = cancerStudy.getCancerStudyStableId();
         String linkToPatientView = GlobalProperties.getLinkToPatientView(mutation.getCaseId(), cancerStudyStableId);
@@ -185,8 +210,9 @@ public class MutationDataUtils {
         mutationData.put(LINK_TO_PATIENT_VIEW, linkToPatientView);
         mutationData.put(CANCER_TYPE, typeOfCancer);
         mutationData.put(CANCER_STUDY, cancerStudy.getName());
-        mutationData.put(CANCER_STUDY_SHORT, getShortName(cancerStudy));
+        mutationData.put(CANCER_STUDY_SHORT, cancerStudy.getShortName());
         mutationData.put(CANCER_STUDY_LINK, GlobalProperties.getLinkToCancerStudyView(cancerStudyStableId));
+	    mutationData.put(TUMOR_TYPE, this.getTumorType(mutation, clinicalDataMap));
         mutationData.put(PROTEIN_CHANGE, mutation.getProteinChange());
         mutationData.put(MUTATION_TYPE, mutation.getMutationType());
         mutationData.put(COSMIC, convertCosmicDataToMatrix(cosmic.get(mutation.getMutationEventId())));
@@ -214,7 +240,8 @@ public class MutationDataUtils {
         mutationData.put(CANONICAL_TRANSCRIPT, mutation.isCanonicalTranscript());
         mutationData.put(REFSEQ_MRNA_ID, mutation.getOncotatorRefseqMrnaId());
         mutationData.put(CODON_CHANGE, mutation.getOncotatorCodonChange());
-        mutationData.put(UNIPROT_ID, this.getUniprotId(mutation));
+        mutationData.put(UNIPROT_ID, mutation.getOncotatorUniprotName());
+	    mutationData.put(UNIPROT_ACC, mutation.getOncotatorUniprotAccession());
         mutationData.put(PROTEIN_POS_START, mutation.getOncotatorProteinPosStart());
         mutationData.put(PROTEIN_POS_END, mutation.getOncotatorProteinPosEnd());
         mutationData.put(MUTATION_COUNT, countMap.get(mutation.getCaseId()));
@@ -316,16 +343,6 @@ public class MutationDataUtils {
         }
 
         return counts;
-    }
-
-    private String getShortName(CancerStudy cancerStudy) throws DaoException {
-        String sName = cancerStudy.getCancerStudyStableId();
-        String tumorType = cancerStudy.getTypeOfCancerId();
-        sName = sName.replace(tumorType + "_", "").replaceAll("_", " ").toUpperCase();
-        TypeOfCancer typeOfCancerById = DaoTypeOfCancer.getTypeOfCancerById(tumorType);
-        sName = typeOfCancerById.getShortName() + " (" + sName + ")";
-
-        return sName;
     }
 
     /**
@@ -595,7 +612,6 @@ public class MutationDataUtils {
 
     protected String getUniprotId(ExtendedMutation mutation)
     {
-        // TODO uniprot name or uniprot accession
         return mutation.getOncotatorUniprotName();
     }
 
@@ -634,6 +650,21 @@ public class MutationDataUtils {
 
         return link;
     }
+
+	protected String getTumorType(ExtendedMutation mutation,
+			Map<String,ClinicalData> clinicalDataMap)
+	{
+		String tumorType = null;
+
+		ClinicalData data = clinicalDataMap.get(mutation.getCaseId());
+
+		if (data != null)
+		{
+			tumorType = data.getAttrVal();
+		}
+
+		return tumorType;
+	}
 
     protected List<List> convertCosmicDataToMatrix(Set<CosmicMutationFrequency> cosmic) {
         if (cosmic==null) {

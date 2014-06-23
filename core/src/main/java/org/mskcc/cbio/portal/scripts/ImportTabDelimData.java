@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.scripts;
 
@@ -135,8 +125,7 @@ public class ImportTabDelimData {
             }
             orderedCaseList.add(caseIds[i]);
         }
-        DaoGeneticProfileCases daoGeneticProfileCases = new DaoGeneticProfileCases();
-        daoGeneticProfileCases.addGeneticProfileCases(geneticProfileId, orderedCaseList);
+        DaoGeneticProfileCases.addGeneticProfileCases(geneticProfileId, orderedCaseList);
 
         String line = buf.readLine();
         int numRecordsStored = 0;
@@ -154,6 +143,9 @@ public class ImportTabDelimData {
         
         if (discritizedCnaProfile) {
             existingCnaEvents = new HashMap<CnaEvent.Event, CnaEvent.Event>();
+            for (CnaEvent.Event event : DaoCnaEvent.getAllCnaEvents()) {
+                existingCnaEvents.put(event, event);
+            }
             cnaEventId = DaoCnaEvent.getLargestCnaEventId();
             MySQLbulkLoader.bulkLoadOn();
         }
@@ -171,8 +163,10 @@ public class ImportTabDelimData {
                 parts = line.split("\t",-1);
                 
                 if (parts.length>lenParts) {
-                    System.err.println("The following line has more fields (" + parts.length
-                            + ") than the headers(" + lenParts + "): \n"+parts[0]);
+                    if (line.split("\t").length>lenParts) {
+                        System.err.println("The following line has more fields (" + parts.length
+                                + ") than the headers(" + lenParts + "): \n"+parts[0]);
+                    }
                 }
                 String values[] = (String[]) ArrayUtils.subarray(parts, caseStartIndex, parts.length>lenParts?lenParts:parts.length);
 
@@ -262,6 +256,7 @@ public class ImportTabDelimData {
                                             } else {
                                                 cnaEvent.setEventId(++cnaEventId);
                                                 DaoCnaEvent.addCaseCnaEvent(cnaEvent, true);
+                                                existingCnaEvents.put(cnaEvent.getEvent(), cnaEvent.getEvent());
                                             }
                                         }
                                     }

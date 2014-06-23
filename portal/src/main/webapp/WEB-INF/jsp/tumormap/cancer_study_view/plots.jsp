@@ -22,8 +22,8 @@
 </style>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript" src="js/src/cancer-study-view/plot-clinical-data.js"></script>
-<script type="text/javascript" src="js/src/cancer-study-view/scatter-plot-mut-cna.js"></script>
+<script type="text/javascript" src="js/src/cancer-study-view/plot-clinical-data.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/cancer-study-view/scatter-plot-mut-cna.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript">   
     google.load('visualization', '1', {packages:['table','corechart']}); 
     $(document).ready(function(){
@@ -97,7 +97,8 @@
             position: {
                     my: 'center', // ...at the center of the viewport
                     at: 'center',
-                    target: $(window)
+                    target: $(window),
+                    viewport: $(window)
             },
             show: {
                     event: 'click', // Show it on click...

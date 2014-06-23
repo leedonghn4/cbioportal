@@ -6,10 +6,10 @@
 <%@ page import="org.mskcc.cbio.portal.model.GeneticProfile" %>
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 
-<script type="text/javascript" src="js/src/plots-view/plots_tab_model.js"></script>
-<script type="text/javascript" src="js/src/plots-view/plots_tab.js"></script>
-<script type="text/javascript" src="js/src/plots-view/plots_two_genes.js"></script>
-<script type="text/javascript" src="js/src/plots-view/plots_custom.js"></script>
+<script type="text/javascript" src="js/src/plots-view/plots_tab_model.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots_two_genes.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots_custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <style>
     #plots .plots {
@@ -156,9 +156,19 @@
         $("#plots-menus").tabs("disable", 1);
     }
     
-    $(document).ready(function() {
-        Plots.init();
+    $(document).ready( function() {
+        var plots_tab_init = false;
+        $("#tabs").bind("tabsactivate", function(event, ui) {
+            if (ui.newTab.text().trim().toLowerCase() === "plots") {
+                if (plots_tab_init === false) {
+                    Plots.init();
+                    plots_tab_init = true;
+                }
+            }
+        });
     });
+
+
 </script>
 
 <script>

@@ -1,29 +1,19 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.scripts;
 
@@ -59,6 +49,7 @@ public class MutationFilter {
    private int unknownAccepts=0;
    private int decisions=0;
    private int silentOrIntronRejects=0;
+   private int mutationStatusNoneRejects=0;
    private int lohOrWildTypeRejects=0;
    private int emptyAnnotationRejects=0;
    private int missenseGermlineRejects=0;
@@ -127,6 +118,12 @@ public class MutationFilter {
          | Translation_Start_Site | 
          +------------------------+
        */
+      
+      // Do not accept mutations with Mutation_Status of None
+      if (safeStringTest( mutation.getMutationStatus(), "None" )) {
+          mutationStatusNoneRejects++;
+          return false;
+      }
             
       // Do not accept Silent or Intronic Mutations
       if( safeStringTest( mutation.getMutationType(), "Silent" ) ||
@@ -214,6 +211,10 @@ public class MutationFilter {
        return this.igrRejects;
    }
 
+    public int getMutationStatusNoneRejects() {
+        return mutationStatusNoneRejects;
+    }
+
     /**
      * Provide number of REJECT decisions for LOH or Wild Type Mutations.
      * @return number of REJECT decisions for LOH or Wild Type Mutations.
@@ -273,6 +274,7 @@ public class MutationFilter {
    public String getStatistics(){
       return "Mutation filter decisions: " + this.getDecisions() +
             "\nRejects: " + this.getRejects() +
+            "\nMutation Status 'None' Rejects:  " + this.getMutationStatusNoneRejects() +
             "\nSilent or Intron Rejects:  " + this.getSilentOrIntronRejects() +
 		  "\nUTR Rejects:  " + this.getUTRRejects() +
 		  "\nIGR Rejects:  " + this.getIGRRejects() +

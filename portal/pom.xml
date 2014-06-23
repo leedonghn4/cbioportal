@@ -39,6 +39,12 @@
 		<artifactId>bio-formats</artifactId>
 		<version>4.5</version>
         </dependency-->
+        
+        <!--dependency>
+                <groupId>net.bull.javamelody</groupId>
+                <artifactId>javamelody-core</artifactId>
+                <version>1.50.0</version>
+        </dependency-->
 
   </dependencies>
 
@@ -112,6 +118,7 @@
 			  <resources>
 				<resource>
 				  <directory>${property-file-dir}</directory>
+                                  <filtering>true</filtering>
 				  <includes>
 					<include>**/*.properties</include>
 				  </includes>
@@ -149,6 +156,8 @@
 
   </build>
     <properties>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
 </project>
