@@ -14,6 +14,7 @@
 <script type="text/javascript" src="js/src/plots-view/plots-tab/plots_two_genes.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/plots_custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/component/BoxPlots.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
 <style>
     #plots .plots {
         height: 610px;
@@ -109,19 +110,19 @@
                         <h4>Plot Parameters</h4>
                         <h5>x Axis</h5>
                         Gene<br>
-                        <select id='custom_geneX' onchange="PlotsCustomMenu.updateX();PlotsCustomView.init();"></select><br>
+                        <select id='custom_gene_x'></select><br>
                         Plot Type<br>
-                        <select id='custom_plots_type_x' onchange='PlotsCustomMenu.updateX();PlotsCustomView.init();'></select><br>
-                        Platform<br>
+                        <select id='custom_plot_type_x' onchange='PlotsCustomMenu.updateX();PlotsCustomView.init();'></select><br>
+                        Data Type<br>
                         <div id='custom_platform_select_div_x'></div>
                         <div id='custom_genes_apply_log_scale_div_x'></div>
                         <br>
                         <h5>y Axis</h5>
                         Gene<br>
-                        <select id='custom_geneY' onchange="PlotsCustomMenu.updateY();PlotsCustomView.init();"></select><br>
+                        <select id='custom_gene_y'></select><br>
                         Plot Type<br>
-                        <select id='custom_plots_type_y' onchange='PlotsCustomMenu.updateY();PlotsCustomView.init();'></select><br>
-                        Platform<br>
+                        <select id='custom_plot_type_y' onchange='PlotsCustomMenu.updateY();PlotsCustomView.init();'></select><br>
+                        Data Type<br>
                         <div id='custom_platform_select_div_y'></div>
                         <div id='custom_genes_apply_log_scale_div_y'></div>
                         <br>
