@@ -7,7 +7,7 @@
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 
 <script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabView.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/ControlPanel.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabMenu.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabUtil.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/plots_tab_model.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/plots_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
