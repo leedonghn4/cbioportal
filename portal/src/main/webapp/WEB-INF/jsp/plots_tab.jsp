@@ -6,6 +6,7 @@
 <%@ page import="org.mskcc.cbio.portal.model.GeneticProfile" %>
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 
+<script type="text/javascript" src="js/src/plots-view/view/PlotsTabView.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_tab_model.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots_two_genes.js?<%=GlobalProperties.getAppVersion()%>"></script>
@@ -64,7 +65,7 @@
                     <div id="one_gene">
                         <h4>Plot Parameters</h4>
                         <h5>Gene</h5>
-                        <select id='one_gene_gene_list' onchange='PlotsMenu.updateMenu();PlotsView.init();'></select>
+                        <select id='one_gene_gene_list'></select>
                         <div id='menu_err_msg'></div>
                         <div id='one_gene_type_spec_div'>
                             <h5>Plot Type</h5>
@@ -87,8 +88,8 @@
                             <div id='two_genes_plot_type_div'></div>
                             <h5>Data Type</h5>
                             <div id='two_genes_data_type_div'></div>
-                            <div id='log_scale_div_x'></div>
-                            <div id='log_scale_div_y'></div>
+                            <div id='two_genes_log_scale_div_x'></div>
+                            <div id='two_genes_log_scale_div_y'></div>
                             <br>                            
                         </div>
 

@@ -67,7 +67,7 @@ var Plots = (function(){
             genetic_profiles[gene] = _genetic_profile;
         }
 
-        PlotsMenu.init();
+        PlotsTabView.init();
         //PlotsTwoGenesMenu.init();
         //PlotsCustomMenu.init();
         //PlotsView.init();
