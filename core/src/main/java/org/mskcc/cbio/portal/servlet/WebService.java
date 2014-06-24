@@ -377,6 +377,14 @@ public class WebService extends HttpServlet {
             throws DaoException, ProtocolException, IOException {
 
         String cancerStudyId = WebserviceParserUtils.getCancerStudyId(request);
+        
+        //TODO: add getting parameter for result type ("meta", "data", "all")
+        //Get the result type: 
+        // ---- "meta" : just the meta info
+        // ---- "data" : just the array of samples with clinical attributes
+        // ---- "all" : data + meta
+        String resultType = request.getParameter("result_type");
+
         if (cancerStudyId==null) {
             Set<String> cancerStudyIds = WebserviceParserUtils.getCancerStudyIDs(request);
             if (cancerStudyIds.size()!=1) {
@@ -404,7 +412,13 @@ public class WebService extends HttpServlet {
         }
         else if ("json".equals(format)) {
             if (attrId == null) {
-                JSONObject.writeJSONString(GetClinicalData.getJSON(cancerStudyId, patientIds), writer);
+                if (resultType == null) {
+                    JSONObject.writeJSONString(GetClinicalData.getJSON(cancerStudyId, patientIds), writer);
+                } else if ("meta".equals(resultType)) {
+                    JSONObject.writeJSONString(GetClinicalData.getMetaJSON(cancerStudyId, patientIds), writer);
+                } else if ("data".equals(resultType)) {
+                    JSONObject.writeJSONString(GetClinicalData.getDataJSON(cancerStudyId, patientIds), writer);
+                } 
             } else {
                 JSONObject outObject;
                 if (patientIds.size() == 1) {

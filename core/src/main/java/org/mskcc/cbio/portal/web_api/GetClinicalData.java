@@ -24,9 +24,11 @@ import org.json.simple.JSONObject;
 import org.mskcc.cbio.portal.dao.DaoClinicalAttribute;
 import org.mskcc.cbio.portal.dao.DaoClinicalData;
 import org.mskcc.cbio.portal.dao.DaoException;
+import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.model.ClinicalAttribute;
 import org.mskcc.cbio.portal.model.ClinicalData;
 import org.mskcc.cbio.portal.model.Patient;
+import org.mskcc.cbio.portal.model.CancerStudy;
 
 /**
  * Utility class to get clinical data
@@ -178,7 +180,6 @@ public class GetClinicalData {
 
     public static String getTxtDatum(String cancerStudyId, String caseId, String attrId) throws DaoException {
         ClinicalData c = DaoClinicalData.getDatum(cancerStudyId, caseId, attrId);
-
         return "" + c.getStableId() + "\t" + c.getAttrId() + "\t" + c.getAttrVal();
     }
 
@@ -227,20 +228,43 @@ public class GetClinicalData {
      */
     public static JSONObject getJSON(String cancerStudyId, List<String> caseIds) throws DaoException {
         List<ClinicalData> clinicals = DaoClinicalData.getData(cancerStudyId, caseIds);
-
         return generateJson(clinicals);
     }
 
     public static JSONObject getJSON(String cancerStudyId, List<String> caseIds, String attrId) throws DaoException {
-
         ClinicalAttribute attr = DaoClinicalAttribute.getDatum(attrId);
         List<ClinicalData> clinicals = DaoClinicalData.getData(cancerStudyId, caseIds, attr);
-
         return generateJson(clinicals);
     }
 
-    
-    
+    public static JSONObject getMetaJSON(String cancerStudyId, List<String> sampleIds) throws DaoException {
+        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyId);
+        int cancerStudyInternalId = cancerStudy.getInternalId();
+        Set<String> sampleIdSet = new HashSet<String>(sampleIds);
+        
+        List<ClinicalAttribute> attrList = DaoClinicalAttribute.getDataBySamples(cancerStudyInternalId, sampleIdSet);
+        Set<JSONObject> attrs = new HashSet<JSONObject>();
+        for (ClinicalAttribute attr : attrList) {
+            attrs.add(reflectToMap(attr));
+        }
+
+        Iterator<JSONObject> attrsIt = attrs.iterator();
+        JSONObject result = new JSONObject();
+        while (attrsIt.hasNext()) {
+            JSONObject _attr = attrsIt.next();
+            result.put(_attr.get("attr_id"), _attr);
+        }
+        return result;
+    }
+
+    public static JSONObject getDataJSON(String cancerStudyId, List<String> sampleIds) throws DaoException {
+        List<ClinicalData> clinicals = DaoClinicalData.getData(cancerStudyId, sampleIds);
+        JSONObject result = new JSONObject();
+        for (ClinicalData c : clinicals) {
+            result.put(reflectToMap(c).get("sample"), reflectToMap(c));
+        }
+        return result;
+    }
 
     private static final Map<String, Integer> clinicalAttributeRank = new HashMap<String, Integer>();
     static {
