@@ -612,7 +612,6 @@ var PlotsTabMenu = (function () {
             }
         }
 
-
         return {
             init : function() {
                 generateGeneList();
