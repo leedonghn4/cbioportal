@@ -261,7 +261,8 @@ public class GetClinicalData {
         List<ClinicalData> clinicals = DaoClinicalData.getData(cancerStudyId, sampleIds);
         JSONObject result = new JSONObject();
         for (ClinicalData c : clinicals) {
-            result.put(reflectToMap(c).get("sample"), reflectToMap(c));
+            String _key = reflectToMap(c).get("sample").toString() + "_" + reflectToMap(c).get("attr_id").toString();
+            result.put(_key, reflectToMap(c));
         }
         return result;
     }
