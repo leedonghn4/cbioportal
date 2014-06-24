@@ -616,7 +616,7 @@ var PlotsTabMenu = (function () {
         return {
             init : function() {
                 generateGeneList();
-                if (gene_list.length > 2) {
+                if (gene_list.length >= 2) {
                     fetchFrameData(gene_list[0], gene_list[1]);
                 } else {
                     fetchFrameData(gene_list[0], gene_list[0]);
@@ -631,7 +631,7 @@ var PlotsTabMenu = (function () {
     return {
         init : function() {
             OneGeneMenu.init();
-            if (gene_list.length > 2) {
+            if (gene_list.length >= 2) {
                 TwoGenesMenu.init();
             }  
             CustomMenu.init();          
