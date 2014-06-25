@@ -141,17 +141,17 @@ var StudyViewSurvivalPlotView = (function() {
             
             $("#" + opts[_plotKey].divs.pvalMatrix).empty();
             $("#" + opts[_plotKey].divs.pvalMatrix)
-                .append("<div style='height: 15px'><svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                .append("<div style='height: 15px; clear:both'><svg style='width: 10px;height: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
                         _curveInfo[0].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
                         _curveInfo[0].name+"</span></div>");
             
             $("#" + opts[_plotKey].divs.pvalMatrix)
-                .append("<div style='height: 15px'><svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                .append("<div style='height: 15px; clear:both'><svg style='width: 10px;height: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
                         _curveInfo[1].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
                         _curveInfo[1].name+"</span></div>");
             
             $("#" + opts[_plotKey].divs.pvalMatrix)
-                .append("<div style='height: 15px'><span>Logrank Test P-Value: "+_content+"</span></div>");
+                .append("<div style='height: 15px; clear:both'><span>Logrank Test P-Value: "+_content+"</span></div>");
             
             addPvalQtip(_plotKey);
         };
@@ -167,7 +167,7 @@ var StudyViewSurvivalPlotView = (function() {
             var _tbody = $('<tbody />');
             var _pairIndex = 0;
             for(var i = 0; i < _numOfCurves; i++) {
-                var _content = "<svg style='width: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
+                var _content = "<svg style='width: 10px;height: 10px;margin-right: 5px;float:left'><rect width=10 height=10 fill="+
                         _curveInfo[i].color+"></rect></svg><span style='font-weight:bold;font-size:10px;color:#000000'>"+
                         _curveInfo[i].name+"</span>";
                 var _tr = $('<tr />');
@@ -235,7 +235,7 @@ var StudyViewSurvivalPlotView = (function() {
             _tfoot.append($("<th />"));
             _tfoot.append($("<th />"));
             for(var i = 0; i < _numOfCurves-1; i++) {
-                var _content = "<svg style='width: 10px;'><rect width=10 height=10 fill="+_curveInfo[i].color+"></rect></svg>";
+                var _content = "<svg style='width: 10px;height: 10px;'><rect width=10 height=10 fill="+_curveInfo[i].color+"></rect></svg>";
                 var _th = $("<th style='text-align: center'> "+_content+"</th>");
                 _tfoot.append(_th);
             }
