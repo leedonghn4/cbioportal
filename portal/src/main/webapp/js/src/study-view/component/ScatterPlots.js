@@ -1136,6 +1136,3 @@ var ScatterPlots = function() {
 
     };
 };
-
-
-
