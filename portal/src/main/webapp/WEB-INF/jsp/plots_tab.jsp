@@ -113,19 +113,19 @@
                         Gene<br>
                         <select id='custom_gene_x'></select><br>
                         Plot Type<br>
-                        <select id='custom_plot_type_x' onchange='PlotsCustomMenu.updateX();PlotsCustomView.init();'></select><br>
+                        <div id='custom_plot_type_div_x'></div>
                         Data Type<br>
-                        <div id='custom_platform_select_div_x'></div>
-                        <div id='custom_genes_apply_log_scale_div_x'></div>
+                        <div id='custom_data_type_div_x'></div>
+                        <div id='custom_log_scale_div_x'></div>
                         <br>
                         <h5>y Axis</h5>
                         Gene<br>
                         <select id='custom_gene_y'></select><br>
                         Plot Type<br>
-                        <select id='custom_plot_type_y' onchange='PlotsCustomMenu.updateY();PlotsCustomView.init();'></select><br>
+                        <div id='custom_plot_type_div_y'></div>
                         Data Type<br>
-                        <div id='custom_platform_select_div_y'></div>
-                        <div id='custom_genes_apply_log_scale_div_y'></div>
+                        <div id='custom_data_type_div_y'></div>
+                        <div id='custom_log_scale_div_y'></div>
                         <br>
                         <div id='custom_genes_view_options'>
                             <h5>Options</h5>

@@ -453,8 +453,8 @@ var PlotsTabMenu = (function () {
         function drawLogScale() {
             $("#two_genes_log_scale_div_x").empty();
             $("#two_genes_log_scale_div_y").empty();
-            var _str_x = "<input type='checkbox' id='two_genes_log_scale_option_x' checked onchange='PlotsTwoGenesView.updateLogScaleX();'/> log scale - x axis";
-            var _str_y = "<input type='checkbox' id='two_genes_log_scale_option_y' checked onchange='PlotsTwoGenesView.updateLogScaleY();'/> log scale - y axis";
+            var _str_x = "<input type='checkbox' id='two_genes_log_scale_x' checked/> log scale - x axis";
+            var _str_y = "<input type='checkbox' id='two_genes_log_scale_y' checked/> log scale - y axis";
             if (($("#two_genes_plot_type").val() ===  plot_type.MRNA.value &&
                  $("#two_genes_data_type option:selected").val().toUpperCase().indexOf(("rna_seq").toUpperCase()) !== -1 &&
                  $("#two_genes_data_type option:selected").val().toUpperCase().indexOf(("zscores").toUpperCase()) === -1)) {
@@ -556,6 +556,16 @@ var PlotsTabMenu = (function () {
             var tmp_gene_holder = tmp_gene_list.pop();
             tmp_gene_list.unshift(tmp_gene_holder);
             PlotsTabMenuUtil.generateGeneList("custom_gene_y", tmp_gene_list);
+            $("#custom_gene_x").on("change", function() {
+                drawPlotTypeX();
+                drawDataTypeX();
+                drawLogScaleX();
+            });
+            $("#custom_gene_y").on("change", function() {
+                drawPlotTypeY();
+                drawDataTypeY();
+                drawLogScaleY();
+            });
         }
 
         function fetchFrameData(geneX, geneY) {
@@ -571,9 +581,10 @@ var PlotsTabMenu = (function () {
             data_type.gene_y.RPPA.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_rppa;
         }
 
-        function drawPlotType() {
+        function drawPlotTypeX() {
+            $("#custom_plot_type_div_x").empty();
+            $("#custom_plot_type_div_x").append("<select id='custom_plot_type_x'></select>")
             PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.MRNA.value, plot_type.MRNA.name);
-            PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.MRNA.value, plot_type.MRNA.name);
             if (data_type.gene_x.COPY_NO.genetic_profile.length !== 0) {
                 var _flag = false;
                 $.each(data_type.gene_x.COPY_NO.genetic_profile, function(index, val) {
@@ -586,6 +597,22 @@ var PlotsTabMenu = (function () {
                         "#custom_plot_type_x", plot_type.COPY_NO.value, plot_type.COPY_NO.name);
                 }
             }
+            if (data_type.gene_x.METHYLATION.genetic_profile.length !== 0) {
+                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.METHYLATION.value, plot_type.METHYLATION.name);
+            }
+            if (data_type.gene_x.RPPA.genetic_profile.length !== 0) {
+                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.RPPA.value, plot_type.RPPA.name);
+            }
+            $("#custom_plot_type_x").on("change", function() {
+                drawDataTypeX();
+                drawLogScaleX();
+            });
+        }
+
+        function drawPlotTypeY() {
+            $("#custom_plot_type_div_y").empty();
+            $("#custom_plot_type_div_y").append("<select id='custom_plot_type_y'></select>")
+            PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.MRNA.value, plot_type.MRNA.name);
             if (data_type.gene_y.COPY_NO.genetic_profile.length !== 0) {
                 var _flag = false;
                 $.each(data_type.gene_y.COPY_NO.genetic_profile, function(index, val) {
@@ -598,18 +625,72 @@ var PlotsTabMenu = (function () {
                         "#custom_plot_type_y", plot_type.COPY_NO.value, plot_type.COPY_NO.name);
                 }
             }
-            if (data_type.gene_x.METHYLATION.genetic_profile.length !== 0) {
-                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.METHYLATION.value, plot_type.METHYLATION.name);
-            }
             if (data_type.gene_y.METHYLATION.genetic_profile.length !== 0) {
                 PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.METHYLATION.value, plot_type.METHYLATION.name);
             }
-            if (data_type.gene_x.RPPA.genetic_profile.length !== 0) {
-                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.RPPA.value, plot_type.RPPA.name);
-            }
-            if (data_type.gene_x.RPPA.genetic_profile.length !== 0) {
+            if (data_type.gene_y.RPPA.genetic_profile.length !== 0) {
                 PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.RPPA.value, plot_type.RPPA.name);
             }
+            $("#custom_plot_type_y").on("change", function() {
+                drawDataTypeY();
+                drawLogScaleY();
+            });
+        }
+
+        function drawDataTypeX() {
+            $("#custom_data_type_div_x").empty();
+            $("#custom_data_type_div_x").append("<select id='custom_data_type_x'></select>");
+            var _currentPlotTypeX = $("#custom_plot_type_x").val();
+            for (var key in plot_type) {
+                if (_currentPlotTypeX === plot_type[key].value) {
+                    var _currentSelectedDataTypeKey = plot_type[key].data_type;
+                    data_type.gene_x[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
+                        $("#custom_data_type_x")
+                            .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
+                    });                        
+                }
+            }
+            $("#custom_data_type_x").on("change", function() {
+                drawLogScaleX();
+            });
+        }
+
+        function drawDataTypeY() {
+            $("#custom_data_type_div_y").empty();
+            $("#custom_data_type_div_y").append("<select id='custom_data_type_y'></select>");
+            var _currentPlotTypeY = $("#custom_plot_type_y").val();
+            for (var key in plot_type) {
+                if (_currentPlotTypeY === plot_type[key].value) {
+                    var _currentSelectedDataTypeKey = plot_type[key].data_type;
+                    data_type.gene_y[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
+                        $("#custom_data_type_y")
+                            .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
+                    });                        
+                }
+            }
+            $("#custom_data_type_y").on("change", function() {
+                drawLogScaleY();
+            });
+        }
+
+        function drawLogScaleX() {
+            $("#custom_log_scale_div_x").empty();
+            var _str_x = "<input type='checkbox' id='custom_log_scale_x' checked/> log scale";
+            if (($("#custom_plot_type_x").val() ===  plot_type.MRNA.value &&
+                $("#custom_data_type_x option:selected").val().toUpperCase().indexOf(("rna_seq").toUpperCase()) !== -1 &&
+                $("#custom_data_type_x option:selected").val().toUpperCase().indexOf(("zscores").toUpperCase()) === -1)) {
+                $("#custom_log_scale_div_x").append(_str_x);
+            }
+        }
+
+        function drawLogScaleY() {
+            $("#custom_log_scale_div_y").empty();
+            var _str_y = "<input type='checkbox' id='custom_log_scale_y' checked/> log scale";
+            if (($("#custom_plot_type_y").val() ===  plot_type.MRNA.value &&
+                $("#custom_data_type_y option:selected").val().toUpperCase().indexOf(("rna_seq").toUpperCase()) !== -1 &&
+                $("#custom_data_type_y option:selected").val().toUpperCase().indexOf(("zscores").toUpperCase()) === -1)) {
+                $("#custom_log_scale_div_y").append(_str_y);
+            }            
         }
 
         return {
@@ -620,12 +701,16 @@ var PlotsTabMenu = (function () {
                 } else {
                     fetchFrameData(gene_list[0], gene_list[0]);
                 }
-                drawPlotType();
+                drawPlotTypeX();
+                drawDataTypeX();
+                drawLogScaleX();
+                drawPlotTypeY();
+                drawDataTypeY();
+                drawLogScaleY();
             }
         }
 
-
-    }());
+    }()); //Closing CustomMenu
 
     return {
         init : function() {
