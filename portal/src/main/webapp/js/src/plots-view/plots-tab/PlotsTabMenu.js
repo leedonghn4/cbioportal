@@ -571,6 +571,11 @@ var PlotsTabMenu = (function () {
                     value : "rppa", 
                     name :  "RPPA Protein Level",
                     data_type : "RPPA"
+                },
+                CLINICAL : {
+                    value : "clinical",
+                    name : "Clinical Attributes",
+                    data_type : "CLINICAL"
                 }
             },
             data_type = {
@@ -593,6 +598,10 @@ var PlotsTabMenu = (function () {
                     RPPA : {
                         value: "rppa",
                         genetic_profile : []
+                    },
+                    CLINICAL : {
+                        value: "clinical",
+                        attributes : {}
                     } 
                 },
                 gene_y : {
@@ -614,7 +623,11 @@ var PlotsTabMenu = (function () {
                     RPPA : {
                         value: "rppa",
                         genetic_profile : []
-                    } 
+                    },
+                    CLINICAL : {
+                        value: "clinical",
+                        attributes : {}
+                    }  
                 }
             }
 
@@ -642,11 +655,13 @@ var PlotsTabMenu = (function () {
             data_type.gene_x.COPY_NO.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_copy_no;
             data_type.gene_x.METHYLATION.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_dna_methylation;
             data_type.gene_x.RPPA.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_rppa;
+            data_type.gene_x.CLINICAL.attributes = Plots.getClinicalAttributes();
             //data_type.gene_y.genetic_profile_mutations = Plots.getGeneticProfiles(geneY).genetic_profile_mutations;
             data_type.gene_y.MRNA.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_mrna;
             data_type.gene_y.COPY_NO.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_copy_no;
             data_type.gene_y.METHYLATION.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_dna_methylation;
             data_type.gene_y.RPPA.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_rppa;
+            data_type.gene_y.CLINICAL.attributes = Plots.getClinicalAttributes();
         }
 
         function drawPlotTypeX() {
@@ -670,6 +685,9 @@ var PlotsTabMenu = (function () {
             }
             if (data_type.gene_x.RPPA.genetic_profile.length !== 0) {
                 PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.RPPA.value, plot_type.RPPA.name);
+            }
+            if (Object.keys(data_type.gene_x.CLINICAL.attributes).length !== 0) {
+                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_x", plot_type.CLINICAL.value, plot_type.CLINICAL.name);
             }
             $("#custom_plot_type_x").on("change", function() {
                 drawDataTypeX();
@@ -699,6 +717,9 @@ var PlotsTabMenu = (function () {
             if (data_type.gene_y.RPPA.genetic_profile.length !== 0) {
                 PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.RPPA.value, plot_type.RPPA.name);
             }
+            if (Object.keys(data_type.gene_y.CLINICAL.attributes).length !== 0) {
+                PlotsTabMenuUtil.appendDropDown("#custom_plot_type_y", plot_type.CLINICAL.value, plot_type.CLINICAL.name);
+            }
             $("#custom_plot_type_y").on("change", function() {
                 drawDataTypeY();
                 drawLogScaleY();
@@ -712,10 +733,22 @@ var PlotsTabMenu = (function () {
             for (var key in plot_type) {
                 if (_currentPlotTypeX === plot_type[key].value) {
                     var _currentSelectedDataTypeKey = plot_type[key].data_type;
-                    data_type.gene_x[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
-                        $("#custom_data_type_x")
-                            .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
-                    });                        
+                    if (data_type.gene_x[_currentSelectedDataTypeKey].value === data_type.gene_x.CLINICAL.value) { //selected the clinical attributes
+                        for (var key in data_type.gene_x[_currentSelectedDataTypeKey].attributes) {
+                            if (data_type.gene_x[_currentSelectedDataTypeKey].attributes[key].display_name !== "" &&
+                                data_type.gene_x[_currentSelectedDataTypeKey].attributes[key].display_name !== "MISSING") {
+                                $("#custom_data_type_x").append(
+                                    "<option value='" + data_type.gene_x[_currentSelectedDataTypeKey].attributes[key].value + "|" + 
+                                    data_type.gene_x[_currentSelectedDataTypeKey].attributes[key].description + "'>" + 
+                                    data_type.gene_x[_currentSelectedDataTypeKey].attributes[key].display_name + "</option>");                                  
+                            }                            
+                        }
+                    } else { //selected genetic profiles
+                        data_type.gene_x[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
+                            $("#custom_data_type_x")
+                                .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
+                        });                            
+                    }
                 }
             }
             $("#custom_data_type_x").on("change", function() {
@@ -730,10 +763,22 @@ var PlotsTabMenu = (function () {
             for (var key in plot_type) {
                 if (_currentPlotTypeY === plot_type[key].value) {
                     var _currentSelectedDataTypeKey = plot_type[key].data_type;
-                    data_type.gene_y[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
-                        $("#custom_data_type_y")
-                            .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
-                    });                        
+                    if (data_type.gene_y[_currentSelectedDataTypeKey].value === data_type.gene_y.CLINICAL.value) { //selected the clinical attributes
+                        for (var key in data_type.gene_y[_currentSelectedDataTypeKey].attributes) {
+                            if (data_type.gene_y[_currentSelectedDataTypeKey].attributes[key].display_name !== "" &&
+                                data_type.gene_y[_currentSelectedDataTypeKey].attributes[key].display_name !== "MISSING") {
+                                $("#custom_data_type_y").append(
+                                    "<option value='" + data_type.gene_y[_currentSelectedDataTypeKey].attributes[key].value + "|" + 
+                                    data_type.gene_y[_currentSelectedDataTypeKey].attributes[key].description + "'>" + 
+                                    data_type.gene_y[_currentSelectedDataTypeKey].attributes[key].display_name + "</option>");                                  
+                            }                            
+                        }
+                    } else { //selected genetic profiles
+                        data_type.gene_y[_currentSelectedDataTypeKey].genetic_profile.forEach(function(profile) {
+                            $("#custom_data_type_y")
+                                .append("<option value='" + profile[0] + "|" + profile[2] + "'>" + profile[1] + "</option>");                    
+                        });                            
+                    }
                 }
             }
             $("#custom_data_type_y").on("change", function() {
