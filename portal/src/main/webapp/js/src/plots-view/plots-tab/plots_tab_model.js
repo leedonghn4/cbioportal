@@ -43,6 +43,7 @@ var Plots = (function(){
             genetic_profile_dna_methylation : []
         },
         genetic_profiles = {},
+        clinical_attributes = {},
         log_scale_threshold = 0.17677669529;  // 2 to the -2.5
 
     function getGeneticProfileCallback(result) {
@@ -67,24 +68,19 @@ var Plots = (function(){
             genetic_profiles[gene] = _genetic_profile;
         }
 
+        //Get available clinical attributes for selected study
+        var paramsGetClinicalAttributes = {
+            cmd : "getClinicalData",
+            case_set_id : patient_set_id,
+            format : "json",
+            result_type : "meta"
+        };
+        $.post("webservice.do", paramsGetClinicalAttributes, getClinicalAttrCallBack, "json");
+    }
+
+    function getClinicalAttrCallBack(result) {
+        clinical_attributes = result;
         PlotsTabView.init();
-        //PlotsTwoGenesMenu.init();
-        //PlotsCustomMenu.init();
-        //PlotsView.init();
-
-        // $('#plots-menus').bind('tabsactivate', function(event, ui) {
-	       //  // note: ui.index is replaced with ui.newTab.index() after jQuery 1.9
-	       //  if (ui.newTab.index() === 0) {
-        //         PlotsView.init();
-        //     } else if (ui.newTab.index() === 1) {
-        //         PlotsTwoGenesView.init();
-        //     } else if (ui.newTab.index() === 2) {
-        //         PlotsCustomView.init();
-        //     } else {
-        //         //TODO: error handle
-        //     }
-        // });
-
     }
 
     function addxAxisHelp(svg, axisGroupSvg, xTitle, xTitleClass, xText) {
@@ -179,6 +175,9 @@ var Plots = (function(){
         },
         getGeneticProfiles: function(selectedGene) {
             return genetic_profiles[selectedGene];
+        },
+        getClinicalAttributes: function() {
+            return clinical_attributes;
         },
         getProfileData: function(gene, genetic_profile_id, case_set_id, case_ids_key, callback_func) {
             var paramsGetProfileData = {
