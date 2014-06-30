@@ -7,13 +7,20 @@
 <%@ page import="org.mskcc.cbio.portal.model.GeneticAlterationType" %>
 
 <script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabView.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabMenu.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabUtil.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/plots_tab_model.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/plots_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/plots_two_genes.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/plots-view/plots-tab/plots_custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
+<script type="text/javascript" src="js/src/plots-view/plots-tab/data/OneGeneDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/data/TwoGenesDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/data/CustomDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
+<script type="text/javascript" src="js/src/plots-view/plots-tab/view/menu.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/view/oneGene.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/view/twoGenes.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/view/custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
+<script type="text/javascript" src="js/src/plots-view/plots-tab/util/menu.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
 <script type="text/javascript" src="js/src/plots-view/component/BoxPlots.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
 
 <style>
     #plots .plots {

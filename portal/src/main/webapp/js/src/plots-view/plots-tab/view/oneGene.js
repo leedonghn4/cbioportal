@@ -26,7 +26,7 @@
  */
 
 
-var PlotsView = (function () {
+var OneGene = (function () {
 
     var text = {
             mutations_alias : {
@@ -1600,3 +1600,5 @@ var PlotsView = (function () {
     };
 
 }());//Closing PlotsView
+
+

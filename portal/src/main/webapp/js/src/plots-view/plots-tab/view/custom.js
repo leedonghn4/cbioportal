@@ -25,7 +25,7 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-var PlotsCustomView = (function() {
+var Custom = (function() {
 
     //Extracted data from JSON for plotting
     //Dots collection
