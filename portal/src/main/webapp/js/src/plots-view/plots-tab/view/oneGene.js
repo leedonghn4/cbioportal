@@ -155,113 +155,6 @@ var OneGene = (function () {
 
     var discretizedDataTypeIndicator = "";
 
-    var Util = (function() {
-
-        function isEmpty(inputVal) {
-            if (inputVal !== "NaN" && inputVal !== "NA") {
-                return false;
-            }
-            return true;
-        }
-
-        function plotsTypeIsCopyNo() {
-            return userSelection.plots_type === "mrna_vs_copy_no";
-        };
-
-        function plotsTypeIsMethylation() {
-            return userSelection.plots_type === "mrna_vs_dna_methylation";
-        };
-
-        function plotsTypeIsRPPA() {
-            return userSelection.plots_type === "rppa_protein_level_vs_mrna";
-        };
-
-        function plotsIsDiscretized() {
-            return userSelection.plots_type.indexOf("copy_no") !== -1 &&
-                userSelection.copy_no_type.indexOf("log2") === -1 &&
-                (userSelection.copy_no_type.indexOf("gistic") !== -1 ||
-                    userSelection.copy_no_type.indexOf("cna") !== -1 ||
-                    userSelection.copy_no_type.indexOf("CNA") !== -1);
-        }
-
-        function analyseData(inputArr) {
-            var tmp_xData = [];
-            var tmp_xIndex = 0;
-            var tmp_yData = [];
-            var tmp_yIndex = 0;
-            for (var j = 0; j< inputArr.length; j++){
-                if (!isEmpty(inputArr[j].xVal) && !isEmpty(inputArr[j].yVal)) {
-                    tmp_xData[tmp_xIndex] = inputArr[j].xVal;
-                    tmp_xIndex += 1;
-                    tmp_yData[tmp_yIndex] = inputArr[j].yVal;
-                    tmp_yIndex += 1;
-                }
-            }
-            var min_x = Math.min.apply(Math, tmp_xData);
-            var max_x = Math.max.apply(Math, tmp_xData);
-            var edge_x = (max_x - min_x) * 0.2;
-            var min_y = Math.min.apply(Math, tmp_yData);
-            var max_y = Math.max.apply(Math, tmp_yData);
-            var edge_y = (max_y - min_y) * 0.1;
-            return {
-                min_x: min_x,
-                max_x: max_x,
-                edge_x: edge_x,
-                min_y: min_y,
-                max_y: max_y,
-                edge_y: edge_y
-            };
-        }
-
-        function copyData(desArray, srcArray) {
-            desArray.length = 0;
-            var desArrayIndex = 0;
-            for (var tmpIndex = 0; tmpIndex < srcArray.length; tmpIndex ++ ){
-                if (srcArray[tmpIndex] !== "" && srcArray[tmpIndex] !== null ) {
-                    desArray[desArrayIndex] = srcArray[tmpIndex];
-                    desArrayIndex += 1;
-                }
-            }
-        }
-
-        function searchIndexBottom(arr, ele) {
-            for(var i = 0; i < arr.length; i++) {
-                if (parseFloat(ele) > parseFloat(arr[i])) {
-                    continue ;
-                } else if (parseFloat(ele) == parseFloat(arr[i])) {
-                    return i;
-                } else {
-                    return i - 1;
-                }
-            }
-            return arr.length - 1 ;
-        };
-
-        function searchIndexTop(arr, ele) {
-            for(var i = 0; i < arr.length; i++) {
-                if (ele <= arr[i]) {
-                    return i;
-                } else {
-                    continue;
-                }
-            }
-            return arr.length - 1;
-        };
-
-        return {
-            plotsTypeIsCopyNo: plotsTypeIsCopyNo,
-            plotsTypeIsMethylation: plotsTypeIsMethylation,
-            plotsTypeIsRPPA: plotsTypeIsRPPA,
-            isEmpty: isEmpty,
-            copyData: copyData,
-            plotsIsDiscretized: plotsIsDiscretized,
-            analyseData: analyseData,
-            searchIndexBottom: searchIndexBottom,
-            searchIndexTop: searchIndexTop
-        };
-
-    }());
-
     var PlotsData = (function() {
 
         var caseSetLength = 0,
@@ -296,13 +189,13 @@ var OneGene = (function () {
                 var _singleDot = jQuery.extend(true, {}, singleDot);
                 _singleDot.caseId = key;
                 //TODO: remove hard-coded menu content
-                if (Util.plotsTypeIsCopyNo()) {
+                if (OneGeneUtil.plotsTypeIsCopyNo()) {
                     _singleDot.xVal = _obj[userSelection.copy_no_type];
                     _singleDot.yVal = _obj[userSelection.mrna_type];
-                } else if (Util.plotsTypeIsMethylation()) {
+                } else if (OneGeneUtil.plotsTypeIsMethylation()) {
                     _singleDot.xVal = _obj[userSelection.dna_methylation_type];
                     _singleDot.yVal = _obj[userSelection.mrna_type];
-                } else if (Util.plotsTypeIsRPPA()) {
+                } else if (OneGeneUtil.plotsTypeIsRPPA()) {
                     _singleDot.xVal = _obj[userSelection.mrna_type];
                     _singleDot.yVal = _obj[userSelection.rppa_type];
                 }
@@ -312,22 +205,22 @@ var OneGene = (function () {
                 } else {
                     _singleDot.mutationType = "non";
                 }
-                if (!Util.isEmpty(_obj[discretizedDataTypeIndicator])) {
+                if (!OneGeneUtil.isEmpty(_obj[discretizedDataTypeIndicator])) {
                     _singleDot.gisticType = text.gistic_txt_val[_obj[discretizedDataTypeIndicator]];
                 } else {
                     _singleDot.gisticType = "NaN";
                 }
                 //Set Data Status
-                if (!Util.isEmpty(_singleDot.xVal)) {
+                if (!OneGeneUtil.isEmpty(_singleDot.xVal)) {
                     status.xHasData = true;
                 }
-                if (!Util.isEmpty(_singleDot.yVal)) {
+                if (!OneGeneUtil.isEmpty(_singleDot.yVal)) {
                     status.yHasData = true;
                 }
                 //Push into the dots array
-                if (!Util.isEmpty(_singleDot.xVal) &&
-                    !Util.isEmpty(_singleDot.yVal) &&
-                    !Util.isEmpty(_singleDot.gisticType)) {
+                if (!OneGeneUtil.isEmpty(_singleDot.xVal) &&
+                    !OneGeneUtil.isEmpty(_singleDot.yVal) &&
+                    !OneGeneUtil.isEmpty(_singleDot.gisticType)) {
                     dotsGroup.push(_singleDot);
                     status.combineHasData = true;
                 }
@@ -390,7 +283,7 @@ var OneGene = (function () {
             var mutatedData= [];
             var dataBuffer = [];
             dotsGroup.forEach (function(entry) {
-                if (!Util.isEmpty(entry.mutationDetail)) {
+                if (!OneGeneUtil.isEmpty(entry.mutationDetail)) {
                     mutatedData.push(entry);
                 } else {
                     nonMutatedData.push(entry);
@@ -411,8 +304,8 @@ var OneGene = (function () {
             var tmp_yData = [];
             var tmp_yIndex = 0;
             for (var j = 0; j < dotsGroup.length; j++){
-                if (!Util.isEmpty(dotsGroup[j].xVal) &&
-                    !Util.isEmpty(dotsGroup[j].yVal)) {
+                if (!OneGeneUtil.isEmpty(dotsGroup[j].xVal) &&
+                    !OneGeneUtil.isEmpty(dotsGroup[j].yVal)) {
                     tmp_xData[tmp_xIndex] = dotsGroup[j].xVal;
                     tmp_xIndex += 1;
                     tmp_yData[tmp_yIndex] = dotsGroup[j].yVal;
@@ -426,7 +319,7 @@ var OneGene = (function () {
 
             //Calculate the co-express/correlation scores
             //(When data is discretized)
-            if (!Util.plotsIsDiscretized()) {
+            if (!OneGeneUtil.plotsIsDiscretized()) {
                 var tmpGeneXcoExpStr = "",
                     tmpGeneYcoExpStr = "";
                 $.each(PlotsData.getDotsGroup(), function(index, obj) {
@@ -505,21 +398,21 @@ var OneGene = (function () {
 
             function getAxisTitles() {
                 //TODO: Change hard-coded menu items value
-                if (Util.plotsTypeIsCopyNo()) {
+                if (OneGeneUtil.plotsTypeIsCopyNo()) {
                     var e = document.getElementById("data_type_copy_no");
                     xTitle = userSelection.gene + ", " + e.options[e.selectedIndex].text;
                     xTitleHelp = e.options[e.selectedIndex].value.split("|")[1];
                     e = document.getElementById("data_type_mrna");
                     yTitle = userSelection.gene + ", " + e.options[e.selectedIndex].text;
                     yTitleHelp = e.options[e.selectedIndex].value.split("|")[1];
-                } else if (Util.plotsTypeIsMethylation()) {
+                } else if (OneGeneUtil.plotsTypeIsMethylation()) {
                     var e = document.getElementById("data_type_dna_methylation");
                     xTitle = userSelection.gene + ", " + e.options[e.selectedIndex].text;
                     xTitleHelp = e.options[e.selectedIndex].value.split("|")[1];
                     e = document.getElementById("data_type_mrna");
                     yTitle = userSelection.gene + ", " + e.options[e.selectedIndex].text;
                     yTitleHelp = e.options[e.selectedIndex].value.split("|")[1];
-                } else if (Util.plotsTypeIsRPPA()) {
+                } else if (OneGeneUtil.plotsTypeIsRPPA()) {
                     var e = document.getElementById("data_type_mrna");
                     xTitle = userSelection.gene + ", " + e.options[e.selectedIndex].text;
                     xTitleHelp = e.options[e.selectedIndex].value.split("|")[1];
@@ -646,7 +539,7 @@ var OneGene = (function () {
                 var min_x = _dataAttr.min_x;
                 var max_x = _dataAttr.max_x;
                 var edge_x = (max_x - min_x) * 0.2;
-                if (Util.plotsTypeIsMethylation()){
+                if (OneGeneUtil.plotsTypeIsMethylation()){
                     //Range for DNA Methylation Data Type
                     //Need to be fixed as from 0 to 1.
                     attr.xScale = d3. scale.linear()
@@ -780,7 +673,7 @@ var OneGene = (function () {
             return {
                 init: function() {
                     getAxisTitles();
-                    if (Util.plotsIsDiscretized()) {
+                    if (OneGeneUtil.plotsIsDiscretized()) {
                         initDiscretizedAxis();
                         drawDiscretizedAxis();
                     } else {
@@ -887,8 +780,8 @@ var OneGene = (function () {
 
             function confContent(d) {
                 var content = "<font size='2'>";
-                if (Util.plotsTypeIsCopyNo()) {
-                    if (Util.plotsIsDiscretized()) {
+                if (OneGeneUtil.plotsTypeIsCopyNo()) {
+                    if (OneGeneUtil.plotsIsDiscretized()) {
                         content += "mRNA: <strong>" + parseFloat(d.yVal).toFixed(3) + "</strong><br>";
                     } else {
                         content += "CNA: <strong>" + parseFloat(d.xVal).toFixed(3) + "</strong><br>" +
@@ -901,7 +794,7 @@ var OneGene = (function () {
                     if (d.mutationType !== 'non') {
                         content = content + "Mutation: " + "<strong>" + d.mutationDetail.replace(/,/g, ", ") + "<br>";
                     }
-                } else if (Util.plotsTypeIsMethylation()) {
+                } else if (OneGeneUtil.plotsTypeIsMethylation()) {
                     content += "Methylation: <strong>" + parseFloat(d.xVal).toFixed(3) + "</strong><br>" +
                         "mRNA: <strong>" + parseFloat(d.yVal).toFixed(3) + "</strong><br>";
                     if (d.gisticType !== "Diploid") {
@@ -914,7 +807,7 @@ var OneGene = (function () {
                     if (d.mutationType !== 'non') {
                         content = content + "Mutation: " + "<strong>" + d.mutationDetail.replace(/,/g, ", ") + "<br>";
                     }
-                } else if (Util.plotsTypeIsRPPA()) {
+                } else if (OneGeneUtil.plotsTypeIsRPPA()) {
                     content += "mRNA: <strong>" + parseFloat(d.xVal).toFixed(3) + "</strong><br>" +
                         "RPPA: <strong>" + parseFloat(d.yVal).toFixed(3) + "</strong><br>";
                     if (d.gisticType !== "Diploid") {
@@ -946,7 +839,7 @@ var OneGene = (function () {
                                     position: {my:'left bottom',at:'top right', viewport: $(window)}
                                 }
                             );
-                            if (Util.plotsTypeIsCopyNo()) {    //Handle special symbols
+                            if (OneGeneUtil.plotsTypeIsCopyNo()) {    //Handle special symbols
                                 var mouseOn = function() {
                                     var dot = d3.select(this);
                                     dot.transition()
@@ -1197,8 +1090,8 @@ var OneGene = (function () {
                 init: function() {
                     elem.boxPlots = elem.svg.append("svg:g");
                     elem.elemDotsGroup = elem.svg.append("svg:g");
-                    if (Util.plotsTypeIsCopyNo()) {
-                        if (Util.plotsIsDiscretized()) {    //Gistic, RAE...
+                    if (OneGeneUtil.plotsTypeIsCopyNo()) {
+                        if (OneGeneUtil.plotsIsDiscretized()) {    //Gistic, RAE...
                             drawBoxPlots(false);
                             drawDiscretizedPlots();
                         } else {   //Log2
@@ -1243,7 +1136,7 @@ var OneGene = (function () {
                             d3.select(this).attr("y_pos", _post_y);
                             return "translate(" + _pre_x + ", " + _post_y + ")";
                         });
-                    if (Util.plotsIsDiscretized()) {
+                    if (OneGeneUtil.plotsIsDiscretized()) {
                         drawBoxPlots(applyLogScale);
                     }
                 }
@@ -1342,12 +1235,12 @@ var OneGene = (function () {
 
             return {
                 init: function() {
-                    if (Util.plotsTypeIsCopyNo()) {
+                    if (OneGeneUtil.plotsTypeIsCopyNo()) {
                         drawCopyNoViewLegends();
                     } else {
                         drawOtherViewLegends();
                     }
-                    if (!Util.plotsIsDiscretized()) {
+                    if (!OneGeneUtil.plotsIsDiscretized()) {
                         var tmpDataAttr = PlotsData.getDataAttr();
                         var tmpPearson = "Pearson: " + tmpDataAttr.pearson,
                             tmpSpearman = "Spearman: " + tmpDataAttr.spearman;
@@ -1380,17 +1273,17 @@ var OneGene = (function () {
         function drawErrMsgs() {
             var _xDataType = "",
                 _yDataType = "";
-            if (Util.plotsTypeIsCopyNo()) {
+            if (OneGeneUtil.plotsTypeIsCopyNo()) {
                 var e = document.getElementById("data_type_copy_no");
                 _xDataType = e.options[e.selectedIndex].text;
                 e = document.getElementById("data_type_mrna");
                 _yDataType = e.options[e.selectedIndex].text;
-            } else if (Util.plotsTypeIsMethylation()) {
+            } else if (OneGeneUtil.plotsTypeIsMethylation()) {
                 var e = document.getElementById("data_type_dna_methylation");
                 _xDataType = e.options[e.selectedIndex].text;
                 e = document.getElementById("data_type_mrna");
                 _yDataType = e.options[e.selectedIndex].text;
-            } else if (Util.plotsTypeIsRPPA()) {
+            } else if (OneGeneUtil.plotsTypeIsRPPA()) {
                 var e = document.getElementById("data_type_mrna");
                 _xDataType = e.options[e.selectedIndex].text;
                 e = document.getElementById("data_type_rppa");
@@ -1435,11 +1328,11 @@ var OneGene = (function () {
 
         function drawImgConverter() {
             $('#view_title').empty();
-            if (Util.plotsTypeIsCopyNo()) {
+            if (OneGeneUtil.plotsTypeIsCopyNo()) {
                 $('#view_title').append(userSelection.gene + ": mRNA Expression v. CNA ");
-            } else if (Util.plotsTypeIsMethylation()) {
+            } else if (OneGeneUtil.plotsTypeIsMethylation()) {
                 $('#view_title').append(userSelection.gene + ": mRNA Expression v. DNA Methylation ");
-            } else if (Util.plotsTypeIsRPPA()) {
+            } else if (OneGeneUtil.plotsTypeIsRPPA()) {
                 $('#view_title').append(userSelection.gene + ": RPPA protein level v. mRNA Expression ");
             }
             var pdfConverterForm = "<form style='display:inline-block' action='svgtopdf.do' method='post' target='_blank' " +
@@ -1582,7 +1475,10 @@ var OneGene = (function () {
             $('#plots_box').hide();
 
             var _status = PlotsMenu.getStatus();
-            if (_status.has_mrna && (_status.has_copy_no || _status.has_dna_methylation || _status.has_rppa)) {
+            if (_status.has_mrna && 
+               (_status.has_copy_no || 
+                _status.has_dna_methylation || 
+                _status.has_rppa)) {
                 getUserSelection();
                 generatePlots();
             } else {

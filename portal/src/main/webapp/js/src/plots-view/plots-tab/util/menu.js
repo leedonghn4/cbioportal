@@ -30,6 +30,7 @@
   * @author: Yichao Sun <yichao@cbio.mskcc.org>
   */
 
+
 var PlotsTabMenuUtil = (function() {
 
     function mergeList(arrX, arrY) {

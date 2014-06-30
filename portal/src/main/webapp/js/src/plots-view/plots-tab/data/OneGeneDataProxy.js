@@ -25,10 +25,20 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
- OneGeneDataProxy = (function() {
+/* 
+ * Data Manager for the one-gene plots sub tab under the "Plots" tab
+ *
+ * @author: YichaoS <yichao@cbio.mskcc.org>
+ * @date: Jun 2014
+ *
+ */
 
+ var OneGeneDataProxy = (function() {
 
- 	
+        return {
+        	init: function() {
+        	}
+        }
 
  }());
 

@@ -101,15 +101,14 @@ var PlotsTabMenu = (function () {
                 has_rppa : false,
                 has_copy_no : false,
                 has_clinical_data : false
-            }
+            };
 
         function fetchContent(selectedGene) {
-            data_type.MRNA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_mrna;
-            data_type.COPY_NO.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_copy_no;
-            data_type.METHYLATION.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_dna_methylation;
-            data_type.RPPA.genetic_profile = Plots.getGeneticProfiles(selectedGene).genetic_profile_rppa;
-            data_type.CLINICAL.attributes = Plots.getClinicalAttributes();
-
+            data_type.MRNA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(selectedGene).genetic_profile_mrna;
+            data_type.COPY_NO.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(selectedGene).genetic_profile_copy_no;
+            data_type.METHYLATION.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(selectedGene).genetic_profile_dna_methylation;
+            data_type.RPPA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(selectedGene).genetic_profile_rppa;
+            data_type.CLINICAL.attributes = PlotsTabMenuDataProxy.getClinicalAttributes();
             status.has_mrna = (data_type.MRNA.genetic_profile.length !== 0);
             status.has_copy_no = (data_type.COPY_NO.genetic_profile.length !== 0);
             status.has_dna_methylation = (data_type.METHYLATION.genetic_profile.length !== 0);
@@ -303,6 +302,11 @@ var PlotsTabMenu = (function () {
             }
         }
 
+        function drawErrMsgs() {
+            $("#one_gene_type_spec_div").hide();
+            $("#menu_err_msg").append("<h5>Profile data missing for generating this view.</h5>");
+        }
+
         return {
             init : function() {
                 $("#menu_err_msg").empty();
@@ -319,7 +323,10 @@ var PlotsTabMenu = (function () {
                 } else {
                     drawErrMsgs();
                 }
-            }            
+            },
+            getStatus : function() {
+                return status;
+            }
         }
 
     }()); //Closing OneGeneMenu
@@ -382,24 +389,24 @@ var PlotsTabMenu = (function () {
         function fetchContent(selectedGenes) {
             var geneX = selectedGenes[0], 
                 geneY = selectedGenes[1];
-            //content.genetic_profile_mutations = Plots.getGeneticProfiles(geneX).genetic_profile_mutations;
+            //content.genetic_profile_mutations = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_mutations;
             data_type.MRNA.genetic_profile = PlotsTabMenuUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_mrna,
-                Plots.getGeneticProfiles(geneY).genetic_profile_mrna
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_mrna,
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_mrna
             );
             data_type.COPY_NO.genetic_profile = PlotsTabMenuUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_copy_no,
-                Plots.getGeneticProfiles(geneY).genetic_profile_copy_no
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_copy_no,
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_copy_no
             );
             data_type.METHYLATION.genetic_profile = PlotsTabMenuUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_dna_methylation,
-                Plots.getGeneticProfiles(geneY).genetic_profile_dna_methylation
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_dna_methylation,
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_dna_methylation
             );
             data_type.RPPA.genetic_profile = PlotsTabMenuUtil.mergeList(
-                Plots.getGeneticProfiles(geneX).genetic_profile_rppa,
-                Plots.getGeneticProfiles(geneY).genetic_profile_rppa
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_rppa,
+                PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_rppa
             );
-            data_type.CLINICAL.attributes = Plots.getClinicalAttributes();
+            data_type.CLINICAL.attributes = PlotsTabMenuDataProxy.getClinicalAttributes();
         }
     
         function drawGeneList() {
@@ -531,11 +538,6 @@ var PlotsTabMenu = (function () {
             }
         }
 
-        function drawErrMsgs() {
-            $("#one_gene_type_spec_div").hide();
-            $("#menu_err_msg").append("<h5>Profile data missing for generating this view.</h5>");
-        }
-
         return {
             init: function() {
                 drawGeneList();               
@@ -650,18 +652,18 @@ var PlotsTabMenu = (function () {
         }
 
         function fetchFrameData(geneX, geneY) {
-            //data_type.gene_x.genetic_profile_mutations = Plots.getGeneticProfiles(geneX).genetic_profile_mutations;
-            data_type.gene_x.MRNA.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_mrna;
-            data_type.gene_x.COPY_NO.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_copy_no;
-            data_type.gene_x.METHYLATION.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_dna_methylation;
-            data_type.gene_x.RPPA.genetic_profile = Plots.getGeneticProfiles(geneX).genetic_profile_rppa;
-            data_type.gene_x.CLINICAL.attributes = Plots.getClinicalAttributes();
-            //data_type.gene_y.genetic_profile_mutations = Plots.getGeneticProfiles(geneY).genetic_profile_mutations;
-            data_type.gene_y.MRNA.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_mrna;
-            data_type.gene_y.COPY_NO.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_copy_no;
-            data_type.gene_y.METHYLATION.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_dna_methylation;
-            data_type.gene_y.RPPA.genetic_profile = Plots.getGeneticProfiles(geneY).genetic_profile_rppa;
-            data_type.gene_y.CLINICAL.attributes = Plots.getClinicalAttributes();
+            //data_type.gene_x.genetic_profile_mutations = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_mutations;
+            data_type.gene_x.MRNA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_mrna;
+            data_type.gene_x.COPY_NO.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_copy_no;
+            data_type.gene_x.METHYLATION.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_dna_methylation;
+            data_type.gene_x.RPPA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneX).genetic_profile_rppa;
+            data_type.gene_x.CLINICAL.attributes = PlotsTabMenuDataProxy.getClinicalAttributes();
+            //data_type.gene_y.genetic_profile_mutations = PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_mutations;
+            data_type.gene_y.MRNA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_mrna;
+            data_type.gene_y.COPY_NO.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_copy_no;
+            data_type.gene_y.METHYLATION.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_dna_methylation;
+            data_type.gene_y.RPPA.genetic_profile = PlotsTabMenuDataProxy.getGeneticProfiles(geneY).genetic_profile_rppa;
+            data_type.gene_y.CLINICAL.attributes = PlotsTabMenuDataProxy.getClinicalAttributes();
         }
 
         function drawPlotTypeX() {
@@ -832,6 +834,9 @@ var PlotsTabMenu = (function () {
                 TwoGenesMenu.init();
             }  
             CustomMenu.init();          
+        },
+        getOneGeneStatus: function() {
+            return OneGeneMenu.getStatus();
         }
     }
 

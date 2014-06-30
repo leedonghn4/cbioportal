@@ -8,6 +8,7 @@
 
 <script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabView.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
+<script type="text/javascript" src="js/src/plots-view/plots-tab/data/PlotsTabMenuDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/OneGeneDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/TwoGenesDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/CustomDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
@@ -175,7 +176,7 @@
         $("#tabs").bind("tabsactivate", function(event, ui) {
             if (ui.newTab.text().trim().toLowerCase() === "plots") {
                 if (plots_tab_init === false) {
-                    Plots.init();
+                    PlotsTabView.init();
                     plots_tab_init = true;
                 }
             }
