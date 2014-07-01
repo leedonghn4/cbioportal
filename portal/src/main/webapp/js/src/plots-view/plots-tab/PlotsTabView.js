@@ -118,11 +118,12 @@ var PlotsTabView = (function(){
     }
 
     return {
+        viewInitCallback: function() { //Register all the sub view init funcs here!!
+            PlotsTabMenu.init();
+            OneGene.init();
+        },
         init: function() {
         	PlotsTabMenuDataProxy.init();
-        },
-        viewInitCallback: function() {
-        	PlotsTabMenu.init();
         },
         getGeneticProfiles: function(selectedGene) {
             return genetic_profiles[selectedGene];

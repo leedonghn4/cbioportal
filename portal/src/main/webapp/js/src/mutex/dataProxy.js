@@ -1,7 +1,7 @@
 var MutexData = (function() {
 
 	var getData = function() {
-		console.log(PortalDataColl.getOncoprintData());
+		//console.log(PortalDataColl.getOncoprintData());
 	}
 
 	return {

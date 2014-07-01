@@ -8,6 +8,7 @@
 
 <script type="text/javascript" src="js/src/plots-view/plots-tab/PlotsTabView.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
+<script type="text/javascript" src="js/src/plots-view/plots-tab/data/PlotsTabDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/PlotsTabMenuDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/OneGeneDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/plots-view/plots-tab/data/TwoGenesDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
@@ -151,10 +152,8 @@
             </td>
             <td>
                 <div id="plots-view" class="plots plots-view">
-                    <div id='loading-image'>
-                        <img style='padding:200px;' src='images/ajax-loader.gif'>
-                    </div>
-                    <b><div id='view_title' style="display:inline-block;padding-left:100px;"></div></b>
+                    <div id='loading-image'><img style='padding:200px;' src='images/ajax-loader.gif'></div>
+                    <!--b><div id='view_title' style="display:inline-block;padding-left:100px;"></div></b-->
                     <div id="plots_box"></div>
                 </div>
             </td>

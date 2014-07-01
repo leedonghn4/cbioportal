@@ -43,7 +43,7 @@ var PlotsTabMenuDataProxy = (function() {
 
     function getClinicalAttrCallBack(result) {
         clinical_attributes = result;
-        Plots.viewInitCallback();
+        PlotsTabView.viewInitCallback();
     }
 
     return {
