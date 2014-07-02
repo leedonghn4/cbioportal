@@ -1,30 +1,25 @@
 var oneGeneUtil = (function() {
 
     function isEmpty(inputVal) {
-        if (inputVal !== "NaN" && inputVal !== "NA") {
+        if (inputVal !== "NaN" && inputVal !== "NA" && 
+            inputVal !== "" && inputVal !== null) {
             return false;
         }
         return true;
     }
 
-    function plotsTypeIsCopyNo() {
-        return userSelection.plots_type === "mrna_vs_copy_no";
-    };
-
-    function plotsTypeIsMethylation() {
-        return userSelection.plots_type === "mrna_vs_dna_methylation";
-    };
-
-    function plotsTypeIsRPPA() {
-        return userSelection.plots_type === "rppa_protein_level_vs_mrna";
-    };
-
-    function plotsIsDiscretized() {
-        return userSelection.plots_type.indexOf("copy_no") !== -1 &&
-            userSelection.copy_no_type.indexOf("log2") === -1 &&
-            (userSelection.copy_no_type.indexOf("gistic") !== -1 ||
-                userSelection.copy_no_type.indexOf("cna") !== -1 ||
-                userSelection.copy_no_type.indexOf("CNA") !== -1);
+    function plotsIsDiscretized(_dataTypeObj) {
+        var result = false;
+        for(var key in _dataTypeObj) {
+            var _id = _dataTypeObj[key].id.toLowerCase();
+            console.log(_id);
+            if (_id.indexOf("log2") === -1 && 
+                (_id.indexOf("gistic") !== -1 ||
+                 _id.indexOf("cna") !== -1)) {
+                    result = true;                    
+            }
+        }
+        return result;
     }
 
     function analyseData(inputArr) {
@@ -92,9 +87,6 @@ var oneGeneUtil = (function() {
     };
 
     return {
-        plotsTypeIsCopyNo: plotsTypeIsCopyNo,
-        plotsTypeIsMethylation: plotsTypeIsMethylation,
-        plotsTypeIsRPPA: plotsTypeIsRPPA,
         isEmpty: isEmpty,
         copyData: copyData,
         plotsIsDiscretized: plotsIsDiscretized,

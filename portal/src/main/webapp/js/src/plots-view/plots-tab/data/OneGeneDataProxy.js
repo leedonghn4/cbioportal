@@ -35,6 +35,24 @@
 
 var OneGeneDataProxy = (function() {
 
+        //Mappings
+        var gistic_txt_val = {
+                "-2": "Homdel",
+                "-1": "Hetloss",
+                "0": "Diploid",
+                "1": "Gain",
+                "2": "Amp"
+            },
+            mutations_alias = { //mapping to the keys in mutation style objects in oneGene.js in view/
+                frameshift : "frameshift",
+                in_frame : "in_frame",
+                missense : "missense",
+                nonsense : "nonsense",
+                splice : "splice",
+                nonstop : "nonstop",
+                nonstart : "nonstart",
+                non : "non"
+            };
         //Options
         var userSelection = { 
 	        	gene: "",
@@ -45,7 +63,7 @@ var OneGeneDataProxy = (function() {
 	    		}        
 	        }; 
 	    //Data Container
-        var caseSetLength = 0,
+        var sampleSetLength = 0,
             dotsGroup = [],
             singleDot = {
                 caseId : "",
@@ -53,14 +71,14 @@ var OneGeneDataProxy = (function() {
                 yVal : "",
                 mutationDetail : "",  //Mutation ID
                 mutationType : "",
-                gisticType : "" //Discretized(GISTIC/RAE) Annotation
-            },   //Template for single dot
+                //gisticType : "" //Discretized(GISTIC/RAE) Annotation
+            },  
             status = {
                 xHasData: false,
                 yHasData: false,
                 combineHasData: false
             },
-            attr = {
+            attr = { //attributes of data set
                 min_x: 0,
                 max_x: 0,
                 min_y: 0,
@@ -69,47 +87,27 @@ var OneGeneDataProxy = (function() {
                 spearman: 0
             };
 
-
         function fetchPlotsData(profileDataResult) {
             var resultObj = profileDataResult[userSelection.gene];
-            for (var key in resultObj) {  //key is case id
-                caseSetLength += 1;
+            for (var key in resultObj) {  //key is sample id
+                sampleSetLength += 1;
                 var _obj = resultObj[key];
                 var _singleDot = jQuery.extend(true, {}, singleDot);
+                //extract x, y axis value 
                 _singleDot.caseId = key;
-                //TODO: remove hard-coded menu content
-                if (OneGeneUtil.plotsTypeIsCopyNo()) {
-                    _singleDot.xVal = _obj[userSelection.copy_no_type];
-                    _singleDot.yVal = _obj[userSelection.mrna_type];
-                } else if (OneGeneUtil.plotsTypeIsMethylation()) {
-                    _singleDot.xVal = _obj[userSelection.dna_methylation_type];
-                    _singleDot.yVal = _obj[userSelection.mrna_type];
-                } else if (OneGeneUtil.plotsTypeIsRPPA()) {
-                    _singleDot.xVal = _obj[userSelection.mrna_type];
-                    _singleDot.yVal = _obj[userSelection.rppa_type];
-                }
-                if (_obj.hasOwnProperty(cancer_study_id + "_mutations")) {
-                    _singleDot.mutationDetail = _obj[cancer_study_id + "_mutations"];
-                    _singleDot.mutationType = _obj[cancer_study_id + "_mutations"]; //Translate into type later
-                } else {
-                    _singleDot.mutationType = "non";
-                }
-                if (!OneGeneUtil.isEmpty(_obj[discretizedDataTypeIndicator])) {
-                    _singleDot.gisticType = text.gistic_txt_val[_obj[discretizedDataTypeIndicator]];
-                } else {
-                    _singleDot.gisticType = "NaN";
-                }
+                _singleDot.xVal = _obj[userSelection.data_type.x.id];
+                _singleDot.yVal = _obj[userSelection.data_type.y.id];
                 //Set Data Status
-                if (!OneGeneUtil.isEmpty(_singleDot.xVal)) {
+                if (!oneGeneUtil.isEmpty(_singleDot.xVal)) {
                     status.xHasData = true;
                 }
-                if (!OneGeneUtil.isEmpty(_singleDot.yVal)) {
+                if (!oneGeneUtil.isEmpty(_singleDot.yVal)) {
                     status.yHasData = true;
                 }
-                //Push into the dots array
-                if (!OneGeneUtil.isEmpty(_singleDot.xVal) &&
-                    !OneGeneUtil.isEmpty(_singleDot.yVal) &&
-                    !OneGeneUtil.isEmpty(_singleDot.gisticType)) {
+                //Push non-empty data points into the dots array
+                if (!oneGeneUtil.isEmpty(_singleDot.xVal) &&
+                    !oneGeneUtil.isEmpty(_singleDot.yVal) &&
+                    !oneGeneUtil.isEmpty(_singleDot.gisticType)) {
                     dotsGroup.push(_singleDot);
                     status.combineHasData = true;
                 }
@@ -123,39 +121,47 @@ var OneGeneDataProxy = (function() {
             var mutationMap = mutationDetailsUtil.getMutationCaseMap();
             $.each(dotsGroup, function(index, dot) {
                 if (!mutationMap.hasOwnProperty(dot.caseId.toLowerCase())) {
-                    dot.mutationType = mutationStyle.non.typeName;
+                    dot.mutationType = mutations_alias.non;
                 } else {
-                    var _mutationTypes = []; //one case can have multi-mutations
+                    var _mutationTypes = [], //one case can have multi-mutations
+                        _proteinChangeStr = "";
                     $.each(mutationMap[dot.caseId.toLowerCase()], function (index, val) {
+                        //Map mutation type
                         if ((val.mutationType === "Frame_Shift_Del")||(val.mutationType === "Frame_Shift_Ins")) {
-                            _mutationTypes.push(mutationStyle.frameshift.typeName);
+                            _mutationTypes.push(mutations_alias.frameshift);
                         } else if ((val.mutationType === "In_Frame_Del")||(val.mutationType === "In_Frame_Ins")) {
-                            _mutationTypes.push(mutationStyle.in_frame.typeName);
+                            _mutationTypes.push(mutations_alias.in_frame);
                         } else if ((val.mutationType === "Missense_Mutation")||(val.mutationType === "Missense")) {
-                            _mutationTypes.push(mutationStyle.missense.typeName);
+                            _mutationTypes.push(mutations_alias.missense);
                         } else if ((val.mutationType === "Nonsense_Mutation")||(val.mutationType === "Nonsense")) {
-                            _mutationTypes.push(mutationStyle.nonsense.typeName);
+                            _mutationTypes.push(mutations_alias.nonsense);
                         } else if ((val.mutationType === "Splice_Site")||(val.mutationType === "Splice_Site_SNP")) {
-                            _mutationTypes.push(mutationStyle.splice.typeName);
+                            _mutationTypes.push(mutations_alias.splice);
                         } else if (val.mutationType === "NonStop_Mutation") {
-                            _mutationTypes.push(mutationStyle.nonstop.typeName);
+                            _mutationTypes.push(mutations_alias.nonstop);
                         } else if (val.mutationType === "Translation_Start_Site") {
-                            _mutationTypes.push(mutationStyle.nonstart.typeName);
+                            _mutationTypes.push(mutations_alias.nonstart);
                         } else { //Fusion etc. new mutation types
-                            _mutationTypes.push(mutationStyle.other.typeName);
+                            _mutationTypes.push(mutations_alias.other);
+                        }
+                        //Simply append protein change
+                        if (_proteinChangeStr !== "") {
+                            _proteinChangeStr += ", " + val.proteinChange;
+                        } else {
+                            _proteinChangeStr += val.proteinChange;
                         }
                     });
-                    //Re-order mutations in one case based on priority list
-                    var mutationPriorityList = [];
-                    mutationPriorityList[mutationStyle.frameshift.typeName] = "0";
-                    mutationPriorityList[mutationStyle.in_frame.typeName] = "1";
-                    mutationPriorityList[mutationStyle.missense.typeName] = "2";
-                    mutationPriorityList[mutationStyle.nonsense.typeName] = "3";
-                    mutationPriorityList[mutationStyle.splice.typeName] = "4";
-                    mutationPriorityList[mutationStyle.nonstop.typeName] = "5";
-                    mutationPriorityList[mutationStyle.nonstart.typeName] = "6";
-                    mutationPriorityList[mutationStyle.other.typeName] = "7"
-                    mutationPriorityList[mutationStyle.non.typeName] = "8";
+                    //Re-order mutations in one case based on a priority list
+                    var mutationPriorityList = []; //define the priority list
+                    mutationPriorityList[mutations_alias.frameshift] = "0";
+                    mutationPriorityList[mutations_alias.in_frame] = "1";
+                    mutationPriorityList[mutations_alias.missense] = "2";
+                    mutationPriorityList[mutations_alias.nonsense] = "3";
+                    mutationPriorityList[mutations_alias.splice] = "4";
+                    mutationPriorityList[mutations_alias.nonstop] = "5";
+                    mutationPriorityList[mutations_alias.nonstart] = "6";
+                    mutationPriorityList[mutations_alias.other] = "7"
+                    mutationPriorityList[mutations_alias.non] = "8";
                     var _primaryMutation = _mutationTypes[0];
                     $.each(_mutationTypes, function(index, val) {
                         if (mutationPriorityList[_primaryMutation] > mutationPriorityList[val]) {
@@ -163,6 +169,7 @@ var OneGeneDataProxy = (function() {
                         }
                     });
                     dot.mutationType = _primaryMutation;
+                    dot.mutationDetail = _proteinChangeStr;
                 }
             });
         }
@@ -172,7 +179,7 @@ var OneGeneDataProxy = (function() {
             var mutatedData= [];
             var dataBuffer = [];
             dotsGroup.forEach (function(entry) {
-                if (!OneGeneUtil.isEmpty(entry.mutationDetail)) {
+                if (!oneGeneUtil.isEmpty(entry.mutationDetail)) {
                     mutatedData.push(entry);
                 } else {
                     nonMutatedData.push(entry);
@@ -181,7 +188,7 @@ var OneGeneDataProxy = (function() {
             nonMutatedData.forEach (function(entry) {
                 dataBuffer.push(entry);
             });
-            mutatedData.forEach (function(entry) {
+            mutatedData.forEach (function(entry) { //mutated data points got plotted last
                 dataBuffer.push(entry);
             });
             dotsGroup = dataBuffer;
@@ -193,8 +200,8 @@ var OneGeneDataProxy = (function() {
             var tmp_yData = [];
             var tmp_yIndex = 0;
             for (var j = 0; j < dotsGroup.length; j++){
-                if (!OneGeneUtil.isEmpty(dotsGroup[j].xVal) &&
-                    !OneGeneUtil.isEmpty(dotsGroup[j].yVal)) {
+                if (!oneGeneUtil.isEmpty(dotsGroup[j].xVal) &&
+                    !oneGeneUtil.isEmpty(dotsGroup[j].yVal)) {
                     tmp_xData[tmp_xIndex] = dotsGroup[j].xVal;
                     tmp_xIndex += 1;
                     tmp_yData[tmp_yIndex] = dotsGroup[j].yVal;
@@ -208,10 +215,10 @@ var OneGeneDataProxy = (function() {
 
             //Calculate the co-express/correlation scores
             //(When data is discretized)
-            if (!OneGeneUtil.plotsIsDiscretized()) {
+            if (!oneGeneUtil.plotsIsDiscretized(userSelection.data_type)) {
                 var tmpGeneXcoExpStr = "",
                     tmpGeneYcoExpStr = "";
-                $.each(PlotsData.getDotsGroup(), function(index, obj) {
+                $.each(dotsGroup, function(index, obj) {
                     tmpGeneXcoExpStr += obj.xVal + " ";
                     tmpGeneYcoExpStr += obj.yVal + " ";
                 });
@@ -221,19 +228,26 @@ var OneGeneDataProxy = (function() {
                 };
                 $.post("calcCoExp.do", paramsCalcCoexp, getCalcCoExpCallBack, "json");
             } else {
-                $('#view_title').show();
-                $('#plots_box').show();
-                $('#loading-image').hide();
-                View.init();                
+                //$('#view_title').show();
+                //$('#plots_box').show();
+                //$('#loading-image').hide();
+                //View.init();                
             }
         }
 
-        function getDataCallback(result) {
+        function getCalcCoExpCallBack(result) {
+        }
+
+        function getDataCallback(profileData, mutationData) { //convert/assemble the raw data
+            fetchPlotsData(profileData);
+            translateMutationType(mutationData);
+            prioritizeMutatedCases();
+            analyseData();
         }
 
         function getData() {
         	var _profileIdStr = userSelection.data_type.x.id + " " +
-        						userSelection.data_type.y.id;
+        						userSelection.data_type.y.id + " ";
             PlotsTabDataProxy.getData(
                 window.PortalGlobals.getCancerStudyId(),
                 userSelection.gene,
@@ -247,7 +261,6 @@ var OneGeneDataProxy = (function() {
         function getUserSelection() {
 		    userSelection.gene = document.getElementById("one_gene_gene_list").value;
 		    userSelection.plot_type = document.getElementById("one_gene_plot_type").value;
-		    userSelection.data_type.length = 0;
 		    var _dataTypeUserSelectionArr = [];
 		    $("#one_gene_data_type_div").find("select").each(function() {
 		    	var _obj = {};

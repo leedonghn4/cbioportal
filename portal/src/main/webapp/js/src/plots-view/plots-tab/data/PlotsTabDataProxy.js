@@ -28,39 +28,19 @@
  var PlotsTabDataProxy = (function() {
 
  	//User input
- 	var input_geneId = "",
+ 	var input_cancerStyId = "", 
+ 		input_geneIds = "",
  		input_profileIds = "",
  		input_sampleSetId = "",
  		input_sampleIdsKey = "",
  		_callbackFunc = "";
- 		
+
  	//Tmp data container
  	var _profileDataResult = {},
  		_mutationResult = {};
 
- 	//Processed data container
- 	var singleDot = {
-	 		caseId: "",
-	 		xVal: "",
-	 		yVal: "",
-	 		mutationDetail: "", //Mutation Id
-	 		mutaitonType: "",
-	 		gisticType: ""
-	 	},
-	 	dotsArr = [];
-
- 	//Data attributes
- 	var attr = {
-            min_x: 0,
-            max_x: 0,
-            min_y: 0,
-            max_y: 0,
-            pearson: 0,
-            spearman: 0
-	 	};
-
  	function convertRawData() {
- 		console.log(_profileDataResult, _mutationResult);
+ 		_callbackFunc(_profileDataResult, _mutationResult);
  	}
 
  	function getMutationDataCallBack(result) {
@@ -71,24 +51,28 @@
  	function getMutationData(result) {
  		_profileDataResult = result;
         var proxy = DataProxyFactory.getDefaultMutationDataProxy();
-        proxy.getMutationData(input_geneId, getMutationDataCallBack);
+        proxy.getMutationData(input_geneIds, getMutationDataCallBack);
  	}
 
- 	function getProfileData(_cancerStudyId, _geneId, _profileIds, _sampleSetId, _sampleIdsKey) {
+ 	function getProfileData() {
  		var _params = {
- 			cancer_study_id: _cancerStudyId,
- 			gene_list: _geneId,
- 			genetic_profile_id: _profileIds,
- 			case_set_id: _sampleSetId,
- 			case_ids_key: _sampleIdsKey
+ 			cancer_study_id: input_cancerStyId,
+ 			gene_list: input_geneIds,
+ 			genetic_profile_id: input_profileIds,
+ 			case_set_id: input_sampleSetId,
+ 			case_ids_key: input_sampleIdsKey
  		};
  		$.post("getProfileData.json", _params, getMutationData, "json");
  	}
 
- 	function getData(_cancerStudyId, _geneId, _profileIds, _sampleSetId, _sampleIdsKey, callback_func) {
- 		input_geneId = _geneId;
+ 	function getData(_cancerStudyId, _geneIds, _profileIds, _sampleSetId, _sampleIdsKey, callback_func) {
+ 		input_cancerStyId = _cancerStudyId;
+ 		input_geneIds = _geneIds;
+ 		input_profileIds = _profileIds;
+ 		input_sampleSetId = _sampleSetId;
+ 		input_sampleIdsKey = _sampleIdsKey;
  		_callbackFunc = callback_func;
- 		getProfileData(_cancerStudyId, _geneId, _profileIds, _sampleSetId, _sampleIdsKey);
+ 		getProfileData();
  	}
 
  	return {

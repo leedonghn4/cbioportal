@@ -20,6 +20,7 @@
 <script type="text/javascript" src="js/src/plots-view/plots-tab/view/custom.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <script type="text/javascript" src="js/src/plots-view/plots-tab/util/menu.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/plots-view/plots-tab/util/oneGene.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 <script type="text/javascript" src="js/src/plots-view/component/BoxPlots.js?<%=GlobalProperties.getAppVersion()%>"></script>
 

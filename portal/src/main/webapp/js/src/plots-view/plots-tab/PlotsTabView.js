@@ -35,6 +35,7 @@
 
 var PlotsTabView = (function(){
 
+    //Settings
     var log_scale_threshold = 0.17677669529;  // 2 to the -2.5
 
     function addxAxisHelp(svg, axisGroupSvg, xTitle, xTitleClass, xText) {
