@@ -155,8 +155,6 @@ var OneGene = (function () {
 
     var discretizedDataTypeIndicator = "";
 
-    
-
     var View = (function() {
 
         var elem = {
@@ -1177,72 +1175,26 @@ var OneGene = (function () {
         }
     }());
 
-    function getUserSelection() {
-        userSelection.gene = document.getElementById("gene").value;
-        userSelection.plots_type = document.getElementById("plots_type").value;
-        userSelection.copy_no_type = document.getElementById("data_type_copy_no").value.split("|")[0];
-        userSelection.mrna_type = document.getElementById("data_type_mrna").value.split("|")[0];
-        userSelection.rppa_type = document.getElementById("data_type_rppa").value.split("|")[0];
-        userSelection.dna_methylation_type = document.getElementById("data_type_dna_methylation").value.split("|")[0];
-    }
-
-    function generatePlots() {
-        getProfileData();
-    }
-
-    function getProfileData() {
-
-    }
-
-    function dataProxyCallBack(profileDataResult) {
-        //TODO: error handle should be get Mutation servlet
-        var resultObj = profileDataResult[userSelection.gene];
-        var _hasMutationProfile = true;
-        for (var key in resultObj) {  //key is case id
-            var _obj = resultObj[key];
-            if (!_obj.hasOwnProperty(cancer_study_id + "_mutations")) {
-                _hasMutationProfile = false;
-            } else {
-                _hasMutationProfile = true;
-            }
-        }
-
-        if (_hasMutationProfile) {
-            Plots.getMutationType(
-                userSelection.gene,
-                cancer_study_id + "_mutations",
-                patient_set_id,
-                patient_ids_key,
-                getMutationTypeCallBack
-            );
-        } else {
-            OneGeneDataProxy.init(profileDataResult, "");
-        }
-
-        function getMutationTypeCallBack(mutationTypeResult) {
-            OneGeneDataProxy.init(profileDataResult, mutationTypeResult);
+    var View = (function() {
+    
+        function configSettings() {
 
         }
+    
+    }());
+
+    function getDataCallback() {
+        console.log(OneGeneDataProxy.getDotsGroup());
+        console.log(OneGeneDataProxy.getDataAttr());
+        console.log(OneGeneDataProxy.getDataStatus());
+        View.init();        
     }
 
     return {
         init: function(){
-            //$('#view_title').empty();
             $('#plots_box').empty();
             $('#loading-image').show();
-            //$('#view_title').hide();
-            //$('#plots_box').hide();
-            OneGeneDataProxy.init(dataProxyCallBack);
-            // var _status = PlotsMenu.getStatus();
-            // if (_status.has_mrna && 
-            //    (_status.has_copy_no || 
-            //     _status.has_dna_methylation || 
-            //     _status.has_rppa)) {
-            //     getUserSelection();
-            //     generatePlots();
-            // } else {
-            //     $('#loading-image').hide();
-            // }
+            OneGeneDataProxy.init(getDataCallback);
         },
         applyLogScaleX: function() {
             var applyLogScale = document.getElementById("log_scale_option_x").checked;
@@ -1254,6 +1206,6 @@ var OneGene = (function () {
         }
     };
 
-}());//Closing PlotsView
+}());//Closing OneGene (plots view)
 
 

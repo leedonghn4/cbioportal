@@ -12,7 +12,6 @@ var oneGeneUtil = (function() {
         var result = false;
         for(var key in _dataTypeObj) {
             var _id = _dataTypeObj[key].id.toLowerCase();
-            console.log(_id);
             if (_id.indexOf("log2") === -1 && 
                 (_id.indexOf("gistic") !== -1 ||
                  _id.indexOf("cna") !== -1)) {

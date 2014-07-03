@@ -118,6 +118,13 @@ var PlotsTabMenu = (function () {
 
         function drawGeneList() {
             PlotsTabMenuUtil.generateGeneList("one_gene_gene_list", gene_list);
+            $("#one_gene_gene_list").on("change", function() {
+                drawPlotType();
+                drawDataType();
+                setDataTypeSel();
+                drawLogScale();    
+                OneGene.init();
+            } );
         }
 
         function drawPlotType() {
@@ -151,6 +158,12 @@ var PlotsTabMenu = (function () {
                     plot_type.MRNA_CLINICAL.text
                 );
             }
+            $("#one_gene_plot_type").on("change", function() {
+                drawDataType();
+                setDataTypeSel();
+                drawLogScale();
+                OneGene.init();       
+            });
         }
 
         function drawDataType() {
@@ -189,8 +202,11 @@ var PlotsTabMenu = (function () {
                             "<option value='" + item_profile[0] + "|" + item_profile[2] + "'>" + item_profile[1] + "</option>");
                     }                      
                 }
-
                 $("#one_gene_data_type_div").append("<br>");
+            });
+
+            $(".one_gene_data_type_sel").on("change", function() {
+                OneGene.init();       
             });
         }
 
@@ -296,25 +312,6 @@ var PlotsTabMenu = (function () {
             $("#menu_err_msg").append("<h5>Profile data missing for generating this view.</h5>");
         }
 
-        function attachEventListener() {
-            $("#one_gene_gene_list").on("change", function() {
-                drawPlotType();
-                drawDataType();
-                setDataTypeSel();
-                drawLogScale();    
-                OneGene.init();
-            } );
-            $("#one_gene_plot_type").on("change", function() {
-                drawDataType();
-                setDataTypeSel();
-                drawLogScale();
-                OneGene.init();       
-            });
-            $(".one_gene_data_type_sel").on("change", function() {
-                OneGene.init();       
-            });
-        }
-
         return {
             init : function() {
                 $("#menu_err_msg").empty();
@@ -328,7 +325,6 @@ var PlotsTabMenu = (function () {
                         drawDataType();
                         setDataTypeSel();
                         drawLogScale();
-                        attachEventListener();
                 } else {
                     drawErrMsgs();
                 }

@@ -86,6 +86,8 @@ var OneGeneDataProxy = (function() {
                 pearson: 0,
                 spearman: 0
             };
+        //user input
+        var _callbackFunc = "";
 
         function fetchPlotsData(profileDataResult) {
             var resultObj = profileDataResult[userSelection.gene];
@@ -231,11 +233,14 @@ var OneGeneDataProxy = (function() {
                 //$('#view_title').show();
                 //$('#plots_box').show();
                 //$('#loading-image').hide();
-                //View.init();                
+                _callbackFunc();           
             }
         }
 
         function getCalcCoExpCallBack(result) {
+            attr.pearson = parseFloat(result.split(" ")[0]);
+            attr.spearman = parseFloat(result.split(" ")[1]);
+            _callbackFunc();
         }
 
         function getDataCallback(profileData, mutationData) { //convert/assemble the raw data
@@ -275,50 +280,23 @@ var OneGeneDataProxy = (function() {
 
         return {
         	init: function(callback_func) {
+                var _callbackFunc = callback_func;
         		getUserSelection();
         		getData(); //profile data 
-		        // var sel = document.getElementById("data_type_copy_no");
-		        // var vals = [];
-		        // for (var i = 0; i < sel.children.length; ++i) {
-		        //     var child = sel.children[i];
-		        //     if (child.tagName == 'OPTION') vals.push(child.value.split("|")[0]);
-		        // }
-		        // if (vals.indexOf(cancer_study_id + "_gistic") !== -1) {
-		        //     discretizedDataTypeIndicator = cancer_study_id + "_gistic";
-		        // } else if (vals.indexOf(cancer_study_id + "_cna") !== -1) {
-		        //     discretizedDataTypeIndicator = cancer_study_id + "_cna";
-		        // } else if (vals.indexOf(cancer_study_id + "_CNA") !== -1) {
-		        //     discretizedDataTypeIndicator = cancer_study_id + "_CNA";
-		        // } else if (vals.indexOf(cancer_study_id + "_cna_rae") !== -1) {
-		        //     discretizedDataTypeIndicator = cancer_study_id + "_cna_rae";
-		        // }
-		        // var _profileIdsStr = cancer_study_id + "_mutations" + " " +
-		        //     discretizedDataTypeIndicator + " " +
-		        //     userSelection.copy_no_type + " " +
-		        //     userSelection.mrna_type + " " +
-		        //     userSelection.rppa_type + " " +
-		        //     userSelection.dna_methylation_type;
-		        // Plots.getProfileData(
-		        //     userSelection.gene,
-		        //     _profileIdsStr,
-		        //     patient_set_id,
-		        //     patient_ids_key,
-		        //     getProfileDataCallBack
-        		// );        		
         	},
-            callback: function(profileDataResult, mutationTypeResult) {
-                status.xHasData = false;
-                status.yHasData = false;
-                status.combineHasData = false;
-                caseSetLength = 0;
-                dotsGroup.length = 0;
-                fetchPlotsData(profileDataResult);
-                if (mutationTypeResult !== "") {
-                    translateMutationType(mutationTypeResult);
-                    prioritizeMutatedCases();
-                }
-                analyseData();
-            },
+            // callback: function(profileDataResult, mutationTypeResult) {
+            //     status.xHasData = false;
+            //     status.yHasData = false;
+            //     status.combineHasData = false;
+            //     caseSetLength = 0;
+            //     dotsGroup.length = 0;
+            //     fetchPlotsData(profileDataResult);
+            //     if (mutationTypeResult !== "") {
+            //         translateMutationType(mutationTypeResult);
+            //         prioritizeMutatedCases();
+            //     }
+            //     analyseData();
+            // },
             getDotsGroup: function() { return dotsGroup; },
             getDataStatus: function() { return status; },
             getDataAttr: function() { return attr; }

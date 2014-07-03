@@ -64,7 +64,6 @@ public class GetProteinArrayDataJSON extends HttpServlet {
         String proteinArrayId = httpServletRequest.getParameter("protein_array_id");
 
         try {
-
             //Get Cancer Study ID (int)
             CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyIdentifier);
             int cancerStudyId = cancerStudy.getInternalId();
