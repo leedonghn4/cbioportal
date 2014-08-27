@@ -197,10 +197,14 @@ var StudyViewInitCharts = (function(){
                 }
 
             }else if(_dataType === "STRING"){
-                if(selectedCol(_attr[i]["attr_id"])){
-                    pie.push(_attr[i]);
-                }
                 varType[_attr[i]["attr_id"]] = "pie";
+                if(selectedCol(_attr[i]["attr_id"])){
+                    if (_attr[i]["attr_id"]==="CANCER_TYPE") {
+                        pie.unshift(_attr[i]);
+                    } else {
+                        pie.push(_attr[i]);
+                    }
+                }
             }else {
                 StudyViewUtil.echoWarningMessg('Can not identify data type.');
                 StudyViewUtil.echoWarningMessg('The data type is ' +_dataType);
@@ -602,12 +606,21 @@ var StudyViewInitCharts = (function(){
     
     function initDcCharts() {
         var createdChartID = 0;
+        
+        var tableIcons = [];
             
         for(var i=0; i< pie.length ; i++){
             makeNewPieChartInstance(createdChartID, pie[i]);
             HTMLtagsMapUID["study-view-dc-chart-" + createdChartID] = createdChartID;
             attrNameMapUID[pie[i]["attr_id"]] = createdChartID;
             displayedID.push(pie[i]["attr_id"]);
+            
+            if (pie[i].attr_id==="CANCER_TYPE") {
+                var tableIcon = $("#study-view-dc-chart-" + createdChartID + "-table-icon");
+                if (tableIcon.css("display")!=="none")
+                    tableIcons.push(tableIcon);
+            }
+            
             createdChartID++;
         }
         
@@ -634,6 +647,10 @@ var StudyViewInitCharts = (function(){
                 deleteChart(_id,_valueA);
                 bondDragForLayout();
                 AddCharts.bindliClickFunc();
+        });
+        
+        tableIcons.forEach(function(tableIcon) {
+            tableIcon.click();
         });
     }
     
