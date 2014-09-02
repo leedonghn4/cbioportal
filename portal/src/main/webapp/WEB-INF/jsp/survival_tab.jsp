@@ -31,14 +31,33 @@
 </style>
 
 <script>
+<<<<<<< local
     var cancer_study_id = "<%out.print(cancer_study_id);%>",
             case_set_id = "<%out.print(case_set_id);%>";
     var case_ids_key = "";
     if (case_set_id === "-1") {
         case_ids_key = "<%out.print(caseIdsKey);%>";
+=======
+    var cancer_study_id = "<%out.print(cancer_study_id);%>";
+    var patient_set_id = "<%out.print(patient_set_id);%>";
+    var patient_ids_key = "";
+    if (patient_set_id === "-1") {
+        patient_ids_key = "<%out.print(patientIdsKey);%>";
+>>>>>>> other
     }
 </script>
+<<<<<<< local
 <script type="text/javascript" src="js/src/survival-tab.js"></script>
+=======
+
+<script type="text/javascript" src="js/src/survival_tab.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/survivalCurveView.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/survivalCurveProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/component/survivalCurve.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/component/kmEstimator.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/component/logRankTest.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/survival-curve/component/boilerPlate.js?<%=GlobalProperties.getAppVersion()%>"></script>
+>>>>>>> other
 
 <div class="section" id="survival">
     <h4 id='os_header'>Overall Survival Kaplan-Meier Estimate</h4>
@@ -53,7 +72,11 @@
     function getSurvivalPlotsCaseList() {
         <%
             JSONObject result = new JSONObject();
+<<<<<<< local
             for (String caseId : mergedCaseList) {
+=======
+            for (String caseId : mergedPatientList) { 
+>>>>>>> other
                 if (dataSummary.isCaseAltered(caseId)) {
                     result.put(caseId, "altered");
                 } else {
@@ -66,6 +89,10 @@
     }
 
     $(document).ready(function() {
+<<<<<<< local
         survivalCurves.init(getSurvivalPlotsCaseList());
+=======
+        SurvivalTab.init(getSurvivalPlotsCaseList());
+>>>>>>> other
     });
 </script>

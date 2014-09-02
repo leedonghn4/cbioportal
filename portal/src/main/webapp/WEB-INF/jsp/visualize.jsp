@@ -2,21 +2,29 @@
 <jsp:include page="global/header.jsp" flush="true" />
 
 <%
-    String smry = cancerStudyName +
-            "/" + caseSetName + ": (" +
-            mergedCaseListSize + ")" + "/" +
+    String smry = "<a href=\"study.do?cancer_study_id="+cancerTypeId+"\">"+cancerStudyName +
+            "</a>/" + patientSetName + ": (" +
+            mergedPatientListSize + ")" + "/" +
             geneSetName + "/" + geneWithScoreList.size() +
             (geneWithScoreList.size() == 1?"gene":"genes");
 %>
 
 <p>
     <div class='gene_set_summary'>
-        Gene Set / Pathway is altered in <%=percentCasesAffected%> of all cases. <br>
+        <!--Gene Set / Pathway is altered in <%=percentCasesAffected%> of all cases. <br>-->
+        Gene Set / Pathway is altered in <div id='main_query_result_cases_affected_percent'></div> of all cases. <br>
     </div>
 </p>
 <p>
-    <small><strong><%=smry%></strong></small>
+    <!--small><strong><%=smry%></strong></small-->
+    <small><strong><div id='main_query_result_smry'></div></strong></small>
 </p>
+
+<script>
+    $("#main_query_result_smry").attach("XXXXX");
+    $("#main_query_result_cases_affected_percent").attach("XXXX");
+        
+</script>
 
 <%
     if (warningUnion.size() > 0) {
@@ -122,7 +130,7 @@
             out.println ("<li><a href='#summary' class='result-tab' title='Compact visualization of genomic alterations'>OncoPrint</a></li>");
 
             if (computeLogOddsRatio && geneWithScoreList.size() > 1) {
-                out.println ("<li><a href='#gene_correlation' class='result-tab' title='Mutual exclusivity and co-occurrence analysis'>"
+                out.println ("<li><a href='#mutex' class='result-tab' title='Mutual exclusivity and co-occurrence analysis'>"
                 + "Mutual Exclusivity</a></li>");
             }
 
@@ -145,7 +153,7 @@
                 + "Protein Changes</a></li>");
             }
 
-            if (clinicalDataList != null && clinicalDataList.size() > 0) {
+            if (has_survival) {
                 out.println ("<li><a href='#survival' class='result-tab' title='Survival analysis and Kaplan-Meier curves'>"
                 + "Survival</a></li>");
             }
@@ -166,7 +174,7 @@
             out.println ("<div class=\"section\" id=\"bookmark_email\">");
 
             // diable bookmark link if case set is user-defined
-            if (caseSetId.equals("-1"))
+            if (patientSetId.equals("-1"))
             {
                 out.println("<br>");
                 out.println("<h4>The bookmark option is not available for user-defined case lists.</h4>");
@@ -205,13 +213,18 @@
             <%@ include file="survival_tab.jsp" %>
         <% } %>
 
-        <% if (computeLogOddsRatio && geneWithScoreList.size() > 1) { %>
-            <%@ include file="correlation.jsp" %>
+        <% if (has_survival) { %>
+            <%@ include file="survival_tab.jsp" %>
         <% } %>
 
+        <% if (computeLogOddsRatio && geneWithScoreList.size() > 1) { %>
+            <%@ include file="mutex_tab.jsp" %>
+        <% } %>
+        
         <% if (mutationDetailLimitReached != null) {
             out.println("<div class=\"section\" id=\"mutation_details\">");
-            out.println("<P>To retrieve mutation details, please specify " + QueryBuilder.MUTATION_DETAIL_LIMIT + " or fewer genes.<BR>");
+            out.println("<P>To retrieve mutation details, please specify "
+            + QueryBuilder.MUTATION_DETAIL_LIMIT + " or fewer genes.<BR>");
             out.println("</div>");
         } else if (showMutTab) { %>
             <%@ include file="mutation_views.jsp" %>

@@ -1,39 +1,31 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.scripts;
 
-import java.io.*;
-import java.util.*;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.util.*;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * Code to Import Copy Number Alteration or MRNA Expression Data.
@@ -109,33 +101,34 @@ public class ImportTabDelimData {
         String headerLine = buf.readLine();
         String parts[] = headerLine.split("\t");
 
-        int caseStartIndex = getStartIndex(parts);
+        int sampleStartIndex = getStartIndex(parts);
         int hugoSymbolIndex = getHugoSymbolIndex(parts);
         int entrezGeneIdIndex = getEntrezGeneIdIndex(parts);
         
-        String caseIds[];
-
+        String sampleIds[];
         //  Branch, depending on targetLine setting
         if (targetLine == null) {
-            caseIds = new String[parts.length - caseStartIndex];
-            System.arraycopy(parts, caseStartIndex, caseIds, 0, parts.length - caseStartIndex);
+            sampleIds = new String[parts.length - sampleStartIndex];
+            System.arraycopy(parts, sampleStartIndex, sampleIds, 0, parts.length - sampleStartIndex);
         } else {
-            caseIds = new String[parts.length - caseStartIndex];
-            System.arraycopy(parts, caseStartIndex, caseIds, 0, parts.length - caseStartIndex);
+            sampleIds = new String[parts.length - sampleStartIndex];
+            System.arraycopy(parts, sampleStartIndex, sampleIds, 0, parts.length - sampleStartIndex);
         }
-		convertBarcodes(caseIds);
-        pMonitor.setCurrentMessage("Import tab delimited data for " + caseIds.length + " cases.");
+        ImportDataUtil.addPatients(sampleIds, geneticProfileId);
+        ImportDataUtil.addSamples(sampleIds, geneticProfileId);
+        pMonitor.setCurrentMessage("Import tab delimited data for " + sampleIds.length + " samples.");
 
-        // Add Cases to the Database
-        ArrayList <String> orderedCaseList = new ArrayList<String>();
-        for (int i = 0; i < caseIds.length; i++) {
-            if (!DaoCaseProfile.caseExistsInGeneticProfile(caseIds[i],
-                    geneticProfileId)) {
-                DaoCaseProfile.addCaseProfile(caseIds[i], geneticProfileId);
+        // Add Samples to the Database
+        ArrayList <Integer> orderedSampleList = new ArrayList<Integer>();
+        for (int i = 0; i < sampleIds.length; i++) {
+           Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(geneticProfile.getCancerStudyId(),
+                                                                       StableIdUtil.getSampleId(sampleIds[i]));
+            if (!DaoSampleProfile.sampleExistsInGeneticProfile(sample.getInternalId(), geneticProfileId)) {
+                DaoSampleProfile.addSampleProfile(sample.getInternalId(), geneticProfileId);
             }
-            orderedCaseList.add(caseIds[i]);
+            orderedSampleList.add(sample.getInternalId());
         }
-        DaoGeneticProfileCases.addGeneticProfileCases(geneticProfileId, orderedCaseList);
+        DaoGeneticProfileSamples.addGeneticProfileSamples(geneticProfileId, orderedSampleList);
 
         String line = buf.readLine();
         int numRecordsStored = 0;
@@ -173,10 +166,12 @@ public class ImportTabDelimData {
                 parts = line.split("\t",-1);
                 
                 if (parts.length>lenParts) {
-                    System.err.println("The following line has more fields (" + parts.length
-                            + ") than the headers(" + lenParts + "): \n"+parts[0]);
+                    if (line.split("\t").length>lenParts) {
+                        System.err.println("The following line has more fields (" + parts.length
+                                + ") than the headers(" + lenParts + "): \n"+parts[0]);
+                    }
                 }
-                String values[] = (String[]) ArrayUtils.subarray(parts, caseStartIndex, parts.length>lenParts?lenParts:parts.length);
+                String values[] = (String[]) ArrayUtils.subarray(parts, sampleStartIndex, parts.length>lenParts?lenParts:parts.length);
 
                 String hugo = parts[hugoSymbolIndex];
                 if (hugo!=null && hugo.isEmpty()) {
@@ -243,7 +238,6 @@ public class ImportTabDelimData {
                                         + "and all tab-delimited data associated with it!");
                                 }
                             } else if (genes.size()==1) {
-                                storeGeneticAlterations(values, daoGeneticAlteration, genes.get(0));
                                 if (discritizedCnaProfile) {
                                     long entrezGeneId = genes.get(0).getEntrezGeneId();
                                     int n = values.length;
@@ -251,12 +245,18 @@ public class ImportTabDelimData {
                                         System.out.println();
                                     int i = values[0].equals(""+entrezGeneId) ? 1:0;
                                     for (; i<n; i++) {
+                                        
+                                        // temporary solution -- change partial deletion back to full deletion.
+                                        if (values[i].equals(GeneticAlterationType.PARTIAL_DELETION)) {
+                                            values[i] = GeneticAlterationType.HOMOZYGOUS_DELETION;
+                                        }
+                                        
                                         if (values[i].equals(GeneticAlterationType.AMPLIFICATION) 
                                                // || values[i].equals(GeneticAlterationType.GAIN)
                                                // || values[i].equals(GeneticAlterationType.ZERO)
                                                // || values[i].equals(GeneticAlterationType.HEMIZYGOUS_DELETION)
                                                 || values[i].equals(GeneticAlterationType.HOMOZYGOUS_DELETION)) {
-                                            CnaEvent cnaEvent = new CnaEvent(orderedCaseList.get(i), geneticProfileId, entrezGeneId, Short.parseShort(values[i]));
+                                            CnaEvent cnaEvent = new CnaEvent(orderedSampleList.get(i), geneticProfileId, entrezGeneId, Short.parseShort(values[i]));
                                             
                                             if (existingCnaEvents.containsKey(cnaEvent.getEvent())) {
                                                 cnaEvent.setEventId(existingCnaEvents.get(cnaEvent.getEvent()).getEventId());
@@ -269,6 +269,7 @@ public class ImportTabDelimData {
                                         }
                                     }
                                 }
+                                storeGeneticAlterations(values, daoGeneticAlteration, genes.get(0));
                                 
                                 numRecordsStored++;
                             } else {
@@ -335,11 +336,4 @@ public class ImportTabDelimData {
         
         return startIndex;
     }
-
-	private void convertBarcodes(String caseIds[])
-	{
-		for (int lc = 0; lc < caseIds.length; lc++) {
-			caseIds[lc] = CaseIdUtil.getCaseId(caseIds[lc]);
-		}
-	}
 }

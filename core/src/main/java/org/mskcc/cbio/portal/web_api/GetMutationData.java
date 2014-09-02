@@ -1,47 +1,30 @@
 /** Copyright (c) 2012 Memorial Sloan-Kettering Cancer Center.
-**
-** This library is free software; you can redistribute it and/or modify it
-** under the terms of the GNU Lesser General Public License as published
-** by the Free Software Foundation; either version 2.1 of the License, or
-** any later version.
-**
-** This library is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
-** MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
-** documentation provided hereunder is on an "as is" basis, and
-** Memorial Sloan-Kettering Cancer Center 
-** has no obligations to provide maintenance, support,
-** updates, enhancements or modifications.  In no event shall
-** Memorial Sloan-Kettering Cancer Center
-** be liable to any party for direct, indirect, special,
-** incidental or consequential damages, including lost profits, arising
-** out of the use of this software and its documentation, even if
-** Memorial Sloan-Kettering Cancer Center 
-** has been advised of the possibility of such damage.  See
-** the GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this library; if not, write to the Free Software Foundation,
-** Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
-**/
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  The software and
+ * documentation provided hereunder is on an "as is" basis, and
+ * Memorial Sloan-Kettering Cancer Center 
+ * has no obligations to provide maintenance, support,
+ * updates, enhancements or modifications.  In no event shall
+ * Memorial Sloan-Kettering Cancer Center
+ * be liable to any party for direct, indirect, special,
+ * incidental or consequential damages, including lost profits, arising
+ * out of the use of this software and its documentation, even if
+ * Memorial Sloan-Kettering Cancer Center 
+ * has been advised of the possibility of such damage.
+*/
 
 package org.mskcc.cbio.portal.web_api;
 
-import org.mskcc.cbio.portal.dao.DaoMutation;
-import org.mskcc.cbio.portal.dao.DaoException;
-import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
-import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
-import org.mskcc.cbio.portal.model.CanonicalGene;
-import org.mskcc.cbio.portal.model.ExtendedMutation;
-import org.mskcc.cbio.portal.model.Gene;
-import org.mskcc.cbio.portal.model.GeneticProfile;
+import org.mskcc.cbio.portal.dao.*;
+import org.mskcc.cbio.portal.model.*;
+import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.servlet.WebService;
-import org.mskcc.cbio.portal.util.XDebug;
 
 import org.apache.commons.httpclient.URI;
 
-import java.util.HashSet;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Class to get mutation data
@@ -62,12 +45,12 @@ public class GetMutationData {
      *
      * @param profile  GeneticProfile Object.
      * @param geneList ArrayList of official gene symbols.
-     * @param caseIdSet HashSet of Strings which are Case Ids.
+     * @param sampleIdSet HashSet of Strings which are Sample Ids.
      * @return ProfileData Object in an ArrayList.
      * @throws DaoException, as of August 2011 GetMutationData has direct access to DAO Objects.
      */
-    public ArrayList<ExtendedMutation> getMutationData(GeneticProfile profile,
-                                                       ArrayList<String> geneList, HashSet<String> caseIdSet, XDebug xdebug) throws DaoException {
+    public List<ExtendedMutation> getMutationData(GeneticProfile profile,
+                                                       List<String> geneList, Set<String> sampleIdSet, XDebug xdebug) throws DaoException {
 
         //initialize DAO objects and ArrayLists
         ArrayList<ExtendedMutation> mutationList = new ArrayList<ExtendedMutation>();
@@ -88,13 +71,14 @@ public class GetMutationData {
                 }
             }
             try {
+                List<Integer> internalSampleIds = InternalIdUtil.getInternalSampleIds(profile.getCancerStudyId(), new ArrayList<String>(sampleIdSet));
                 //parse each Mutation List retrieved from DaoMutation and add to Main Mutation List
                 for (Long entrezID : entrezIDList) {
                     ArrayList<ExtendedMutation> tempmutationList =
                             DaoMutation.getMutations(GeneticProfile, entrezID);
                     for (ExtendedMutation mutation : tempmutationList){
-                        // seperate out mutations for the given set of caseIDS.
-                        if (caseIdSet.contains(mutation.getCaseId()))
+                        // seperate out mutations for the given set of sampleIDS.
+                        if (internalSampleIds.contains(mutation.getSampleId()))
                             mutationList.add(mutation);
                     }
 
@@ -137,7 +121,7 @@ public class GetMutationData {
 
     public static String getProfileData(String geneticProfileId,
                                         ArrayList<String> targetGeneList,
-                                        ArrayList<String> targetCaseList) throws DaoException {
+                                        ArrayList<String> targetSampleList) throws DaoException {
 
         StringBuffer buf = new StringBuffer();
 
@@ -149,6 +133,9 @@ public class GetMutationData {
                     .append(":  ").append(geneticProfileId).append(".\n");
             return buf.toString();
         }
+
+        List<Integer> internalSampleIds =
+            InternalIdUtil.getInternalSampleIds(geneticProfile.getCancerStudyId(), targetSampleList);
 
         //  Output Actual Data
         ArrayList<Gene> geneList = WebApiUtil.getGeneList(targetGeneList,
@@ -169,11 +156,12 @@ public class GetMutationData {
                     DaoMutation.getMutations(geneticProfile.getGeneticProfileId(),
                             canonicalGene.getEntrezGeneId());
             for (ExtendedMutation mutation:  mutationList) {
-                String caseId = mutation.getCaseId();
-                if (targetCaseList==null || targetCaseList.contains(caseId)) {
+                Integer sampleId = mutation.getSampleId();
+                if (targetSampleList==null || internalSampleIds.contains(sampleId)) {
                     buf.append(canonicalGene.getEntrezGeneId()).append(TAB);
                     buf.append(canonicalGene.getHugoGeneSymbolAllCaps()).append(TAB);
-                    buf.append(caseId).append(TAB);
+                    Sample s = DaoSample.getSampleById(sampleId);
+                    buf.append(s.getStableId()).append(TAB);
                     buf.append(mutation.getSequencingCenter()).append(TAB);
                     buf.append(mutation.getMutationStatus()).append(TAB);
                     buf.append(mutation.getMutationType()).append(TAB);

@@ -1,55 +1,35 @@
 package org.mskcc.cbio.portal.util;
 
 import java.util.*;
-import org.json.simple.JSONObject;
+
 import org.mskcc.cbio.portal.model.*;
-import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.dao.*;
+
 
 
 public class CoExpUtil {
 
-    //Sort json objects array by propName
-    public static ArrayList<JSONObject> sortJsonArr(ArrayList<JSONObject> jsonArr, String propName) {
-
-        for (int mainIndex = 0 ; mainIndex < jsonArr.size(); mainIndex++) {
-            for (int comparedIndex = mainIndex + 1; comparedIndex < jsonArr.size(); comparedIndex++) {
-                JSONObject mainObj = jsonArr.get(mainIndex);
-                JSONObject comparedObj = jsonArr.get(comparedIndex);
-                double mainScore = (Double)mainObj.get(propName);
-                double comparedScore = (Double)comparedObj.get(propName);
-                if (Math.abs(mainScore) > Math.abs(comparedScore)) {
-                    jsonArr.add(mainIndex, comparedObj);
-                    jsonArr.remove(mainIndex + 1);
-                    jsonArr.add(comparedIndex, mainObj);
-                    jsonArr.remove(comparedIndex + 1);
-                }
-            }
-        }
-        return jsonArr;
-    }
-
-    public static ArrayList<String> getCaseIds(String caseSetId, String caseIdsKey) {
+    public static ArrayList<String> getPatientIds(String patientSetId, String patientIdsKey) {
 		try {
-			DaoCaseList daoCaseList = new DaoCaseList();
-            CaseList caseList;
-            ArrayList<String> caseIdList = new ArrayList<String>();
-            if (caseSetId.equals("-1")) {
-                String strCaseIds = CaseSetUtil.getCaseIds(caseIdsKey);
-                String[] caseArray = strCaseIds.split("\\s+");
-                for (String item : caseArray) {
-                    caseIdList.add(item);
+			DaoPatientList daoPatientList = new DaoPatientList();
+            PatientList patientList;
+            ArrayList<String> patientIdList = new ArrayList<String>();
+            if (patientSetId.equals("-1")) {
+                String strPatientIds = PatientSetUtil.getPatientIds(patientIdsKey);
+                String[] patientArray = strPatientIds.split("\\s+");
+                for (String item : patientArray) {
+                    patientIdList.add(item);
                 }
             } else {
-                caseList = daoCaseList.getCaseListByStableId(caseSetId);
-                caseIdList = caseList.getCaseList();
+                patientList = daoPatientList.getPatientListByStableId(patientSetId);
+                patientIdList = patientList.getPatientList();
             }
-			return caseIdList;
+			return patientIdList;
         } catch (DaoException e) {
             System.out.println("Caught Dao Exception: " + e.getMessage());
 			return null;
         }
-	}
+    }
 
 	public static GeneticProfile getPreferedGeneticProfile(String cancerStudyIdentifier) {
         CancerStudy cs = DaoCancerStudy.getCancerStudyByStableId(cancerStudyIdentifier);
@@ -71,20 +51,27 @@ public class CoExpUtil {
         return final_gp;
     }
 
-	public static Map<Long,double[]> getExpressionMap(int profileId, String caseSetId, String caseIdsKey) throws DaoException {
-
-		ArrayList<String> caseIds = getCaseIds(caseSetId, caseIdsKey);
+    public static Map<Long,double[]> getExpressionMap(int profileId, String patientSetId, String patientIdsKey) throws DaoException {
+        
+        GeneticProfile gp = DaoGeneticProfile.getGeneticProfileById(profileId);
+        List<String> sampleIdsFromPatientIds =
+            StableIdUtil.getStableSampleIdsFromPatientIds(gp.getCancerStudyId(), getPatientIds(patientSetId, patientIdsKey));
+        List<Integer> sampleIds = new ArrayList<Integer>();
+        for(String sampleId : sampleIdsFromPatientIds) {
+            Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(gp.getCancerStudyId(), sampleId);   
+            sampleIds.add(sample.getInternalId()); 
+        }   
+        sampleIds.retainAll(DaoSampleProfile.getAllSampleIdsInProfile(profileId));
 
         DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
         Map<Long, HashMap<String, String>> mapStr = daoGeneticAlteration.getGeneticAlterationMap(profileId, null);
-
         Map<Long, double[]> map = new HashMap<Long, double[]>(mapStr.size());
-        for (Map.Entry<Long, HashMap<String, String>> entry : mapStr.entrySet()) {
+        for (Map.Entry<Long, HashMap<Integer, String>> entry : mapStr.entrySet()) {
             Long gene = entry.getKey();
-            Map<String, String> mapCaseValueStr = entry.getValue();
-            double[] values = new double[caseIds.size()];
-            for (int i = 0; i < caseIds.size(); i++) {
-                String caseId = caseIds.get(i);
+            Map<Integer, String> mapCaseValueStr = entry.getValue();
+            double[] values = new double[sampleIds.size()];
+            for (int i = 0; i < sampleIds.size(); i++) {
+                Integer caseId = sampleIds.get(i);
                 String value = mapCaseValueStr.get(caseId);
                 Double d;
                 try {
@@ -92,12 +79,12 @@ public class CoExpUtil {
                 } catch (Exception e) {
                     d = Double.NaN;
                 }
-                if (d!=null && !d.isNaN()) {
-                    values[i]=d;
-                }
+                values[i]=d;
             }
+                 
             map.put(gene, values);
         }
+
         return map;
     }
 	

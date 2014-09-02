@@ -75,15 +75,19 @@
                                                 <a href="news.jsp">News</a>
                                             </li>
                                             <% } %>
-                                            <!--li class="internal">
+                                            <li class="internal">
                                                 <a href="tools.jsp">Tools</a>
-                                            </li-->
+                                            </li>
                                             <li class="internal">
                                                 <a href="about_us.jsp">About</a>
                                             </li>
 					    
                                             <li class="internal" style="float:right">
 					    <a href="visualize_your_data.jsp" float="right"><b><i>VISUALIZE YOUR DATA</i></b></a>
+					    </li>
+					    
+                                            <li class="internal" style="float:right">
+					    <a href="jobs.jsp" float="right"><b><i>JOBS</i></b></a>
 					    </li>
                                         </ul>
                                     </td>
