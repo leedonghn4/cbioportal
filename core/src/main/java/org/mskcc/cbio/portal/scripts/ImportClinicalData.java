@@ -67,6 +67,11 @@ public class ImportClinicalData {
         List<ClinicalAttribute> columnAttrs = grabAttrs(buff);
         int iCaseId = findCaseIDColumn(columnAttrs);
 
+        Map<String,Set<String>> mapAttrCaseIds = new HashMap<String,Set<String>>();
+        for (ClinicalAttribute attr : columnAttrs) {
+            mapAttrCaseIds.put(attr.getAttrId(), new HashSet<String>());
+        }
+        
         String line;
         while ((line = buff.readLine()) != null) {
             line = line.trim();
@@ -82,17 +87,21 @@ public class ImportClinicalData {
                 continue;
             }
             
-            String caseId = fields[iCaseId];
+            String caseId = fields[iCaseId].trim();
             for (int i = 0; i < fields.length; i++) {
                 if (i!=iCaseId && !fields[i].isEmpty()) {
-                    DaoClinicalData.addDatum(cancerStudy.getInternalId(), caseId, columnAttrs.get(i).getAttrId(), fields[i]);
+                    DaoClinicalData.addDatum(cancerStudy.getInternalId(), caseId, columnAttrs.get(i).getAttrId(), fields[i].trim());
+                    mapAttrCaseIds.get(columnAttrs.get(i).getAttrId()).add(caseId);
                 }
             }
         }
         
-        if (MySQLbulkLoader.isBulkLoad()) {
-            MySQLbulkLoader.flushAll();
+        // overwrite the old data
+        for (Map.Entry<String,Set<String>> entry : mapAttrCaseIds.entrySet()) {
+            DaoClinicalData.removeData(cancerStudy.getInternalId(), entry.getValue(), Collections.singleton(entry.getKey()));
         }
+        
+        MySQLbulkLoader.flushAll();
     }
 
     /**
