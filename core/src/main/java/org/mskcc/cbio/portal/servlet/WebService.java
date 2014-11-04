@@ -20,15 +20,18 @@ package org.mskcc.cbio.portal.servlet;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.web_api.*;
-import org.mskcc.cbio.portal.model.CancerStudy;
+import org.mskcc.cbio.portal.model.*;
 
 import org.json.simple.*;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
-import javax.servlet.ServletException;
 import javax.servlet.http.*;
+import javax.servlet.ServletException;
 
 /**
  * Core Web Service.
@@ -56,6 +59,9 @@ public class WebService extends HttpServlet {
     public static final String PROTEIN_ARRAY_ID = "protein_array_id";
     public static final String FORMAT = "format";
 
+    // class which process access control to cancer studies
+    private AccessControl accessControl;
+
     /**
      * Shutdown the Servlet.
      */
@@ -73,6 +79,8 @@ public class WebService extends HttpServlet {
         System.out.println("Starting up the Web Service API...");
         System.out.println("Reading in init parameters from web.xml");
         DatabaseProperties dbProperties = DatabaseProperties.getInstance();
+        System.out.println("Initializing AccessControl");
+        accessControl = SpringUtil.getAccessControl();
         System.out.println("Starting CGDS Server");
         verifyDbConnection();
     }
@@ -192,6 +200,10 @@ public class WebService extends HttpServlet {
                             ") is not in the dbms. Please reformulate request.");
                     return;
                 }
+                if (accessControl.isAccessibleCancerStudy(cancerStudyID).size() != 1) {
+                    outputError(writer, "You are not authorized to view the cancer study identified by the request (" + cancerStudyID + ").");
+                    return;
+                }
             }
 
             if (cmd.equals("getGeneticProfiles")) {
@@ -206,6 +218,11 @@ public class WebService extends HttpServlet {
             } else if (cmd.equals("getClinicalData")) {
                 // PROVIDES case_set_id
                 getClinicalData(httpServletRequest, writer);
+            } else if (cmd.equals("getAllClinicalData")) {
+                // Get patient and sample clinical data
+                getSampleAndPatientClinicalDataBySampleIds(httpServletRequest, writer);
+            } else if (cmd.equals("getPatientSampleMapping")) {
+                getSampleAndPatientMappingTable(httpServletRequest, writer);
             } else if (cmd.equals("getMutationData")) {
                 // PROVIDES genetic_profile_id
                 getMutationData(httpServletRequest, writer);
@@ -422,6 +439,48 @@ public class WebService extends HttpServlet {
             throw new ProtocolException("please specify the format, i.e. format=txt OR format=json");
         }
     }
+    
+    private void getSampleAndPatientClinicalDataBySampleIds(HttpServletRequest request, PrintWriter writer)
+            throws DaoException, ProtocolException, IOException {
+        String cancerStudyId = WebserviceParserUtils.getCancerStudyId(request);
+        if(cancerStudyId == null) {
+            writer.print("Please specify the cancer study.");
+            return;
+        }
+        
+        String format = WebserviceParserUtils.getFormat(request);
+        if("json".equals(format)){
+            int internalCancerStudyId = DaoCancerStudy.getCancerStudyByStableId(cancerStudyId).getInternalId();
+            List<String> patientIds = WebserviceParserUtils.getPatientList(request);
+            List<String> sampleIds = StableIdUtil.getStableSampleIdsFromPatientIds(internalCancerStudyId, patientIds);
+            JSONObject.writeJSONString(GetClinicalData.generateJson(DaoClinicalData.getSampleAndPatientData(internalCancerStudyId, sampleIds)), writer);
+        }else {
+            // die
+            writer.print("There was an error in processing your request.  Please try again");
+            throw new ProtocolException("please specify the format, format=json");
+        }
+    }
+    
+    private void getSampleAndPatientMappingTable(HttpServletRequest request, PrintWriter writer)
+            throws DaoException, ProtocolException, IOException {
+        
+        String cancerStudyId = WebserviceParserUtils.getCancerStudyId(request);
+        if(cancerStudyId == null) {
+            writer.print("Please specify the cancer study.");
+            return;
+        }
+        
+        int internalCancerStudyId = DaoCancerStudy.getCancerStudyByStableId(cancerStudyId).getInternalId();
+        List<String> patientIds = WebserviceParserUtils.getPatientList(request);
+        
+        JSONObject mapping = new JSONObject();
+        for (String patientId : patientIds) {
+            List<String> patientList = new ArrayList<String>();
+            patientList.add(patientId);
+            mapping.put(patientId, StableIdUtil.getStableSampleIdsFromPatientIds(internalCancerStudyId, patientList));
+        }
+        JSONObject.writeJSONString(mapping, writer);
+    }
 
     /*
      * For getMutSig client specifies a Cancer Study ID,
@@ -522,8 +581,9 @@ public class WebService extends HttpServlet {
         // check that command is correct
         String[] commands = {"getTypesOfCancer", "getNetwork", "getCancerStudies",
                 "getCancerTypes", "getGeneticProfiles", "getProfileData", "getCaseLists",
-                "getClinicalData", "getMutationData", "getMutationFrequency",
-                "getProteinArrayInfo", "getProteinArrayData", "getMutSig"};
+                "getClinicalData", "getAllClinicalData", "getPatientSampleMapping", 
+                "getMutationData", "getMutationFrequency", "getProteinArrayInfo", 
+                "getProteinArrayData", "getMutSig"};
         for (String aCmd : commands) {
             if (aCmd.equals(cmd)) {
                 return true;

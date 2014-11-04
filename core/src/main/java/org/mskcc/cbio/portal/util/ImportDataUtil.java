@@ -19,50 +19,11 @@ package org.mskcc.cbio.portal.util;
 
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
-import org.mskcc.cbio.portal.service.*;
-import org.mskcc.cbio.portal.persistence.*;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 
 import java.util.List;
 
 public class ImportDataUtil
 {
-    private static ApplicationContext context = initContext();
-    private static ApplicationContext initContext()
-    {
-        GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
-        ctx.getEnvironment().setActiveProfiles("dbcp");
-        ctx.refresh();
-        ctx.load("classpath:applicationContext-business.xml");
-        return ctx; 
-    }
-        
-    public static EntityService entityService = initEntityService();
-    private static EntityService initEntityService()
-    {
-        return (EntityService)context.getBean("entityService");
-    }
-
-    public static EntityAttributeService entityAttributeService = initEntityAttributeService();
-    private static EntityAttributeService initEntityAttributeService()
-    {
-        return (EntityAttributeService)context.getBean("entityAttributeService");
-    }
-
-    public static EntityMapper entityMapper = initEntityMapper();
-    private static EntityMapper initEntityMapper()
-    {
-        return (EntityMapper)context.getBean("entityMapper");
-    }
-
-    public static EntityAttributeMapper entityAttributeMapper = initEntityAttributeMapper();
-    private static EntityAttributeMapper initEntityAttributeMapper()
-    {
-        return (EntityAttributeMapper)context.getBean("entityAttributeMapper");
-    }
-
     public static void addPatients(String barcodes[], int geneticProfileId) throws DaoException
     {
         addPatients(barcodes, getCancerStudy(geneticProfileId));
@@ -76,26 +37,31 @@ public class ImportDataUtil
 
     public static void addPatients(String barcodes[], CancerStudy cancerStudy) throws DaoException
     {
-        Entity cancerStudyEntity =
-            entityService.getCancerStudy(cancerStudy.getCancerStudyStableId());
         for (String barcode : barcodes) {
             String patientId = StableIdUtil.getPatientId(barcode);
             if (unknownPatient(cancerStudy, patientId)) {
-                addPatient(patientId, cancerStudy, cancerStudyEntity);
+                addPatient(patientId, cancerStudy);
             }
         }
     }
 
     private static boolean unknownPatient(CancerStudy cancerStudy, String stableId)
     {
-        return (DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), stableId) == null);
+        Patient p = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), stableId);
+        if (p == null) {
+            // genomic data typically has sample ids, check if a sample exists with the id, and if so,
+            // that the sample has a patient record associated with it
+            Sample s = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), stableId);
+            return (s == null || (s != null && s.getInternalPatientId() <= 0));
+        }
+        else {
+            return false;
+        }
     }
 
-    private static void addPatient(String stableId, CancerStudy cancerStudy, Entity cancerStudyEntity) throws DaoException
+    private static void addPatient(String stableId, CancerStudy cancerStudy) throws DaoException
     {
         DaoPatient.addPatient(new Patient(cancerStudy, stableId));
-        Entity patientEntity = entityService.insertPatientEntity(cancerStudy.getCancerStudyStableId(), stableId);
-        entityService.insertEntityLink(cancerStudyEntity.internalId, patientEntity.internalId);
     }
 
     public static void addSamples(String barcodes[], int geneticProfileId) throws DaoException
@@ -106,34 +72,28 @@ public class ImportDataUtil
     public static void addSamples(String barcodes[], CancerStudy cancerStudy) throws DaoException
     {
         for (String barcode : barcodes) {
-            String patientId = StableIdUtil.getPatientId(barcode);
-            Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
             String sampleId = StableIdUtil.getSampleId(barcode);
-            if (unknownSample(patient, sampleId)) {
-                addSample(sampleId, patient, cancerStudy);
+            if (!StableIdUtil.isNormal(barcode) && unknownSample(cancerStudy, sampleId)) {
+                addSample(sampleId, cancerStudy);
             }
         }
     }
 
-    private static boolean unknownSample(Patient patient, String stableId)
+    private static boolean unknownSample(CancerStudy cancerStudy, String stableId)
     {
-        for (Sample knownSample : DaoSample.getSamplesByPatientId(patient.getInternalId())) {
-          if (knownSample.getStableId().equals(stableId)) {
-            return false;
-          }
-        }
-        return true;
+        Sample s = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), stableId);
+        return (s == null);
     }
 
-    private static void addSample(String sampleId, Patient patient, CancerStudy cancerStudy) throws DaoException
+    private static void addSample(String sampleId, CancerStudy cancerStudy) throws DaoException
     {
-        DaoSample.addSample(new Sample(sampleId,
-                                       patient.getInternalId(),
+        // if we get here, all we can do is find a patient that owns the sample using the sample id.
+        // if we can't find a patient, create a patient using the sample id
+        String patientId = StableIdUtil.getPatientId(sampleId);
+        Patient p = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
+        int pId = (p == null) ?
+            DaoPatient.addPatient(new Patient(cancerStudy, patientId)) : p.getInternalId();
+        DaoSample.addSample(new Sample(sampleId, pId,
                                        cancerStudy.getTypeOfCancerId()));
-        Entity sampleEntity = entityService.insertSampleEntity(cancerStudy.getCancerStudyStableId(),
-                                                               patient.getStableId(), sampleId);
-        Entity patientEntity = entityService.getPatient(cancerStudy.getCancerStudyStableId(),
-                                                        patient.getStableId());
-        entityService.insertEntityLink(patientEntity.internalId, sampleEntity.internalId);
     }
 }

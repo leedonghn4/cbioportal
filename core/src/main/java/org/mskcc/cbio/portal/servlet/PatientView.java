@@ -12,9 +12,6 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
@@ -66,10 +63,7 @@ public class PatientView extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-
-	    ApplicationContext context =
-			    new ClassPathXmlApplicationContext("classpath:applicationContext-security.xml");
-	    accessControl = (AccessControl)context.getBean("accessControl");
+        accessControl = SpringUtil.getAccessControl();
     }
     
     /** 
@@ -106,10 +100,12 @@ public class PatientView extends HttpServlet {
             }
         
         } catch (DaoException e) {
+            e.printStackTrace();
             xdebug.logMsg(this, "Got Database Exception:  " + e.getMessage());
             forwardToErrorPage(request, response,
                     "An error occurred while trying to connect to the database.", xdebug);
         } catch (ProtocolException e) {
+            e.printStackTrace();
             xdebug.logMsg(this, "Got Protocol Exception " + e.getMessage());
             forwardToErrorPage(request, response,
                     "An error occurred while trying to authenticate.", xdebug);
@@ -289,8 +285,7 @@ public class PatientView extends HttpServlet {
         
         request.setAttribute("has_timeline_data", Boolean.FALSE);
         if (patientId!=null) {
-            request.setAttribute("has_timeline_data", DaoClinicalEvent.timeEventsExistForPatient(
-                    cancerStudy.getInternalId(), patientId));
+            request.setAttribute("has_timeline_data", DaoClinicalEvent.timeEventsExistForPatient(patient.getInternalId()));
         }
 
         request.setAttribute(PATIENT_ID, patientId);

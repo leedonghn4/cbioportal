@@ -111,9 +111,11 @@
     int mergedPatientListSize = mergedPatientList.size();
     String patientSetId = (String) request.getAttribute(QueryBuilder.CASE_SET_ID);
     String patientSetName = "";
+    String patientSetDescription = "";
     for (PatientList patientSet:  patientSets) {
         if (patientSetId.equals(patientSet.getStableId())) {
             patientSetName = patientSet.getName();
+            patientSetDescription = patientSet.getDescription();
         }
     }
     String patients = (String) request.getAttribute(QueryBuilder.SET_OF_CASE_IDS);
@@ -152,13 +154,89 @@
     if (final_gp != null) {
         showCoexpTab = true;
     } 
-
     Object patientSampleIdMap = request.getAttribute(QueryBuilder.SELECTED_PATIENT_SAMPLE_ID_MAP);
 %>
 
+<!--Global Data Objects Manager-->
 <script type="text/javascript">
+    var PortalDataColl = (function() {
+        var oncoprintData = null,
+            oncoprintStat = null;
+        return {
+            setOncoprintData : function(obj) { 
+                if (oncoprintData === null) {
+                    oncoprintData = obj;    
+                }
+                PortalDataCollManager.fire("oncoprint-data-fetched");
+            },
+            setOncoprintStat : function(obj) {
+                if (oncoprintStat === null) {
+                    oncoprintStat = obj;
+                }
+                PortalDataCollManager.fire("oncoprint-stat-fetched");
+            },
+            getOncoprintData : function() { 
+                //TODO: sort the data by sample Id
+                return oncoprintData; 
+            },
+            getOncoprintStat : function() { return oncoprintStat; }
+        };
+    }());
+
+    var PortalDataCollManager = (function() {
+        var fns_oncoprint = [],
+            fns_oncoprint_stat = [];
+        
+        var subscribeOncoprint = function(fn){
+            fns_oncoprint.push(fn);
+        };
+
+        var subscribeOncoprintStat = function(fn) {
+            fns_oncoprint_stat.push(fn);
+        }
+
+        return {
+            //to subscribe the functions that would re-use oncoprint data -- by subscribing, once the oncoprint
+            //data is fetched, the functions would be called/executed. 
+            subscribeOncoprint: subscribeOncoprint, 
+            subscribeOncoprintStat: subscribeOncoprintStat,
+            fire: function(o) {
+                if (o === "oncoprint-data-fetched") {
+                    fns_oncoprint.forEach(
+                        function(el) {
+                            el.call();
+                        }
+                    );
+                } else if(o === "oncoprint-stat-fetched") {
+                    fns_oncoprint_stat.forEach(
+                        function(el) {
+                            el.call();
+                        }
+                    );
+                }
+            }
+        }
+
+    }());
+</script>
+
+<!-- Global variables : basic information about the main query -->
+<script type="text/javascript">
+
+    var num_total_cases = 0, num_altered_cases = 0;
+    var global_gene_data = {}, global_sample_ids = [];
+
     window.PortalGlobals = {
+        setSampleIds: function(_inputArr) { global_sample_ids = _inputArr; },
+        getSampleIds: function() { return global_sample_ids; },
+        setGeneData: function(_inputObj) { global_gene_data = _inputObj; },
+        getGeneData: function() { return global_gene_data; },
+        //TODO: this is just temporary solution of getting the right total number of samples -- should update the number in the database table instead.
+        getNumOfTotalCases: function() { return num_total_cases; },
+        getNumOfAlteredCases: function() { return num_altered_cases; },
+        getPercentageOfAlteredCases: function() { return ((num_altered_cases / num_total_cases) * 100).toFixed(1); },
         getCancerStudyId: function() { return '<%=cancerTypeId%>'},
+        getCancerStudyName: function() { return '<%=cancerStudyName%>'},
         gerMutationProfileId: function() { return <%=(mutationProfileID==null?"null":("'"+mutationProfileID+"'"))%>},
         getGenes: function() { return '<%=genes%>'},  // raw gene list (as it is entered by the user, it MAY CONTAIN onco query language)
         getGeneListString: function() {  // gene list WITHOUT onco query language
@@ -168,6 +246,7 @@
             var _geneList = '<%=StringUtils.join(theOncoPrintSpecParserOutput.getTheOncoPrintSpecification().listOfGenes(), " ")%>';
             return _geneList.split(/\s+/);    //Gene Id list without onco query language
         },
+        getGeneSetName: function() { return '<%=geneSetName%>'; },
         getCaseSetId: function() { return '<%= patientSetId %>';},  //Id for user chosen standard case set
         getCaseSetName: function() { return '<%= patientSetName %>'},  //Name for user chose standard case set
         getCaseIdsKey: function() { return '<%= patientIdsKey %>'; },   //A key arrsigned to use build case set
@@ -185,6 +264,12 @@
         getZscoreThreshold: function() { return '<%=zScoreThreshold%>'; },
         getRppaScoreThreshold: function() { return '<%=rppaScoreThreshold%>'; },
         getPatientIds: function() { return '<%=patients%>'; },
+        getPatientSetName: function() { return '<%=patientSetName%>'; },
+        getPatientSetDescription: function() { 
+            var _str = '<%=patientSetDescription%>';
+            _str = _str.substring(0, _str.indexOf("("));
+            return _str;
+        },
         getPatientSampleIdMap: function() { 
             var _tmpPatientSampleIdMap = '<%=patientSampleIdMap%>'; 
             var tmpPatientSampleIdMap = _tmpPatientSampleIdMap.substring(1, _tmpPatientSampleIdMap.length-1);
@@ -197,43 +282,76 @@
             return result;
         }
     };
+</script>
 
-    //Global Data Objects -- to be re-used
-    var PortalDataColl = (function() {
-        var oncoprintData = null;
-        return {
-            setOncoprintData : function(obj) { 
-                if (oncoprintData === null) {
-                    oncoprintData = obj;    
+<script>
+
+    PortalDataCollManager.subscribeOncoprint(function() {
+
+        //calculate total alteration
+        var _dataArr = PortalDataColl.getOncoprintData();
+        num_total_cases = _dataArr.length;
+        $.each(_dataArr, function(outerIndex, outerObj) {
+            $.each(outerObj.values, function(innerIndex, innerObj) {
+                if(Object.keys(innerObj).length > 2) { // has more than 2 fields -- indicates existence of alteration
+                    num_altered_cases += 1;
+                    return false;
                 }
-                PortalDataCollManager.fire("oncoprint-data-fetched");
-            },
-            getOncoprintData : function() { return oncoprintData; }
-        }
-    }());
+            });
+        });     
 
-    var PortalDataCollManager = (function() {
-        var fns_oncoprint = [];
-        var subscribeOncoprint = function(fn){
-            fns_oncoprint.push(fn);
-        };
-
-        return {
-            subscribeOncoprint: subscribeOncoprint,
-            fire: function(o) {
-                if (o === "oncoprint-data-fetched") {
-                    fns_oncoprint.forEach(
-                        function(el) {
-                            el.call();
-                        }
-                    );
-                }
+        //extract the sample Ids array
+        var _sampleIds = [];
+        $.each(window.PortalGlobals.getGeneData(), function(index, obj) {
+            if ($.inArray(obj.sample, _sampleIds) === -1) {
+                _sampleIds.push(obj.sample);
             }
-        }
+        });
+        window.PortalGlobals.setSampleIds(_sampleIds);
 
-    }());
+        //Configure the summary line of alteration statstics
+        var _stat_smry = "<h3 style='color:#686868;font-size:14px;'>Gene Set / Pathway is altered in <b>" + window.PortalGlobals.getNumOfAlteredCases() + " (" + window.PortalGlobals.getPercentageOfAlteredCases() + "%)" + "</b> of queried samples</h3>";
+        $("#main_smry_stat_div").append(_stat_smry);
+
+        //Configure the summary line of query
+        var _query_smry = "<h3 style='font-size:110%;'><a href='study.do?cancer_study_id=" + 
+            window.PortalGlobals.getCancerStudyId() + "' target='_blank'>" + 
+            window.PortalGlobals.getCancerStudyName() + "</a><br>" + " " +  
+            "<small>" + window.PortalGlobals.getPatientSetName() + " (<b>" + window.PortalGlobals.getNumOfTotalCases() + "</b> samples)" + " / " + 
+            "<b>" + window.PortalGlobals.getGeneList().length + "</b>" + (window.PortalGlobals.getGeneList().length===1?" Gene":" Genes") + "<br></small></h3>"; 
+        $("#main_smry_query_div").append(_query_smry);
+
+        //Append the modify query button
+        var _modify_query_btn = "<button type='button' class='btn btn-primary' data-toggle='button' id='modify_query_btn'>Modify Query</button>";
+        $("#main_smry_modify_query_btn").append(_modify_query_btn);
+
+        //Set Event listener for the modify query button (expand the hidden form)
+        $("#modify_query_btn").click(function () {
+            $("#query_form_on_results_page").toggle();
+            if($("#modify_query_btn").hasClass("active")) {
+                $("#modify_query_btn").removeClass("active");
+            } else {
+                $("#modify_query_btn").addClass("active");    
+            }
+        });
+        $("#toggle_query_form").click(function(event) {
+            event.preventDefault();
+            $('#query_form_on_results_page').toggle();
+            //  Toggle the icons
+            $(".query-toggle").toggle();
+        });
+
+        //Oncoprint summary lines
+        $("#oncoprint_sample_set_description").append(window.PortalGlobals.getPatientSetDescription() + 
+            "(" + window.PortalGlobals.getNumOfTotalCases() + " samples)");
+        $("#oncoprint_sample_set_name").append(window.PortalGlobals.getPatientSetName());
+        $("#oncoprint_num_of_altered_cases").append(window.PortalGlobals.getNumOfAlteredCases());
+        $("#oncoprint_percentage_of_altered_cases").append(window.PortalGlobals.getPercentageOfAlteredCases());
+
+    });
 
 </script>
+
 
 <%!
     public int countProfiles (ArrayList<GeneticProfile> profileList, GeneticAlterationType type) {

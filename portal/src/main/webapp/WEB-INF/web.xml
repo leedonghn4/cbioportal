@@ -22,7 +22,21 @@
 
     <resource-ref>
       <description>DB Connection</description>
-      <res-ref-name>jdbc/cbioportal-gdac</res-ref-name>
+      <res-ref-name>jdbc/cbioportal-public</res-ref-name>
+      <res-type>javax.sql.DataSource</res-type>
+      <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <resource-ref>
+      <description>DB Connection</description>
+      <res-ref-name>jdbc/cbioportal-private</res-ref-name>
+      <res-type>javax.sql.DataSource</res-type>
+      <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <resource-ref>
+      <description>DB Connection</description>
+      <res-ref-name>jdbc/cbioportal-mskcc</res-ref-name>
       <res-type>javax.sql.DataSource</res-type>
       <res-auth>Container</res-auth>
     </resource-ref>
@@ -37,6 +51,13 @@
     <resource-ref>
       <description>DB Connection</description>
       <res-ref-name>jdbc/cgds_public</res-ref-name>
+      <res-type>javax.sql.DataSource</res-type>
+      <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <resource-ref>
+      <description>DB Connection</description>
+      <res-ref-name>jdbc/dev</res-ref-name>
       <res-type>javax.sql.DataSource</res-type>
       <res-auth>Container</res-auth>
     </resource-ref>
@@ -83,6 +104,16 @@
     </listener>
 
     <!-- filters -->
+    <filter>
+      <filter-name>CorsFilter</filter-name>
+      <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>CorsFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>

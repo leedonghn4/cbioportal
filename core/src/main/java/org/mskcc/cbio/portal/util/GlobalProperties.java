@@ -79,8 +79,6 @@ public class GlobalProperties {
     public static final String PATIENT_VIEW_DIGITAL_SLIDE_META_URL = "digitalslidearchive.meta.url";
     public static final String PATIENT_VIEW_TCGA_PATH_REPORT_URL = "tcga_path_report.url";
     
-    public static final String TEMPORARY_DIR = "temporary_dir";
-
     private static Log LOG = LogFactory.getLog(GlobalProperties.class);
     private static Properties properties = initializeProperties();
     private static Properties initializeProperties()
@@ -180,7 +178,13 @@ public class GlobalProperties {
 
     public static boolean usersMustAuthenticate()
     {
-		return Boolean.parseBoolean(properties.getProperty(AUTHENTICATE));
+        String prop = properties.getProperty(AUTHENTICATE);
+        return (!prop.isEmpty() && !prop.equals("false"));
+    }
+
+    public static String authenticationMethod()
+    {
+        return properties.getProperty(AUTHENTICATE);
     }
 
 	public static boolean usersMustBeAuthorized()
@@ -357,10 +361,5 @@ public class GlobalProperties {
     {
         String url = GlobalProperties.getProperty(PATIENT_VIEW_TCGA_PATH_REPORT_URL);
         return (url==null) ? null : url.replace("{cancer.type}", typeOfCancer);
-    }
-    
-    public static String getTemporaryDir() {
-        String tmp = GlobalProperties.getProperty(TEMPORARY_DIR);
-        return tmp == null || tmp.isEmpty() ? "/tmp" : tmp;
     }
 }

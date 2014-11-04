@@ -120,13 +120,19 @@ public class ImportTabDelimData {
 
         // Add Samples to the Database
         ArrayList <Integer> orderedSampleList = new ArrayList<Integer>();
+        ArrayList <Integer> filteredSampleIndices = new ArrayList<Integer>();
         for (int i = 0; i < sampleIds.length; i++) {
            Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(geneticProfile.getCancerStudyId(),
                                                                        StableIdUtil.getSampleId(sampleIds[i]));
-            if (!DaoSampleProfile.sampleExistsInGeneticProfile(sample.getInternalId(), geneticProfileId)) {
-                DaoSampleProfile.addSampleProfile(sample.getInternalId(), geneticProfileId);
-            }
-            orderedSampleList.add(sample.getInternalId());
+           if (sample == null) {
+                assert StableIdUtil.isNormal(sampleIds[i]);
+                filteredSampleIndices.add(i);
+                continue;
+           }
+           if (!DaoSampleProfile.sampleExistsInGeneticProfile(sample.getInternalId(), geneticProfileId)) {
+               DaoSampleProfile.addSampleProfile(sample.getInternalId(), geneticProfileId);
+           }
+           orderedSampleList.add(sample.getInternalId());
         }
         DaoGeneticProfileSamples.addGeneticProfileSamples(geneticProfileId, orderedSampleList);
 
@@ -172,6 +178,7 @@ public class ImportTabDelimData {
                     }
                 }
                 String values[] = (String[]) ArrayUtils.subarray(parts, sampleStartIndex, parts.length>lenParts?lenParts:parts.length);
+                values = filterOutNormalValues(filteredSampleIndices, values);
 
                 String hugo = parts[hugoSymbolIndex];
                 if (hugo!=null && hugo.isEmpty()) {
@@ -335,5 +342,16 @@ public class ImportTabDelimData {
         }
         
         return startIndex;
+    }
+
+    private String[] filterOutNormalValues(ArrayList <Integer> filteredSampleIndices, String[] values)
+    {
+        ArrayList<String> filteredValues = new ArrayList<String>();
+        for (int lc = 0; lc < values.length; lc++) {
+            if (!filteredSampleIndices.contains(lc)) {
+                filteredValues.add(values[lc]);
+            }
+        }
+        return filteredValues.toArray(new String[filteredValues.size()]);
     }
 }

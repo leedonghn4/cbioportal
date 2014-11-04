@@ -56,6 +56,7 @@ public class ResetDatabase {
         DaoPatientList daoPatientList = new DaoPatientList();
         daoPatientList.deleteAllRecords();
         DaoClinicalData.deleteAllRecords();
+        DaoClinicalEvent.deleteAllRecords();
         DaoCopyNumberSegmentFile.deleteAllRecords();
         DaoMutation.deleteAllRecords();
         DaoMutationFrequency daoMutationFrequency = new DaoMutationFrequency();
@@ -77,9 +78,6 @@ public class ResetDatabase {
         daoClinicalTrial.deleteAllRecords();
         DaoPatient.deleteAllRecords();
         DaoSample.deleteAllRecords();
-        ImportDataUtil.entityMapper.deleteAllEntity();
-        ImportDataUtil.entityMapper.deleteAllEntityLinks();
-        ImportDataUtil.entityAttributeMapper.deleteAllEntityAttributes();
         System.out.println("all database reset.");
     }
 

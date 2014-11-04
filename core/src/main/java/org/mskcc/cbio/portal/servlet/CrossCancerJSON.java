@@ -26,8 +26,6 @@ import org.mskcc.cbio.portal.util.*;
 
 import org.apache.log4j.Logger;
 import org.json.simple.JSONValue;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
@@ -48,9 +46,7 @@ public class CrossCancerJSON extends HttpServlet {
      */
     public void init() throws ServletException {
         super.init();
-        ApplicationContext context =
-                new ClassPathXmlApplicationContext("classpath:applicationContext-security.xml");
-        accessControl = (AccessControl)context.getBean("accessControl");
+        accessControl = SpringUtil.getAccessControl();
     }
 
     /**
@@ -94,7 +90,6 @@ public class CrossCancerJSON extends HttpServlet {
                 Map cancerMap = new LinkedHashMap();
                 cancerMap.put("studyId", cancerStudyId);
                 cancerMap.put("typeOfCancer", cancerStudy.getTypeOfCancerId());
-                resultsList.add(cancerMap);
 
                 //  Get all Genetic Profiles Associated with this Cancer Study ID.
                 ArrayList<GeneticProfile> geneticProfileList = GetGeneticProfiles.getGeneticProfiles(cancerStudyId);
@@ -105,6 +100,10 @@ public class CrossCancerJSON extends HttpServlet {
                 //  Get the default patient set
                 AnnotatedPatientSets annotatedPatientSets = new AnnotatedPatientSets(patientSetList, dataTypePriority);
                 PatientList defaultPatientSet = annotatedPatientSets.getDefaultPatientList();
+                if (defaultPatientSet == null) {
+                    continue;
+                }
+                
                 List<Sample> defaultSamples = InternalIdUtil.getSamplesById(
                         InternalIdUtil.getInternalNonNormalSampleIdsFromPatientIds(cancerStudy.getInternalId(),
                                 defaultPatientSet.getPatientList()));
@@ -220,6 +219,8 @@ public class CrossCancerJSON extends HttpServlet {
                 alterations.put("other", noOfOther);
                 cancerMap.put("genes", genes);
                 cancerMap.put("skipped", skipStudy);
+                
+                resultsList.add(cancerMap);
             }
 
             JSONValue.writeJSONString(resultsList, writer);

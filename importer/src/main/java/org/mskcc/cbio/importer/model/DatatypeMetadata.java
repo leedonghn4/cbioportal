@@ -48,6 +48,7 @@ public class DatatypeMetadata {
 	// delimiter when specifying datatypes on worksheet
     public static final String DATATYPES_DELIMITER = ":"; 
 
+    public static final String MUT_PACK_CALLS_FILE = "Mutation_Packager_Calls";
 	public static final String MAF_FILE_EXT = ".maf.annotated";
 	public static final String MUTATIONS_STAGING_FILENAME = "data_mutations_extended.txt";
 
@@ -65,6 +66,8 @@ public class DatatypeMetadata {
 	public static final String SEQUENCED_SAMPLES_FILENAME = "sequenced_samples.txt";
 
     public static final String ZSCORE_STAGING_FILENAME_SUFFIX = "_Zscores.txt";
+
+	public static final String NORMAL_STAGING_FILENAME_SUFFIX = "_normals.txt";
 
 	/*
 	 * The following is an example of a downloadArchive string which the following 

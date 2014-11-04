@@ -1,30 +1,21 @@
 <%@ include file="global/global_variables.jsp" %>
+
 <jsp:include page="global/header.jsp" flush="true" />
 
-<%
-    String smry = "<a href=\"study.do?cancer_study_id="+cancerTypeId+"\">"+cancerStudyName +
-            "</a>/" + patientSetName + ": (" +
-            mergedPatientListSize + ")" + "/" +
-            geneSetName + "/" + geneWithScoreList.size() +
-            (geneWithScoreList.size() == 1?"gene":"genes");
-%>
-
-<p>
-    <div class='gene_set_summary'>
-        <!--Gene Set / Pathway is altered in <%=percentCasesAffected%> of all cases. <br>-->
-        Gene Set / Pathway is altered in <div id='main_query_result_cases_affected_percent'></div> of all cases. <br>
+<div class='main_smry'>
+    <div id='main_smry_stat_div' style='float:right;margin-right:15px;width:50%;padding-top:10px;text-align:right;'></div>
+    <div id='main_smry_info_div'>
+        <table style='margin-left:10px;width=40%;' >
+            <tr>
+                <td><div id='main_smry_modify_query_btn'><div></td>
+                <td><div id='main_smry_query_div' style='padding-left: 5px;'></div></td>
+            </tr>
+        </table>
     </div>
-</p>
-<p>
-    <!--small><strong><%=smry%></strong></small-->
-    <small><strong><div id='main_query_result_smry'></div></strong></small>
-</p>
-
-<script>
-    $("#main_query_result_smry").attach("XXXXX");
-    $("#main_query_result_cases_affected_percent").attach("XXXX");
-        
-</script>
+    <div style="margin-left:5px;display:none;" id="query_form_on_results_page">
+        <%@ include file="query_form.jsp" %>
+    </div>
+</div>
 
 <%
     if (warningUnion.size() > 0) {
@@ -51,22 +42,6 @@
         out.println ("</div>");
     } else {
 %>
-
-<script type="text/javascript">
-    $(document).ready(function(){
-        // Init Tool Tips
-        $("#toggle_query_form").tipTip();
-    });
-</script>
-
-<p><a href="" title="Modify your original query.  Recommended over hitting your browser's back button." id="toggle_query_form">
-    <span class='query-toggle ui-icon ui-icon-triangle-1-e' style='float:left;'></span>
-    <span class='query-toggle ui-icon ui-icon-triangle-1-s' style='float:left; display:none;'></span><b>Modify Query</b></a>
-<p/>
-
-<div style="margin-left:5px;display:none;" id="query_form_on_results_page">
-    <%@ include file="query_form.jsp" %>
-</div>
 
 <div id="tabs">
     <ul>
@@ -198,7 +173,6 @@
         <!--contents of fingerprint.jsp now come from attribute on request object -->
         <div class="section" id="summary">
             <%@ include file="oncoprint/main.jsp" %>
-            <%@ include file="gene_info.jsp" %>
         </div>
         
         <% if (has_mrna && (has_copy_no || has_methylation || has_copy_no)) { %> 
@@ -239,12 +213,12 @@
             <%@ include file="networks.jsp" %>
         <% } %>
 
-        <%@ include file="data_download.jsp" %>
-        <%@ include file="image_tabs_data.jsp" %>
-        
         <% if (showCoexpTab) { %>
             <%@ include file="co_expression.jsp" %>
         <% } %>
+
+        <%@ include file="data_download.jsp" %>
+        <%@ include file="image_tabs_data.jsp" %>
 
 </div> <!-- end tabs div -->
 <% } %>
@@ -264,19 +238,22 @@
 </form>
 
 <script type="text/javascript">
-	// initially hide network tab
-	$("div.section#network").attr('style', 'height: 0px; width: 0px; visibility: hidden;');
+    // initially hide network tab
+    $("div.section#network").attr('style', 'height: 0px; width: 0px; visibility: hidden;');
 
-	// it is better to check selected tab after document gets ready
-	$(document).ready(function() {
-		// check if network tab is initially selected
-		// TODO this depends on aria-hidden attribute which may not be safe...
-		if ($("div.section#network").attr('aria-hidden') == "false")
-		{
-			// make the network tab visible...
-			$("div.section#network").removeAttr('style');
-		}
-	});
+    // it is better to check selected tab after document gets ready
+    $(document).ready(function() {
+
+        $("#toggle_query_form").tipTip();
+        // check if network tab is initially selected
+        // TODO this depends on aria-hidden attribute which may not be safe...
+        
+        if ($("div.section#network").attr('aria-hidden') == "false"){
+            // make the network tab visible...
+            $("div.section#network").removeAttr('style');
+        }
+
+    });
 
     // to fix problem of flash repainting
     $("a.result-tab").click(function(){
@@ -284,7 +261,7 @@
         if($(this).attr("href")=="#network") {
             $("div.section#network").removeAttr('style');
         } else {
-	        // since we never allow display:none we should adjust visibility, height, and width properties
+            // since we never allow display:none we should adjust visibility, height, and width properties
             $("div.section#network").attr('style', 'height: 0px; width: 0px; visibility: hidden;');
         }
     });
@@ -292,6 +269,22 @@
     //  Set up Tip-Tip Event Handler for Genomic Profiles help
     $(".result-tab").tipTip({defaultPosition: "bottom", delay:"100", edgeOffset: 10, maxWidth: 200});
 </script>
+
+
+<style type="text/css">
+    input[type="checkbox"]  {
+        margin: 5px;
+    }
+    input[type="radio"]  {
+        margin: 3px;
+    }
+    button {
+        margin: 3px;
+    }
+    [class*="ui-button-text"] {
+        margin: 3px;
+    }
+</style>
 
 </body>
 </html>
