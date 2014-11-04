@@ -183,10 +183,6 @@
             <%@ include file="igv.jsp" %>
         <% } %>
 
-        <% if (clinicalDataList != null && clinicalDataList.size() > 0) { %>
-            <%@ include file="survival_tab.jsp" %>
-        <% } %>
-
         <% if (has_survival) { %>
             <%@ include file="survival_tab.jsp" %>
         <% } %>

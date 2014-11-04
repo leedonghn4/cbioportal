@@ -64,7 +64,7 @@ public class CoExpUtil {
         sampleIds.retainAll(DaoSampleProfile.getAllSampleIdsInProfile(profileId));
 
         DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
-        Map<Long, HashMap<String, String>> mapStr = daoGeneticAlteration.getGeneticAlterationMap(profileId, null);
+        Map<Long, HashMap<Integer, String>> mapStr = daoGeneticAlteration.getGeneticAlterationMap(profileId, null);
         Map<Long, double[]> map = new HashMap<Long, double[]>(mapStr.size());
         for (Map.Entry<Long, HashMap<Integer, String>> entry : mapStr.entrySet()) {
             Long gene = entry.getKey();
