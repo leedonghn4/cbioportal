@@ -386,7 +386,7 @@ var StudyViewBoilerplate ={
             "</div>",
 
     wordCloudDiv:
-        "<div id='study-view-word-cloud-main' class='study-view-dc-chart study-view-word-cloud h1'>"+
+        "<div id='study-view-word-cloud-main' class='study-view-dc-chart study-view-word-cloud h1half w2'>"+
             "<div id='study-view-word-cloud-title-wrapper'style='height: 16px; width:100%; float:left; text-align:center;'>"+
                 "<div style='height:16px;float:right;' id='study-view-word-cloud-header'>"+
                     "<img id='study-view-word-cloud-reload-icon' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
@@ -399,7 +399,6 @@ var StudyViewBoilerplate ={
                 "<chartTitleH4 id='study-view-word-cloud-title'>Mutated Genes</chartTitleH4>" +
             "</div>"+
             "<div id='study-view-word-cloud'>"+
-                "<div style='width:180px;float:left;text-align:center'></div>"+
             "</div>"+
             "<div id='study-view-word-cloud-loader' class='study-view-loader' style='top:20%;left:20%'><img src='images/ajax-loader.gif'/></div>"+
         "</div>",

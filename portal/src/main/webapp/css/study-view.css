@@ -260,6 +260,11 @@
     text-align: left;
     padding-top: 4px;
 }
+#study-view-word-cloud .dataTables_filter {
+    width: 100%;
+    text-align: left;
+    padding-top: 4px;
+}
 .qtip-content .dataTables_filter {
     width: 100%;
 }

@@ -127,7 +127,8 @@ var StudyViewInitCharts = (function(){
             //table chart will always put ahead, and the higher prioirty, the bigger index(later will use array unshift for table charts)
             _priorityAttrs = ['CANCER_TYPE_DETAILED', 'CANCER_TYPE', 'PATIENT_ID', 'CASE_ID'];
         
-        mutatedGenes = dataObtained.mutatedGenes;   
+        mutatedGenes = dataObtained.mutatedGenes;
+        console.log(dataObtained);
         numOfCases = _arr.length;        
         ndx = crossfilter(_arr);
         
@@ -418,11 +419,11 @@ var StudyViewInitCharts = (function(){
             _mutatedGenes.sort(sortNumMuts);
         }
 
-        if(_dataLength < 10){
-            _mutatedGenesLength = _dataLength;
-        }else{
-            _mutatedGenesLength = 10;
-        }
+//        if(_dataLength < 20){
+            _mutatedGenesLength = _mutatedGenes.length;
+//        }else{
+//            _mutatedGenesLength = 20;
+//        }
         
         if(_mutatedGenesLength === 0){
             _topGenes.names = ['No Mutated Gene'];
@@ -436,7 +437,7 @@ var StudyViewInitCharts = (function(){
                 _topGenes.mutationsPerNucletide.push(_mutatedGenes[i][1]);
                 
             }
-            _topGenes.percentage  = calculatePercentage(_topGenes.mutationsPerNucletide);
+            _topGenes.percentage  = _topGenes.mutationsPerNucletide;
             _topGenes.size = calculateWordSize(_topGenes.mutationsPerNucletide);
         }
         return _topGenes;

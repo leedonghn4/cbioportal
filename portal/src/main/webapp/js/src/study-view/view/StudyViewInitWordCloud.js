@@ -37,10 +37,12 @@ var StudyViewInitWordCloud = (function() {
     var words = [],
         fontSize = [],
         percentage = [];
-    var WIDTH = 150,
-        HEIGHT = 150;
+    var WIDTH = 300,
+        HEIGHT = 300;
     
     var initStatus = false;
+    
+    var dataTable;
     
     function initData(_data){
         words = _data.names;
@@ -238,6 +240,46 @@ var StudyViewInitWordCloud = (function() {
         });
     }
     
+    function initTable() {
+        $('#study-view-word-cloud').html('<table width="100%"><thead><tr><th>Gene</th><th>Overall</th><th>Mutation Rate</th></tr></thead><tbody></tbody></table>');
+        var body = $('#study-view-word-cloud').find('tbody');
+        words.forEach(function(e, index){
+            var string= '<tr>';
+                string += '<td>' + words[index] + '</td>';
+                string += '<td>' + addBar(percentage[index])+ '</td>';
+                string += '<td>' + Number(percentage[index]).toFixed(4) + '</td>';
+            string += '</tr>';
+            body.append(string);
+        });  
+        dataTable = $('#study-view-word-cloud table').dataTable({
+            "sDom": 'rt<f>',
+            "sScrollY": '255',
+            "bPaginate": false,
+            "aaSorting": [[2, 'desc']],
+            "bAutoWidth": true,
+            "fnInitComplete": function(oSettings, json) {
+                $('#study-view-word-cloud .dataTables_filter')
+                        .find('label')
+                        .contents()
+                        .filter(function(){
+                            return this.nodeType === 3;
+                        }).remove();
+
+                $('#study-view-word-cloud .dataTables_filter')
+                        .find('input')
+                        .attr('placeholder', 'Search...');
+            }
+        });
+    }
+    
+    function addBar(percentage) {
+        var str = "<svg width='35px' height='10px'>";
+
+        str += "<rect fill='lightgrey' width='30px' height='6px'></rect>";
+        str += "<rect fill='red' width='"+(Number(percentage) * 30)+"px' height='6px'></rect>";
+        str += '</svg>';
+        return str;
+    }
     //Changed based on Jason's example file.
     function initD3Cloud() {
         d3.layout.cloud().size([180, 180])
@@ -253,21 +295,24 @@ var StudyViewInitWordCloud = (function() {
     }
     
     function redraw(_data){
-        $("#study-view-word-cloud").find('svg').remove();
+        $("#study-view-word-cloud").empty();
         initData(_data);
-        initD3Cloud();
+        initTable();
     }
     
     return {
         init: function(_data){
             initData(_data);
             initDiv();
-            initD3Cloud();
+            initTable();
+//            initD3Cloud();
             addQtip();
 //            addEvents();
             initStatus = true;
         },
-        
+        getTable: function(){
+            return dataTable;
+        },
         redraw: redraw,
         getInitStatus: function(){
             return initStatus;
