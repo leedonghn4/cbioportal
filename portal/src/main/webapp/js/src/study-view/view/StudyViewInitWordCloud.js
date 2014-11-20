@@ -264,7 +264,7 @@ var StudyViewInitWordCloud = (function() {
             initDiv();
             initD3Cloud();
             addQtip();
-            addEvents();
+//            addEvents();
             initStatus = true;
         },
         

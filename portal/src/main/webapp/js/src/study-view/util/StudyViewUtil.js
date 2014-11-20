@@ -185,10 +185,17 @@ var StudyViewUtil = (function(){
         }
     }
     
-    function isInt(n) {
-        return typeof n === 'number' && parseFloat(n) == parseInt(n, 10) && !isNaN(n);
+    function addQtip(_text, element, position){
+        var _qtip = jQuery.extend(true,{},StudyViewBoilerplate.pieLabelQtip);
+        
+        _qtip.content.text = _text;
+        
+        if(typeof position !== 'undefined') {
+            _qtip.position = position;
+        }
+        element.qtip(_qtip);
     }
-
+    
     return{
         showHideDivision: showHideDivision,
         echoWarningMessg: echoWarningMessg,
@@ -200,7 +207,6 @@ var StudyViewUtil = (function(){
         changePosition: changePosition,
         testM: testM,
         changeTitle: changeTitle,
-        isInt: isInt,
-        showHideTitle: showHideTitle
+        addQtip: addQtip
     };
 })();

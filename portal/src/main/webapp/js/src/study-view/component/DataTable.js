@@ -8,19 +8,7 @@
  *                      case. Each case should include all attributes as key and
  *                      their relative value. If attribute of this case doesn't
  *                      exist, the NA value will still give to this attribute.
- *                  
- * @interface: getDataTable -- return DataTable Object.
- * @interface: updateTable -- giving filteredResultList, the dateTable will be
- *                            refreshed.
- * @interface: rowClickCallback -- pass a function to dataTable. It will be
- *                                 called when one row is clicked.
- * @interface: rowShiftClickCallback -- pass a function to dataTable. It will be
- *                                      called when one row is clicked and
- *                                      ShiftKeys is pressed at same time.
- * @interface: resizeTable: will be used when width of dataTable changed.
- *     
- * @note: The 'string' sorting function of datatable has been rewrited in
- *        FnGetColumnData.js                                     
+ *                                                    
  *                                                                                                           
  * @authur: Hongxin Zhang
  * @date: Mar. 2014
@@ -28,7 +16,6 @@
  */
         
 var DataTable = function() {
-    
     var attr,
         arr,
         attrLength,
@@ -36,6 +23,8 @@ var DataTable = function() {
         aoColumnsLength,
         aaDataLength,
         dataTable,
+        forzedLeftCol = null,
+        dataTableScrollHeight = 500,
         tableId,
         tableContainerId,
         dataType = [],
@@ -49,15 +38,12 @@ var DataTable = function() {
          * always get a deep copy from permenentDisabledId.
         */
         disableFiltId = [],
-                            
+        noLeftColumnFlag = false,                    
         aoColumns = [], //DataTable Title Data
         aaData = [], //DataTable Content Data
         columnIndexMappingColumnId = [],
-        noLeftColumnFlag = true,
-        displayMapName = {};
-    
-    var rowClickCallback,
-        rowShiftClickCallback;
+        selectorData = [],
+        filters = {};
     
     function initParam(_tableId, _tableContainerId, _data) {
         var i;
@@ -81,30 +67,94 @@ var DataTable = function() {
         
         initColumnsTitleData();
         initContentData();
+        selectorData = tfootData();
+    }
+    
+    function numberBetween(value, min, max) {
+        return value > min && value < max;
+    }
+    
+    function tfootData() {
+        var tfootInfo = [];
+        var filteredAAData = [];
+        var attrL = attr.length;
+        
+        for(var  i= 0; i < attrL; i++) {
+            tfootInfo.push([]);
+        }
+        
+        if($.isEmptyObject(filters)) {
+            filteredAAData = aaData;
+        }else {
+            for(var i = 0 , aaDataL = aaData.length; i < aaDataL; i++) {
+                var statisfy = true;
+                for(var key in filters) {
+                    var index = Number(key);
+                    var keyword = "";
+                    
+                    if(typeof filters[key] === "object") {
+                        var start = Number(filters[key]["start"]);
+                        var end = Number(filters[key]["end"]);
+                        if(!numberBetween(Number(aaData[i][index]), start, end)) {
+                            statisfy = false;
+                        }
+                    }else {
+                        keyword = filters[key].toString();
+                        if(aaData[i][index].toString().toLowerCase() !== keyword.toString().toLowerCase()) {
+                            statisfy = false;
+                        }
+                    }
+                }
+                if(statisfy) {
+                    filteredAAData.push(aaData[i]);
+                }
+            }
+        }
+        
+        
+        for(var i = 0, filteredL = filteredAAData.length; i < filteredL; i++) {
+            for(var j = 0; j < attrL; j++) {
+                if(tfootInfo[j].indexOf(filteredAAData[i][j]) === -1 && filteredAAData[i][j] !== "") {
+                    tfootInfo[j].push(filteredAAData[i][j]);
+                }
+            }
+        }
+        
+        return tfootInfo;
     }
     
     //Initialize aoColumns Data
     function initColumnsTitleData() {
         var i,
-            _permenentDisabledTitles =  ['CASE ID', 
-                                        'PATIENT_ID', 
-                                        'Patient Identifier'];
+            _permenentDisabledAttrs =  ['CASE_ID', 
+                                        'PATIENT_ID'];
         
         aoColumns.length = 0;
         
-        aoColumns.push({sTitle:"CASE ID",sType:'string',sClass:'nowrap'});
-        displayMapName['CASE ID'] = 'CASE_ID';
+        aoColumns.push({
+            dataTable: {sTitle:"CASE ID",sType:'string',sClass:'nowrap'},
+            fullDisplay: 'CASE ID',
+            attrId: "CASE_ID"
+        });
         for( i = 0; i < attr.length; i++ ){
             if( attr[i].attr_id !== 'CASE_ID' ){
                 var _tmp = {};
                 
+                _tmp.dataTable = {};
+                _tmp.attrId = attr[i].attr_id;
+                
                 if(attr[i].attr_id === 'COPY_NUMBER_ALTERATIONS'){
-                    _tmp.sTitle = 'CNA';
+                    _tmp.dataTable.sTitle = 'CNA';
+                    _tmp.fullDisplay = 'CNA';
                 }else{
-                    _tmp.sTitle = attr[i].display_name;
+                    if(attr[i].display_name.toString().length > 15) {
+                        _tmp.dataTable.sTitle = attr[i].display_name.toString().substring(0,15) + "...";
+                    }else {
+                        _tmp.dataTable.sTitle = attr[i].display_name;
+                    }
+                    _tmp.fullDisplay = attr[i].display_name;
                 }
-                displayMapName[_tmp.sTitle] = attr[i].attr_id;
-                _tmp.sType = dataType[attr[i].attr_id];
+                _tmp.dataTable.sType = dataType[attr[i].attr_id];
                 aoColumns.push(_tmp);
             }
         }
@@ -119,13 +169,13 @@ var DataTable = function() {
             //
             //TODO: Need second sorting function for sorting pre disabled
             //predisabled columns if needed.
-            if(_permenentDisabledTitles.indexOf(a.sTitle) !== -1) {
+            if(_permenentDisabledAttrs.indexOf(a.attrId) !== -1) {
                 return -1;
-            }else if(_permenentDisabledTitles.indexOf(b.sTitle) !== -1) {
+            }else if(_permenentDisabledAttrs.indexOf(b.attrId) !== -1) {
                 return 1;
             }else{
-                var _a = a.sTitle.toLowerCase(),
-                    _b = b.sTitle.toLowerCase();
+                var _a = a.dataTable.sTitle.toLowerCase(),
+                    _b = b.dataTable.sTitle.toLowerCase();
                     
                 if(_a < _b) {
                     return -1;
@@ -136,7 +186,7 @@ var DataTable = function() {
         });
         
         for( var i = 0; i < aoColumnsLength; i++) {
-            if(_permenentDisabledTitles.indexOf(aoColumns[i].sTitle) !== -1) {
+            if(_permenentDisabledAttrs.indexOf(aoColumns[i].attrId) !== -1) {
                 permenentDisabledId.push(i);
             }
         }
@@ -156,29 +206,25 @@ var DataTable = function() {
             aaData[_key] = [];
             
             for ( var j = 0; j < _aoColumnsLength; j++) {
-                var _valueAo = aoColumns[j],
+                var _attrId = aoColumns[j].attrId,
                     _selectedString,
                     _specialCharLength,
                     _tmpValue ='',
                     _specialChar = ['(',')','/','?','+'];
 
-                if(_valueAo.sTitle === 'CNA'){
-                    _tmpValue = _value['COPY_NUMBER_ALTERATIONS'];                
-                }else if ( _valueAo.sTitle === 'COMPLETE (ACGH, MRNA, SEQUENCING)'){
-                    _tmpValue = _value[_valueAo.sTitle];
-                }else if ( _valueAo.sTitle === 'CASE ID'){
+                if ( _attrId === 'CASE_ID'){
                     _tmpValue = "<a href='case.do?case_id=" + 
                     _value['CASE_ID'] + "&cancer_study_id=" +
                     StudyViewParams.params.studyId + "' target='_blank'><span style='color: #2986e2'>" + 
                     _value['CASE_ID'] + "</span></a></strong>";
-                }else if ( (_valueAo.sTitle === 'Patient Identifier' || _valueAo.sTitle === 'PATIENT_ID') && _value['PATIENT_ID'] !== 'NA'){
+                }else if ( _attrId === 'PATIENT_ID' && _value['PATIENT_ID'] !== 'NA'){
                     _tmpValue = "<a href='case.do?cancer_study_id=" +
                     StudyViewParams.params.studyId + "&patient_id="+
                     _value['PATIENT_ID'] +
                     "' target='_blank'><span style='color: #2986e2'>" + 
                     _value['PATIENT_ID'] + "</span></a></strong>";
                 }else{
-                    _tmpValue = _value[displayMapName[_valueAo.sTitle]];
+                    _tmpValue = _value[aoColumns[j].attrId];
                 }
                 if(!isNaN(_tmpValue) && (_tmpValue % 1 !== 0)){
                     _tmpValue = cbio.util.toPrecision(Number(_tmpValue),3,0.01);
@@ -189,7 +235,7 @@ var DataTable = function() {
                 _specialCharLength = _specialChar.length;
                 
                 //Only usded for columns without URL link
-                if ( _valueAo.sTitle !== 'CASE ID' && _valueAo.sTitle !== 'Patient Identifier' && _valueAo.sTitle !== 'PATIENT_ID' ){
+                if ( _attrId === 'CASE_ID' && _attrId === 'PATIENT_ID' ){
                     for( var z = 0; z < _specialCharLength; z++){
                         if(_selectedString.indexOf(_specialChar[z]) !== -1){
                             var _re = new RegExp("\\" + _specialChar[z], "g");
@@ -210,15 +256,35 @@ var DataTable = function() {
     
     //Initialize the basic dataTable component by using jquery.dataTables.min.js
     function initDataTable() {
-        dataTable = $('#' + tableId).dataTable({
-            "sScrollX": "1200px",
-            "sScrollY": "500px",
-            "bPaginate": false,
-            "bScrollCollapse": true,
-            "aoColumns": aoColumns,
+        var dataTableaoColumns = [];
+        
+        for(var i = 0; i < aoColumnsLength; i++) {
+            dataTableaoColumns.push(aoColumns[i].dataTable);
+        }
+        
+        var dataTableSettings = {
+            "scrollX": "100%",
+            "scrollY": dataTableScrollHeight,
+            "paging": false,
+            "scrollCollapse": true,
+            "aoColumns": dataTableaoColumns,
             "aaData": aaData,
             "bJQueryUI": true,
-            "sDom": '<"H"Ci<"dataTableReset">f>rt',
+            "autoWidth": true,
+            "sDom": '<"H"TCi<"dataTableReset">f>rt',
+            "tableTools": {
+                "aButtons": [
+                    {
+                        "sExtends": "copy",
+                        "bFooter": false
+                    },
+                    {
+                        "sExtends": "csv",
+                        "bFooter": false
+                    }
+                ],
+                "sSwfPath": "swf/copy_csv_xls_pdf.swf"
+            },
             "oLanguage": {
                 "sInfo": "&nbsp;&nbsp;Showing _TOTAL_ samples&nbsp;",
                 "sInfoFiltered": "(filtered from _MAX_ samples)",
@@ -237,26 +303,50 @@ var DataTable = function() {
                         }
                     });
                     $("#clinical_table_filter label input").val("");
-                    $.fn.dataTableExt.afnFiltering = [];
-                    disableFiltId = jQuery.extend(true, [], permenentDisabledId);     
+                    $.fn.dataTable.ext.search = [];
+                    disableFiltId = jQuery.extend(true, [], permenentDisabledId); 
                     refreshSelectionInDataTable();
-                    resizeLeftColumn();    
                     $(".dataTableReset span").css('display','none');
                 }
+                updateTableHeight();
+                updateFrozedColStyle();
             }
-        }).fnSetFilteringDelay();
+        };
+        
+        if(arrLength > 500) {
+            delete dataTableSettings.scrollY;
+            dataTableSettings.paging = true;
+            dataTableSettings.sPaginationType = "two_button";
+            dataTableSettings.iDisplayLength = 30;
+            dataTableSettings.sDom = '<"H"TpCi<"dataTableReset">f>rt';
+        }
+        
+        dataTable = $('#' + tableId).dataTable(dataTableSettings);
+        dataTable.fnSetFilteringDelay(1000);
+        refreshSelectionInDataTable();
+        forzedLeftCol = new $.fn.dataTable.FixedColumns( dataTable, {
+            "sHeightMatch": "none"
+        } );
+        
+        $('#' + tableId + "_wrapper .dataTables_scroll .dataTables_scrollHeadInner thead").find('th').each(function(index) {
+            if(aoColumns[index].fullDisplay.toString() !== aoColumns[index].dataTable.sTitle.toString()){
+                StudyViewUtil.addQtip(aoColumns[index].fullDisplay, $(this), {my:'bottom left',at:'top left', viewport: $(window)});
+            }
+        });
+        dataTableaoColumns = null;
     }
     
     //Add th tags based on number of attributes
     function initDataTableTfoot() {
         for( var i = 0; i < aoColumnsLength; i++ ){
-            $("#" + tableId+" tfoot tr").append("<th></th>");
+            $("#" + tableId+" tfoot tr").append("<td></td>");
             columnIndexMappingColumnId[i] = i;
         }
     }
     
     //Add all HTML events by using JQUERY
     function addEvents() {
+        var windowResize = false;
         
         $(".ColVis_MasterButton").click(function() {
             $('.ColVis_collection.TableTools_collection')
@@ -275,182 +365,86 @@ var DataTable = function() {
         $(".dataTableReset")
             .append("<a><span class='hidden' title='Reset Chart'>RESET</span></a>");
     
-        $("#clinical-data-table-div .dataTableReset span").click(function(){
-            $(this).css({'cursor': 'wait'});
-            $("#clinical_table_filter label input").val("");
-            $.fn.dataTableExt.afnFiltering = [];
-            updateTable([]);          
-            refreshSelectionInDataTable();
-            dataTable.fnAdjustColumnSizing();
-            resizeLeftColumn();
+        $("#" + tableContainerId + " .dataTableReset span").click(function(){
+            
+            $("#" + tableId + "-search input").val("");
+            
+            for(var key in dataTableNumericFilter) {
+                dataTableNumericFilter[key] = '';
+            }
+            $.fn.dataTable.ext.search = [];
+            var oSettings = dataTable.fnSettings();
+            for(var iCol = 0; iCol < oSettings.aoPreSearchCols.length; iCol++) {
+                oSettings.aoPreSearchCols[ iCol ].sSearch = '';
+            }
+            dataTable.fnFilter('');
+            filters = {};
+            disableFiltId = jQuery.extend(true, [], permenentDisabledId);
             showDataTableReset();
-            $(this).css({'cursor': 'default'});
+            refreshSelectionInDataTable();
+            modifyTableStyle();
         });
-        
-        var inputDelay = (function(){
-            var timer = 0;
-            return function(callback, ms){
-              clearTimeout (timer);
-              timer = setTimeout(callback, ms);
-            };
-        })();
-        
-        $("#clinical_table_filter label input").keyup(function() {
-            inputDelay(function(){
-                showDataTableReset(dataTable);
-                refreshSelectionInDataTable();
-                resizeLeftColumn();
-            }, 500 );
-        });
-        
-        if ($('#study-tab-clinical-a').hasClass('selected')) {
-            dataTable.fnAdjustColumnSizing();
-            $('#study-tab-clinical-a').addClass("tab-clicked")
-        }
-        
-        $('#study-tab-clinical-a').click(function(){
-            if (!$(this).hasClass("tab-clicked")) {
-                //First time: adjust the width of data table;
-                dataTable.fnAdjustColumnSizing();
-                if($("#" + tableId).width() > 1200) {
-                    noLeftColumnFlag = false;
-                    new FixedColumns(dataTable);
-                    $(".DTFC_LeftBodyLiner").css("overflow-y","hidden");
-                    //$(".dataTables_scroll").css("overflow-x","scroll");
-                    $(".DTFC_LeftHeadWrapper").css("background-color","white");
-                    $(".DTFC_LeftFootWrapper").css('background-color','white');
 
-                    //After resizing left column, the width of DTFC_LeftWrapper is different
-                    //with width DTFC_LeftBodyLiner, need to rewrite the width of
-                    //DTFC_LeftBodyLiner width
-                    var _widthLeftWrapper = $('.DTFC_LeftWrapper').width();
-                    $('.DTFC_LeftBodyLiner').css('width', _widthLeftWrapper+4);
-                }
-                //dataTable.fnFilter('', 0);
-                showDataTableReset();
-                refreshSelectionInDataTable();
-                //Sencond time: adjust the width of table foot;
-                dataTable.fnAdjustColumnSizing();
-                if(!noLeftColumnFlag) {
-                    resizeLeftColumn();
-                    $(window).resize();
-                }
-                $(this).addClass("tab-clicked");
-            }
-        });
-        
-        //Set mouse down timeout to seperate click and mousedown and hold
-//        var _timeOut = 0;
-//        $("#" + tableId+" tbody").mousedown(function(event){
-//            var _d = new Date();
-//            _timeOut= _d.getTime();
-//            //Tried couple times, only prevent default function in here works.
-//            //The shiftKey click function should be originally combined with
-//            //mousedown function.
-//            if(event.shiftKey){
-//                event.preventDefault();
-//            }
-//        }).bind('mouseup', function(event) {
-//            var _d = new Date();
-//            _timeOut= _d.getTime()-_timeOut;
-//            
-//            if(_timeOut < 500){
-//                mouseDownFunc(event);
-//            }
-//        });;
-        
-//        function mouseDownFunc(event) {
-//            var _selectedRowCaseId = [],
-//                _deSelect = false;
-//        
-//            if(event.shiftKey){
-//                event.preventDefault();
-//
-//                if($(event.target.parentNode).hasClass('row_selected')){
-//                    $(event.target.parentNode).removeClass('row_selected');
-//                    if($(event.target.parentNode).hasClass('odd')){
-//                       $(event.target.parentNode).css('background-color','#E2E4FF'); 
-//                    }else{
-//                        $(event.target.parentNode).css('background-color','white');
-//                    }
-//                }else{
-//                    $(event.target.parentNode).addClass('row_selected');
-//                    $(event.target.parentNode).css('background-color','lightgray');
-//                }
-//                
-//                _selectedRowCaseId = getRowSelectedCases();
-//                rowShiftClickCallback(_selectedRowCaseId);
-//                
-//            }else{
-//                if($(event.target.parentNode).hasClass('row_selected')){
-//                    $(event.target.parentNode).removeClass('row_selected');
-//                    if($(event.target.parentNode).hasClass('odd')){
-//                       $(event.target.parentNode).css('background-color','#E2E4FF'); 
-//                    }else{
-//                        $(event.target.parentNode).css('background-color','white');
-//                    }
-//                    _deSelect = true;
-//                }else{
-//                    $(dataTable.fnSettings().aoData).each(function (){
-//                        if($(this.nTr).hasClass('row_selected')){
-//                            $(this.nTr).removeClass('row_selected');
-//                            if($(this.nTr).hasClass('odd')){
-//                               $(this.nTr).css('background-color','#E2E4FF'); 
-//                            }else{
-//                                $(this.nTr).css('background-color','white');
-//                            }
-//                        }
-//                    });
-//
-//                    $(event.target.parentNode).addClass('row_selected');
-//                    $(event.target.parentNode).css('background-color','lightgray');
-//                }
-//                
-//                _selectedRowCaseId = getRowSelectedCases();
-//                rowClickCallback(_deSelect, _selectedRowCaseId);
-//            }
-//        }
-    
-    }
-    
-    function getRowSelectedCases() {
-        var _selectedRowCaseIds = [],
-            _returnValue = fnGetSelected(),
-            _returnValueLength = _returnValue.length;
-        
-        for( var i = 0; i < _returnValueLength; i++ ){
-            _selectedRowCaseIds.push($(_returnValue[i]).find('td').first().text());
+        if(forzedLeftCol) {
+            $(".DTFC_LeftBodyLiner").css("overflow-y","hidden");
+            $(".DTFC_LeftBodyLiner").css("overflow-x","hidden");
+            $(".DTFC_LeftHeadWrapper").css("background-color","white");
+            $(".DTFC_LeftFootWrapper").css('background-color','white');
+
+            //After resizing left column, the width of DTFC_LeftWrapper is different
+            //with width DTFC_LeftBodyLiner, need to rewrite the width of
+            //DTFC_LeftBodyLiner width
+            var _widthLeftWrapper = $('.DTFC_LeftWrapper').width();
+            $('.DTFC_LeftBodyLiner').css('width', _widthLeftWrapper+4);
         }
         
-        return _selectedRowCaseIds;
+        $(window).resize(function(){
+            if(windowResize !== false)
+                clearTimeout(windowResize);
+            windowResize = setTimeout(function() {
+                updateFrozedColStyle(); 
+            }, 200); //200 is time in miliseconds
+        });
     }
     
-    function updateTable(_exceptionColumns){
-        var _oSettings = dataTable.fnSettings();
+    function modifyTableStyle() {
+        dataTable.api().columns.adjust();
+        updateTableHeight();
+        forzedLeftCol.fnUpdate();
+        updateFrozedColStyle();
+    }
+    
+    function updateTableHeight() {
+        if($("#" + tableContainerId+ " .dataTables_scrollBody").height() < dataTableScrollHeight) {
+            $("#" + tableContainerId+ " .dataTables_scrollBody").height("100%");
+        }
+    }
+    function updateFrozedColStyle() {
+        var _heightBody = $("#" + tableContainerId+ " .dataTables_scrollBody").height(),
+            _widthBody = $("#" + tableContainerId+ " tbody>tr:nth-child(2)>td:nth-child(1)").width();
         
-        for(var iCol = 0; iCol < _oSettings.aoPreSearchCols.length; iCol++) {
-            if(_exceptionColumns.indexOf(iCol) === -1){
-                _oSettings.aoPreSearchCols[ iCol ].sSearch = '';
+        if(_widthBody === null) {
+            $(".DTFC_LeftWrapper").css('display', 'none');
+        }else {
+            _widthBody = _widthBody + 22;
+            if(forzedLeftCol) {
+                $(".DTFC_LeftWrapper").css('display', 'block');
+                if(_heightBody < 0) {
+                    $(".DTFC_LeftBodyLiner").height('');
+                }else {
+                    $(".DTFC_LeftBodyLiner").height(_heightBody - 15);
+                    
+                    //Changed from _heightBody, 15px was designed for
+                    //horizontal scroller
+                    $(".DTFC_LeftBodyWrapper").height(_heightBody - 15); 
+                }
+                $(".DTFC_LeftWrapper").width(_widthBody);
+                $(".DTFC_LeftBodyLiner").width(_widthBody);
+//                $(".DTFC_LeftBodyLiner").css('background-color','white');
+                $(".DTFC_LeftFootWrapper").css('top', '15px');
             }
         }
-        _oSettings.oPreviousSearch.sSearch = '';
-        dataTable.fnDraw();
     }
-    
-    //Return the selected nodes
-    function fnGetSelected(){
-        var i,
-            _aReturn = [],
-            _aTrs = dataTable.fnGetNodes();
-
-        for ( i = 0; i < _aTrs.length; i++ ){
-                if ( $(_aTrs[i]).hasClass('row_selected') ){
-                        _aReturn.push( _aTrs[i] );
-                }
-        }
-        return _aReturn;
-    }
-    
     //Create Regular Selector or Numeric Selector based on data type.
     function fnCreateSelect( aData, index, _this ){
         var _isNumericArray = true,
@@ -527,34 +521,6 @@ var DataTable = function() {
         }
     }
     
-    //This function will be called when the dataTable has been resized
-    function resizeLeftColumn(){
-        if(!noLeftColumnFlag) {
-            var _heightBody = $("#" + tableContainerId+ " .dataTables_scrollBody").height(),
-                _heightTable = $("#" + tableContainerId+ " .dataTables_scroll").height(),
-                _widthBody = $("#" + tableContainerId+ " tbody>tr:nth-child(2)>td:nth-child(1)").width();
-            
-            if(_widthBody === null) {
-                $(".DTFC_LeftWrapper").css('display', 'none');
-            }else {
-                _widthBody = _widthBody + 22;
-                if($("#" + tableId).width() > 1200) {
-                    $(".DTFC_LeftWrapper").css('display', 'block');
-                    $(".DTFC_LeftBodyLiner").height(_heightBody - 15);
-                    $(".DTFC_LeftBodyWrapper").height(_heightBody - 15); 
-                    $(".DTFC_LeftWrapper").width(_widthBody);
-                    $(".DTFC_LeftBodyLiner").width(_widthBody);
-                    $(".DTFC_LeftBodyLiner").css('background-color','white');
-                }
-            }
-            //When selecting or unselecting columns in table of summary tab,
-            //the column width will be stretched, the columns width will be changed
-            //automatically, but the width of left column needs to be changed by
-            //using following two statements.
-            $(".DTFC_ScrollWrapper").height(_heightTable);
-        }
-    }
-    
     function showDataTableReset( ){
         var _showedColumnNumber = dataTable.fnSettings().fnRecordsDisplay(),
             _totalColumnNumber = dataTable.fnSettings().fnRecordsTotal();
@@ -565,22 +531,17 @@ var DataTable = function() {
         }else{
             $(".dataTableReset span").css('display','none');
             $(".ColVis.TableTools").css('display','block');
-            disableFiltId = jQuery.extend(true, [], permenentDisabledId);
-            refreshSelectionInDataTable();
         }
     }
     
     function updateDataTableNumericFilter(){
-        var i,
-            _dataTableNumericFilterLength = dataTableNumericFilter.length;
-        
-        $.fn.dataTableExt.afnFiltering = [];
-        for( i = 0; i < _dataTableNumericFilterLength; i++ ){
+        $.fn.dataTable.ext.search = [];
+        for(var i = 0, filterL = dataTableNumericFilter.length; i < filterL; i++ ){
             if(dataTableNumericFilter[i] !== ''){
-                $.fn.dataTableExt.afnFiltering.push(dataTableNumericFilter[i]);
+                $.fn.dataTable.ext.search.push(dataTableNumericFilter[i]);
             }
         }
-        dataTable.fnDraw();
+        dataTable.api().draw();
     }
     
     function selectorDragMove() {
@@ -625,12 +586,12 @@ var DataTable = function() {
             _max = _min;
             _min = _tmp;
         }
-
+        
         dataTableNumericFilter[columnIndexMappingColumnId[_i]] = function( oSettings, aData, iDataIndex ) {
             var _iMin = _min,
                 _iMax = _max,
-                _iCurrent = aData[columnIndexMappingColumnId[_i]];
-
+                _iCurrent = Number(aData[columnIndexMappingColumnId[_i]]);
+            
             if ( _iMin === "" && _iMax === "" ){
                     return true;
             }else if ( _iMin === "" && _iCurrent <= _iMax ){
@@ -643,23 +604,33 @@ var DataTable = function() {
 
             return false;
         };
-
+        filters[columnIndexMappingColumnId[_i]] = {
+            start: _min,
+            end: _max
+        };
         updateDataTableNumericFilter();
-        dataTable.fnSort([ [columnIndexMappingColumnId[_i],'asc']]);
-        disableFiltId.push(_i);
+//        dataTable.fnSort([ [columnIndexMappingColumnId[_i],'asc']]);
+        pushDisableFiltId(_i);
         showDataTableReset();
         $("#dataTable-" + _i + "-reset").css('display','block');
         refreshSelectionInDataTable();
-        dataTable.fnAdjustColumnSizing();
-        resizeLeftColumn();  
+        modifyTableStyle();
+    }
+    
+    function pushDisableFiltId(Id) {
+        if(disableFiltId.indexOf(Id) === -1) {
+            disableFiltId.push(Id);
+        }
     }
     
     function refreshSelectionInDataTable(){
-        $(".dataTables_scrollFoot tfoot th").each( function ( i ) {
+        selectorData = tfootData();
+        $(".dataTables_scrollFoot tfoot td").each( function ( i ) {
             
             if(disableFiltId.indexOf(i) === -1){               
                 $(this).css('z-index','1500');
-                this.innerHTML = fnCreateSelect( dataTable.fnGetColumnData(columnIndexMappingColumnId[i]), i, this);
+                
+                this.innerHTML = fnCreateSelect( selectorData[columnIndexMappingColumnId[i]], i, this);
                 
                 var _drag = d3.behavior.drag()
                         .on("drag", selectorDragMove)
@@ -672,20 +643,21 @@ var DataTable = function() {
                         
                 $("#dataTable-" + i + "-reset").unbind('click');
                 $("#dataTable-" + i + "-reset").click(function(){
+                    delete filters[columnIndexMappingColumnId[i]];
                     dataTableNumericFilter[columnIndexMappingColumnId[i]] = '';
                     updateDataTableNumericFilter();
                     disableFiltId.splice(disableFiltId.indexOf(i),1);
                     showDataTableReset();
                     $("#dataTable-" + i + "-reset").css('display','none');
                     refreshSelectionInDataTable();
-                    dataTable.fnAdjustColumnSizing();
-                    resizeLeftColumn();  
+                    modifyTableStyle();
                 });
                 
                 $('select', this).change( function () {
                     if($(this).val() === ''){
                         dataTable.fnFilter($(this).val(), columnIndexMappingColumnId[i]);
                         disableFiltId.splice(disableFiltId.indexOf(i),1);
+                        delete filters[columnIndexMappingColumnId[i]];
                     }else{
                         //Need to process special charector which can no be
                         //treated as special charector in regular expression.
@@ -700,68 +672,19 @@ var DataTable = function() {
                             } 
                         }
                         dataTable.fnFilter("^"+_selectedString+"$", columnIndexMappingColumnId[i], true);
-                        disableFiltId.push(i);
+                        pushDisableFiltId(i);
+                        filters[columnIndexMappingColumnId[i]] = $(this).val();
                     }
                     
                     showDataTableReset();
                     refreshSelectionInDataTable();
-                    dataTable.fnAdjustColumnSizing();
-                    resizeLeftColumn();
+                    if($(this).val() !== ''){
+                        $(window).resize();
+                    }
+                    modifyTableStyle();
                 });
             }
         });
-    }
-    
-    function deleteChartResetDataTable(_filteredResult) {
-        var _filterArray = [];
-
-        for(var i=0 ; i<_filteredResult.length ; i++){
-            _filterArray.push(_filteredResult[i].CASE_ID);
-        }
-
-        $.fn.dataTableExt.afnFiltering = [function( oSettings, aData, iDataIndex ) {
-            var _data = aData[0],
-                _dataContent = $(_data).text();
-                
-            if ( _filterArray.indexOf(_dataContent) !== -1){
-                return true;
-            }
-            return false;
-        }];
-        dataTable.fnDraw();
-    }
-    
-    //Will be used after initializing datatable. This function is called from
-    //StudyViewSummaryTabController
-    function resizeTable(){
-        //Before resize data table, the window should be showed first
-//        $('#dc-plots-loading-wait').hide();
-//        $('#study-view-main').show();
-         
-        refreshSelectionInDataTable();
-        
-        //Resize column size first, then add left column
-//        dataTable.fnAdjustColumnSizing();
-//        console.log($("#" + tableId).width());
-//        if($("#" + tableId).width() > 1200) {
-            new FixedColumns(dataTable);
-
-            //Have to add in there
-            $(".DTFC_LeftBodyLiner").css("overflow-y","hidden");
-            //$(".dataTables_scroll").css("overflow-x","scroll");
-            $(".DTFC_LeftHeadWrapper").css("background-color","white");
-            $(".DTFC_LeftFootWrapper").css('background-color','white');
-
-            //After resizing left column, the width of DTFC_LeftWrapper is different
-            //with width DTFC_LeftBodyLiner, need to rewrite the width of
-            //DTFC_LeftBodyLiner width
-            var _widthLeftWrapper = $('.DTFC_LeftWrapper').width();
-            $('.DTFC_LeftBodyLiner').css('width', _widthLeftWrapper+4);//Column has table spacing
-//        }else {
-//            $('#clinical-data-table-div .dataTables_scrollBody').css('overflow-x', 'hidden');
-//        }
-        dataTable.fnAdjustColumnSizing();
-//        resizeLeftColumn();
     }
     
     return {
@@ -769,36 +692,141 @@ var DataTable = function() {
             initParam(_tableId, _tableContainerId, _data);
             initDataTableTfoot();
             initDataTable();
-            //resizeTable();
             addEvents();
         },
         
-        getDataTable: function() {
-            return dataTable;
-        },
-        
-        updateTable: function(_filteredResult) {
-            if( $("#clinical_table_filter label input").val() !== ''){
-                dataTable.fnFilter('');
-            }
-            deleteChartResetDataTable(_filteredResult);
-             refreshSelectionInDataTable();
-            dataTable.fnAdjustColumnSizing();
-            $("#clinical_table_filter label input").val("");
-            showDataTableReset();
-            resizeLeftColumn();
-        },
-        
-        rowClickCallback: function(_callback) {
-            rowClickCallback = _callback;
-        },
-        
-        rowShiftClickCallback: function(_callback) {
-            rowShiftClickCallback = _callback;
-        },
-        
-        resizeTable: resizeTable,
-        getTableHeader: function() { return aoColumns;},
-        getTableContent: function() { return aaData;}
+        updateFrozedColStyle: updateFrozedColStyle,
+        getColumnData: function() {
+            return aoColumns;
+        }
     };
 };
+
+TableTools.prototype._fnGetDataTablesData = function ( oConfig )
+{
+        var i, iLen, j, jLen;
+        var aRow, aData=[], sLoopData='', arr;
+        var dt = this.s.dt, tr, child;
+        var regex = new RegExp(oConfig.sFieldBoundary, "g"); /* Do it here for speed */
+        var aColumnsInc = this._fnColumnTargets( oConfig.mColumns );
+        var bSelectedOnly = (typeof oConfig.bSelectedOnly != 'undefined') ? oConfig.bSelectedOnly : false;
+        var aoColumns = StudyViewInitClinicalTab.getDataTable().getColumnData();
+        
+        /*
+         * Header
+         */
+        if ( oConfig.bHeader )
+        {
+                aRow = [];
+
+                for ( i=0, iLen=dt.aoColumns.length ; i<iLen ; i++ )
+                {
+                        if ( aColumnsInc[i] )
+                        {
+                                sLoopData = aoColumns[i].fullDisplay.replace(/\n/g," ").replace( /<.*?>/g, "" ).replace(/^\s+|\s+$/g,"");
+                                sLoopData = this._fnHtmlDecode( sLoopData );
+
+                                aRow.push( this._fnBoundData( sLoopData, oConfig.sFieldBoundary, regex ) );
+                        }
+                }
+
+                aData.push( aRow.join(oConfig.sFieldSeperator) );
+        }
+
+        /*
+         * Body
+         */
+        var aSelected = this.fnGetSelected();
+        bSelectedOnly = this.s.select.type !== "none" && bSelectedOnly && aSelected.length !== 0;
+
+        var api = $.fn.dataTable.Api;
+        var aDataIndex = api ?
+                new api( dt ).rows( oConfig.oSelectorOpts ).indexes().flatten().toArray() :
+                dt.oInstance
+                        .$('tr', oConfig.oSelectorOpts)
+                        .map( function (id, row) {
+                                // If "selected only", then ensure that the row is in the selected list
+                                return bSelectedOnly && $.inArray( row, aSelected ) === -1 ?
+                                        null :
+                                        dt.oInstance.fnGetPosition( row );
+                        } )
+                        .get();
+
+        for ( j=0, jLen=aDataIndex.length ; j<jLen ; j++ )
+        {
+                tr = dt.aoData[ aDataIndex[j] ].nTr;
+                aRow = [];
+
+                /* Columns */
+                for ( i=0, iLen=dt.aoColumns.length ; i<iLen ; i++ )
+                {
+                        if ( aColumnsInc[i] )
+                        {
+                                /* Convert to strings (with small optimisation) */
+                                var mTypeData = dt.oApi._fnGetCellData( dt, aDataIndex[j], i, 'display' );
+                                if ( oConfig.fnCellRender )
+                                {
+                                        sLoopData = oConfig.fnCellRender( mTypeData, i, tr, aDataIndex[j] )+"";
+                                }
+                                else if ( typeof mTypeData == "string" )
+                                {
+                                        /* Strip newlines, replace img tags with alt attr. and finally strip html... */
+                                        sLoopData = mTypeData.replace(/\n/g," ");
+                                        sLoopData =
+                                            sLoopData.replace(/<img.*?\s+alt\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+)).*?>/gi,
+                                                '$1$2$3');
+                                        sLoopData = sLoopData.replace( /<.*?>/g, "" );
+                                }
+                                else
+                                {
+                                        sLoopData = mTypeData+"";
+                                }
+
+                                /* Trim and clean the data */
+                                sLoopData = sLoopData.replace(/^\s+/, '').replace(/\s+$/, '');
+                                sLoopData = this._fnHtmlDecode( sLoopData );
+
+                                /* Bound it and add it to the total data */
+                                aRow.push( this._fnBoundData( sLoopData, oConfig.sFieldBoundary, regex ) );
+                        }
+                }
+
+                aData.push( aRow.join(oConfig.sFieldSeperator) );
+
+                /* Details rows from fnOpen */
+                if ( oConfig.bOpenRows )
+                {
+                        arr = $.grep(dt.aoOpenRows, function(o) { return o.nParent === tr; });
+
+                        if ( arr.length === 1 )
+                        {
+                                sLoopData = this._fnBoundData( $('td', arr[0].nTr).html(), oConfig.sFieldBoundary, regex );
+                                aData.push( sLoopData );
+                        }
+                }
+        }
+
+        /*
+         * Footer
+         */
+        if ( oConfig.bFooter && dt.nTFoot !== null )
+        {
+                aRow = [];
+
+                for ( i=0, iLen=dt.aoColumns.length ; i<iLen ; i++ )
+                {
+                        if ( aColumnsInc[i] && dt.aoColumns[i].nTf !== null )
+                        {
+                                sLoopData = dt.aoColumns[i].nTf.innerHTML.replace(/\n/g," ").replace( /<.*?>/g, "" );
+                                sLoopData = this._fnHtmlDecode( sLoopData );
+
+                                aRow.push( this._fnBoundData( sLoopData, oConfig.sFieldBoundary, regex ) );
+                        }
+                }
+
+                aData.push( aRow.join(oConfig.sFieldSeperator) );
+        }
+
+        var _sLastData = aData.join( this._fnNewline(oConfig) );
+        return _sLastData;
+}

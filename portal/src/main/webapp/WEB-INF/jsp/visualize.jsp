@@ -2,8 +2,8 @@
 <jsp:include page="global/header.jsp" flush="true" />
 
 <%
-    String smry = cancerStudyName +
-            "/" + caseSetName + ": (" +
+    String smry = "<a href=\"study.do?cancer_study_id="+cancerTypeId+"\">"+cancerStudyName +
+            "</a>/" + caseSetName + ": (" +
             mergedCaseListSize + ")" + "/" +
             geneSetName + "/" + geneWithScoreList.size() +
             (geneWithScoreList.size() == 1?"gene":"genes");
@@ -190,7 +190,6 @@
         <div class="section" id="summary">
             <% //contents of fingerprint.jsp now come from attribute on request object %>
             <%@ include file="oncoprint/main.jsp" %>
-            <%@ include file="gene_info.jsp" %>
         </div>
 
             <% if ( has_mrna && (has_copy_no || has_methylation || has_copy_no) ) { %>

@@ -109,21 +109,16 @@ var LogRankTest = function() {
             _item.variance = ( _num_of_failures * (_num_at_risk - _num_of_failures) * _item.num_at_risk_1 * _item.num_at_risk_2) / ((_num_at_risk * _num_at_risk) * (_num_at_risk - 1));
         }
     }
-    
-    function calcChi2() {
-        var O1 = 0, E1 = 0, V = 0, _chi_square_score = 0;
-        for (var i = 0; i < mergedArrLength; i++) {
-            var _item = mergedArr[i];
-            O1 += _item.num_of_failure_1;
-            E1 += _item.expectation;
-            V += _item.variance;
-        }
-        _chi_square_score = (O1 - E1) * (O1 - E1) / V;
-        return _chi_square_score;
-    }
-    
-    function calcPval(_chi_square_score, _callBackFunc) {
-        $.post( "calcPval.do", { chi_square_score: _chi_square_score })
+
+    function calcPval(_callBackFunc) {
+        var O1 = 0, E1 = 0, V = 0;
+        $.each(mergedArr, function(index, obj) {
+            O1 += obj.num_of_failure_1;
+            E1 += obj.expectation;
+            V += obj.variance;            
+        });
+        var chi_square_score = (O1 - E1) * (O1 - E1) / V;
+        $.post( "calcPval.do", { chi_square_score: chi_square_score })
             .done( function(_data) {
                 callBackFunc = _callBackFunc;
             callBackFunc(_data);

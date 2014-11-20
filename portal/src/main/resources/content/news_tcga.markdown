@@ -1,3 +1,6 @@
+# September 26, 2014
+* All TCGA data updated to the Firehose run of July 15, 2014
+
 # May 21, 2014
 * All TCGA data updated to the Firehose run of April 16, 2014
 
@@ -36,7 +39,6 @@
 
 # September 5, 2013:
 
-* [New standalone oncoprint tool](tools.jsp)
 * Updated COSMIC data (v66 Release)
 * Improved / interactive visualization on the "Protein changes" tab
 * Enhanced mutation diagrams: color-coding by mutation time and syncing with table filters

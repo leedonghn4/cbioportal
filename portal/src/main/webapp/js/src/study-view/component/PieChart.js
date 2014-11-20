@@ -93,7 +93,7 @@ var PieChart = function(){
         $('#' + DIV.labelTableID+'-0').find('tr').each(function(index, value) {
             if(_filters.indexOf($($($(value).find('td')[0])).find('span').text()) !== -1) {
                 $(value).find('td').each(function (index1, value1) {
-                    $(value1).addClass('heightlightRow');
+                    $(value1).addClass('highlightRow');
                 });
             }
         });
@@ -300,7 +300,9 @@ var PieChart = function(){
                     });
 
                     $('.pieLabel', api.elements.tooltip).click(function(_event){
-                        pieLabelClick(this);
+                        var _shiftClicked = StudyViewWindowEvents.getShiftKeyDown();
+                        _event.preventDefault();
+                        pieLabelClick(this, _shiftClicked);
                         api.show(_event);
                     });
 
@@ -405,11 +407,23 @@ var PieChart = function(){
                 postFilterCallback();
             });
             pieChart.on("preRedraw",function(chart){
+                var _filters = pieChart.filters();
                 removeMarker();
+                if(category !== "extendable") {
+                    $('#qtip-' + DIV.mainDiv + "-table").find("tr").each(function(index, value) {
+                        if(_filters.indexOf($(value).find('td').first().find('span').text()) !== -1) {
+                            $(value).find('td').addClass("highlightRow");
+                        }
+                    });
+                }
             });
             pieChart.on("postRedraw",function(chart){
                 var _filters = pieChart.filters();
-                if(previousFilters.equals(_filters) || pieChart.filters()) {
+                
+                if(
+                        (!previousFilters.equals(_filters) 
+                            && _filters.length === 0) 
+                        || previousFilters.equals(_filters) ){
                     addPieLabels();
                 }
                 previousFilters = jQuery.extend(true, [], _filters);
@@ -421,17 +435,50 @@ var PieChart = function(){
         }
     }
     
+    function showHideDivision(_listenedDiv, _targetDiv, _time){
+        var _targetLength = _targetDiv.length;
+        for ( var i = 0; i < _targetLength; i++) {
+            $(_targetDiv[i]).css('display', 'none');
+        }
+        $(_listenedDiv).hover(function(){
+            $(_listenedDiv).css('z-index', '1');
+            for ( var i = 0; i < _targetLength; i++) {
+                $(_targetDiv[i]).stop().fadeIn(_time, function(){
+                    $(this).css('display', 'block');
+                });
+            }
+//            $("#"+DIV.chartDiv +"-title-wrapper").width('130');
+            $("#"+DIV.chartDiv +"-title-wrapper").css('text-align', 'left');
+            if(selectedAttrDisplay.length > 14) {
+                $("#"+DIV.chartDiv +"-title").text(selectedAttrDisplay.substring(0,12) + "...");
+                addQtip(selectedAttrDisplay, DIV.chartDiv +"-title");
+            }
+        }, function(){
+            $(_listenedDiv).css('z-index', '0');
+            for ( var i = 0; i < _targetLength; i++) {
+                $(_targetDiv[i]).stop().fadeOut(_time, function(){
+                    $(this).css('display', 'none');
+                });
+            }
+//            $("#"+DIV.chartDiv +"-title-wrapper").width('180');
+            $("#"+DIV.chartDiv +"-title-wrapper").css('text-align', 'center');
+            if(selectedAttrDisplay.length > titleLengthCutoff) {
+                $("#"+DIV.chartDiv +"-title").text(selectedAttrDisplay.substring(0,(titleLengthCutoff-2)) + "...");
+            }else {
+                $("#"+DIV.chartDiv +"-title").text(selectedAttrDisplay);
+            }
+            $('#' + DIV.chartDiv +"-title").qtip('destroy', true);
+        });
+    }
+    
     //Add all listener events
     function addEvents() {
         
-        StudyViewUtil.showHideTitle(
-                "#"+DIV.mainDiv, 
-                "#"+DIV.chartDiv+"-header",
-                0,
-                selectedAttrDisplay,
-                14,
-                25);
-        
+        showHideDivision("#"+DIV.mainDiv, 
+                        ["#"+DIV.chartDiv+"-side"], 0);
+        showHideDivision("#"+DIV.mainDiv, 
+                        ["#"+DIV.chartDiv+"-header"],0);
+//        
         if(plotDataButtonFlag) {
             $("#"+DIV.chartDiv+"-plot-data").click(function(){
                 var _casesInfo = {},
@@ -442,8 +489,8 @@ var PieChart = function(){
 
                 if(pieChart.hasFilter()){
                     $("#"+DIV.labelTableID+"-0").find('td').each(function(index, value) {
-                        if($(value).hasClass('heightlightRow')) {
-                            $(value).removeClass('heightlightRow');
+                        if($(value).hasClass('highlightRow')) {
+                            $(value).removeClass('highlightRow');
                         }
                     });
                     pieChart.filterAll();
@@ -473,6 +520,25 @@ var PieChart = function(){
             });
         }
         
+//        $("#"+DIV.chartDiv+"-transfer-icon").click(function() {
+////            $("#"+DIV.mainDiv).css('z-index', 16000);
+////            $("#"+DIV.mainDiv).animate({height: "340px", width: "375px", duration: 300, queue: false}, 300, function() {
+////                StudyViewInitCharts.getLayout().layout();
+////                $("#"+DIV.mainDiv).css('z-index', '');
+////                $("#"+DIV.chartDiv+"-expand-icon").css('display', 'none');
+////                $("#"+DIV.chartDiv +"-pieLabel-table").css('display', 'block');
+////                $("#"+DIV.chartDiv+"-contract-icon").css('display', 'block');
+////                $('#' + DIV.mainDiv).qtip('api').hide();
+////            });
+//            var _svg = $(pieChart.svg()[0]),
+//                _svgHtml = _svg.html(),
+//                _svgWidth = _svg.width(),
+//                _svgHeight = _svg.height();
+//                
+//            $('#' + DIV.mainDiv).qtip('api').set('content.text', "<svg width="+_svgWidth+" height="+_svgHeight+">"+_svgHtml+"</svg>");
+////            $('#' + DIV.chartDiv + ' svg').animate({'margin-left': '125px', duration: 300, queue: false});
+//        });
+//        
         $("#"+DIV.chartDiv+"-table-icon").click(function() {
             $("#"+DIV.mainDiv).css('z-index', 16000);
             $('#' + DIV.chartDiv ).css('display','none');
@@ -483,7 +549,8 @@ var PieChart = function(){
                 $("#"+DIV.chartDiv+"-pie-icon").css('display', 'block');
                 $("#"+DIV.chartDiv+"-table-icon").css('display', 'none');
                 $("#"+DIV.mainDiv + " .study-view-pie-label").css('display','block');
-                labelTable.fnAdjustColumnSizing();
+                if (labelTable)
+                    labelTable.fnAdjustColumnSizing();
             });
         });
         $("#"+DIV.chartDiv+"-pie-icon").click(function() {
@@ -502,8 +569,8 @@ var PieChart = function(){
         $("#"+DIV.chartDiv+"-reload-icon").click(function() {
             $('#' + DIV.labelTableID+'-0').find('tr').each(function(index, value) {
                 $(value).find('td').each(function (index1, value1) {
-                    if($(value1).hasClass('heightlightRow')) {
-                        $(value1).removeClass('heightlightRow');
+                    if($(value1).hasClass('highlightRow')) {
+                        $(value1).removeClass('highlightRow');
                     }
                 });
             });
@@ -687,6 +754,11 @@ var PieChart = function(){
                 "<div id='" + DIV.chartDiv +"-title-wrapper'" +
                 " style='height: 16px; width:100%; float:left; text-align:center;'>"+
                 "<div style='height:16px;float:right;' id='"+DIV.chartDiv+"-header'>"+
+//                "<a href='javascript:StudyViewInitCharts.getChartsByID("+ 
+//                chartID +").getChart().filterAll();" +
+//                "dc.redrawAll();'><span title='Reset Chart'"+
+//                "class='study-view-dc-chart-change' style='float:left; font-size:10px;'>"+
+//                "RESET</span></a>" +
                 "<img id='"+ DIV.chartDiv +"-reload-icon' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
                 _plotDataButtonDiv + 
                 "<img id='"+ DIV.chartDiv +"-pie-icon' class='study-view-title-icon hover' src='images/pie.svg'/>"+
@@ -702,9 +774,23 @@ var PieChart = function(){
                 "<div id=\"" + DIV.chartDiv + "\" class='" + 
                 className + "'  oValue='"+ selectedAttr + "," + 
                 selectedAttrDisplay + ",pie'>"+
+                
                 "<div style='width:180px;float:left;text-align:center'></div></div>"+
+//                "<div id='"+ DIV.chartDiv +"-extend' style='text-align:center;width: 100%;height:15px;float:left;display:none'>" + 
+//                "<img id='"+ DIV.chartDiv +"-arrow-down-icon'"+
+//                "class='study-view-arrow-icon show hover'" + 
+//                "src='images/arrow-down.svg'/>"+
+//                "<img id='"+ DIV.chartDiv +"-arrow-up-icon'"+
+//                "class='study-view-arrow-icon hidden hover'" + 
+//                "src='images/arrow-up.svg'/>"+
+//                "</div>" + 
                 "<div class='study-view-pie-label'></div></div>");
-            }
+            //Title has been cut with 8 head character with ..., so the length
+            //still longer than titleLengthCutoff
+//            if(_title.length > titleLengthCutoff) {
+//                addQtip(selectedAttrDisplay, DIV.chartDiv +"-title");
+//            }
+        }
     }
     
     
@@ -832,7 +918,7 @@ var PieChart = function(){
                 }
             });
             if(_keys.indexOf('NA') !== -1) {
-                _color[_keys.indexOf('NA')] = '#cccccc';
+                _color[_keys.indexOf('NA')] = '#CCCCCC';
             }
         
             if(_keys.length > 10) {
@@ -941,6 +1027,10 @@ var PieChart = function(){
         for(var i=0; i< label.length; i++){
             var _tmpName = label[i].name;
             
+//            if(_tmpName.length > 9){
+//                _tmpName = _tmpName.substring(0,5) + " ...";
+//            }
+            
             if(i % 1 === 0){
                 $('#' + DIV.mainDiv)
                         .find('#' + DIV.labelTableID+"-0 tbody")
@@ -966,6 +1056,10 @@ var PieChart = function(){
             if(maxLabelValue < label[i].value) {
                 maxLabelValue = label[i].value;
             }
+            //Only add qtip when the length of pie label bigger than 9
+//            if(label[i].name.length > 9){
+//                addQtip(label[i].name, DIV.labelTableTdID +label[i].id+'-'+i);
+//            }
         }
         
         if(category === 'extendable') {
@@ -989,11 +1083,11 @@ var PieChart = function(){
                             .filter(function(){
                                 return this.nodeType === 3;
                             }).remove();
-                    
+
                     $('#'+ DIV.mainDiv + ' .dataTables_filter')
                             .find('input')
                             .attr('placeholder', 'Search...');
-                    
+
                     labelTableOrder = oSettings.aaSorting;
                 }
             });
@@ -1012,10 +1106,8 @@ var PieChart = function(){
             
             $('#' + DIV.mainDiv+' .pieLabel').unbind('click');
             $('#' + DIV.mainDiv+' .pieLabel').click(function(_event){
-                var _shiftClicked = _event.shiftKey;
-                if(_shiftClicked) {
-                    _event.preventDefault();
-                }
+                var _shiftClicked = StudyViewWindowEvents.getShiftKeyDown();
+                _event.preventDefault();
                 pieLabelClick(this, _shiftClicked);
             });
         }
@@ -1059,10 +1151,10 @@ var PieChart = function(){
         
         if(_shiftKeyDown) {
             $(_this).parent().find('td').each(function(index, value) {
-                if($(value).hasClass('heightlightRow')) {
-                    $(value).removeClass('heightlightRow');
+                if($(value).hasClass('highlightRow')) {
+                    $(value).removeClass('highlightRow');
                 }else {
-                    $(value).addClass('heightlightRow');
+                    $(value).addClass('highlightRow');
                 }
             });
             
@@ -1076,8 +1168,8 @@ var PieChart = function(){
             
             $(_this).parent().parent().find('tr').each(function(index, value) {
                 $(value).find('td').each(function(index1, value1) {
-                    if($(value1).hasClass('heightlightRow')) {
-                        $(value1).removeClass('heightlightRow');
+                    if($(value1).hasClass('highlightRow')) {
+                        $(value1).removeClass('highlightRow');
                         if(index === _trIndex) {
                             _selfClicked = true;
                         }
@@ -1089,7 +1181,7 @@ var PieChart = function(){
             
             if(!_selfClicked) {
                 $(_this).parent().find('td').each(function(index, value) {
-                    $(value).addClass('heightlightRow');
+                    $(value).addClass('highlightRow');
                 });
                 
                 pieChart.onClick({
@@ -1107,6 +1199,14 @@ var PieChart = function(){
             'fill-opacity': '1',
             'stroke-width': '1px'
         });
+    }
+    
+    //Pass the qtip ID without #
+    function addQtip(_text, _DivID){
+        var _qtip = jQuery.extend(true,{},StudyViewBoilerplate.pieLabelQtip);
+                
+        _qtip.content.text = _text;
+        $('#'+_DivID).qtip(_qtip);
     }
     
     //Display pie chart or dataTable
