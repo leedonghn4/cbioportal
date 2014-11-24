@@ -533,7 +533,7 @@ public final class DaoMutation {
      * @return
      * @throws DaoException 
      */
-    public static Map<Long, Integer> getSMGs(int profileId, Collection<Long> entrezGeneIds,
+    public static Map<Long, Map<String, String>> getSMGs(int profileId, Collection<Long> entrezGeneIds,
             int thresholdRecurrence, int thresholdNumGenes,
             Collection<String> selectedCaseIds) throws DaoException {
         Connection con = null;
@@ -541,7 +541,7 @@ public final class DaoMutation {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoMutation.class);
-            String sql = "SELECT mutation.ENTREZ_GENE_ID, COUNT(*), COUNT(*)/`LENGTH` AS count_per_nt"
+            String sql = "SELECT mutation.ENTREZ_GENE_ID, GROUP_CONCAT(mutation.CASE_ID), COUNT(*), COUNT(*)/`LENGTH` AS count_per_nt"
                     + " FROM mutation, gene"
                     + " WHERE mutation.ENTREZ_GENE_ID=gene.ENTREZ_GENE_ID"
                     + " AND GENETIC_PROFILE_ID=" + profileId
@@ -553,9 +553,12 @@ public final class DaoMutation {
                     + (thresholdNumGenes>0?(" LIMIT 0,"+thresholdNumGenes):"");
             pstmt = con.prepareStatement(sql);
             rs = pstmt.executeQuery();
-            Map<Long, Integer> map = new HashMap<Long, Integer>();
+            Map<Long, Map<String, String>> map = new HashMap<>();
             while (rs.next()) {
-                map.put(rs.getLong(1), rs.getInt(2));
+                Map<String, String> value = new HashMap<>();
+                value.put("caseIds", rs.getString(2));
+                value.put("count", rs.getString(3));
+                map.put(rs.getLong(1), value);
             }
             return map;
         } catch (SQLException e) {

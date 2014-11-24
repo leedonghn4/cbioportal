@@ -35,7 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 var StudyViewInitWordCloud = (function() {
     //The length of words should be same with the length of fontSize.
     var words = [],
-        fontSize = [],
+//        fontSize = [],
+        numOfMutations = [],
         percentage = [];
     var WIDTH = 300,
         HEIGHT = 300;
@@ -46,8 +47,9 @@ var StudyViewInitWordCloud = (function() {
     
     function initData(_data){
         words = _data.names;
-        fontSize = _data.size;
-        percentage = _data.percentage;
+        numOfMutations = _data.numOfMutations;
+//        fontSize = _data.size;
+        percentage = _data.sampleRate;
     }
     
     var DIV = {
@@ -241,13 +243,14 @@ var StudyViewInitWordCloud = (function() {
     }
     
     function initTable() {
-        $('#study-view-word-cloud').html('<table width="100%"><thead><tr><th>Gene</th><th>Overall</th><th>Mutation Rate</th></tr></thead><tbody></tbody></table>');
+        $('#study-view-word-cloud').html('<table width="100%"><thead><tr><th>Gene</th><th>Mutated Samples</th><th>Mutation Freq</th></tr></thead><tbody></tbody></table>');
         var body = $('#study-view-word-cloud').find('tbody');
         words.forEach(function(e, index){
             var string= '<tr>';
                 string += '<td>' + words[index] + '</td>';
-                string += '<td>' + addBar(percentage[index])+ '</td>';
-                string += '<td>' + Number(percentage[index]).toFixed(4) + '</td>';
+//                string += '<td>' + addBar(percentage[index])+ '</td>';
+                string += '<td>' + numOfMutations[index]+ '</td>';
+                string += '<td>' + percentage[index] + '</td>';
             string += '</tr>';
             body.append(string);
         });  
@@ -255,7 +258,7 @@ var StudyViewInitWordCloud = (function() {
             "sDom": 'rt<f>',
             "sScrollY": '255',
             "bPaginate": false,
-            "aaSorting": [[2, 'desc']],
+            "aaSorting": [[1, 'desc']],
             "bAutoWidth": true,
             "fnInitComplete": function(oSettings, json) {
                 $('#study-view-word-cloud .dataTables_filter')

@@ -68,7 +68,7 @@ public class MutationsJSON extends HttpServlet {
         String mutationProfileId = request.getParameter(PatientView.MUTATION_PROFILE);
         GeneticProfile mutationProfile;
         Map<Long, Double> mutsig = Collections.emptyMap();
-        Map<Long, Integer> smgs = Collections.emptyMap();
+        Map<Long, Map<String, String>> smgs = Collections.emptyMap();
         DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
         try {
             mutationProfile = DaoGeneticProfile.getGeneticProfileByStableId(mutationProfileId);
@@ -116,7 +116,7 @@ public class MutationsJSON extends HttpServlet {
         }
         
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
-        for (Map.Entry<Long, Integer> entry : smgs.entrySet()) {
+        for (Map.Entry<Long, Map<String, String>> entry : smgs.entrySet()) {
             Map<String,Object> map = new HashMap<String,Object>();
             
             Long entrez = entry.getKey();
@@ -133,14 +133,14 @@ public class MutationsJSON extends HttpServlet {
                 map.put("length", length);
             }
             
-            Integer count = entry.getValue();
+            Integer count = Integer.parseInt(entry.getValue().get("count"));
             map.put("num_muts", count);
             
             Double qvalue = mutsig.get(entrez);
             if (qvalue!=null) {
                 map.put("qval", qvalue);
             }
-            
+            map.put("caseIds", entry.getValue().get("caseIds"));
             data.add(map);
         }
         

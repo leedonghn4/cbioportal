@@ -227,6 +227,9 @@
 #clinical_table_info {
     float: left;
 }
+#study-view-word-cloud table.dataTable thead th {
+    font-size: 10px;
+}
 /*
 #study-view-scatter-plot-body-top-chart {
     width: 100%;
