@@ -36,46 +36,75 @@ var StudyViewInitTables = (function() {
     function init(input,callback) {
         initData(input);
         initTables();
-        callback();
+        if(typeof callback === 'function'){
+            callback();
+        }
     }
     
     function initData(input) {
-        var data = input.data,
+        var attr = input.data.attr,
+            arr = input.data.arr,
             numOfCases = input.numOfCases;
-    
-        for(var key in data) {
-            var _datum = data[key],
+        
+        attr.forEach(function(e, i) {
+            var _datum = arr[e.name],
                 _worker = {};
             
             _worker.opts = {};
             _worker.data = {};
             
-            switch (key) {
+            switch (e.name) {
                 case 'mutatedGenes':
                     _worker.opts.title = 'Mutated Genes';
-                    _worker.data = {};
                     _worker.data.attr = [{
-                            name: 'name',
+                            name: 'gene',
                             displayName: 'Gene'
                         },{
                             name: 'numOfMutations',
+                            displayName: '# Mutations'
+                        },{
+                            name: 'mutatedSamples',
                             displayName: 'Mutated Samples'
                         },{
                             name: 'sampleRate',
-                            displayName: 'Mutated Frequency'
-                        }
+                            displayName: 'Smaple Mutated Frequency'
+                        } 
                     ];
                     _worker.data.arr = mutatedGenesData(_datum, numOfCases);
+                    break;
                 case 'cna':
+                console.log(_datum);
                     _worker.opts.title = 'CNA';
+                    _worker.data.attr = [{
+                            name: 'gene',
+                            displayName: 'Gene'
+                        },{
+                            name: 'ampDel',
+                            displayName: 'AMP/DEL'
+                        },{
+                            name: 'count',
+                            displayName: 'Count'
+                        }
+                        
+//                            name: 'mutatedSamples',
+//                            displayName: 'Mutated Samples'
+//                        },{
+//                            name: 'sampleRate',
+//                            displayName: 'Smaple Mutated Frequency'
+//                        } 
+                    ];
+                    _worker.data.arr = cnaData(_datum, numOfCases);
+                    break;
                 default:
                     _worker.opts.title = 'Unknown';
+                    break;
             }
-            _worker.opts.name = key;
-            _worker.opts.tableId = 'study-view-table' + key;
+            _worker.opts.name = e.name;
+            _worker.opts.tableId = 'study-view-table-' + e.name;
             _worker.opts.parentId = 'study-view-charts';
+            _worker.opts.webService = e.webService;
             workers.push(_worker);
-        }
+        });
     }
     
     function initTables() {
@@ -89,63 +118,100 @@ var StudyViewInitTables = (function() {
         var genes = [];
         
         for(var i = 0, dataL = data.length; i < dataL; i++){
-            var datum = {};
+            var datum = {},
+                caseIds = data[i].caseIds.split(',');
             
-            datum.name = data[i].gene_symbol;
+            datum.gene = data[i].gene_symbol;
             datum.numOfMutations = Number(data[i].num_muts);
+            datum.mutatedSamples = caseIds.filter(function(elem, pos) {
+                return caseIds.indexOf(elem) === pos;
+            }).length;
             datum.sampleRate = 
-                    (Number(data[i].num_muts) / Number(numOfCases)* 100).toFixed(1) + '%';
+                    (datum.mutatedSamples / Number(numOfCases)* 100).toFixed(1) + '%';
             genes.push(datum);
         }
         return genes;
     }
     
-    function cnaData() {
+    function cnaData(data, numOfCases) {
+        var genePair = {},
+            genes = [];
         
+        for(var i = 0, dataL = data.length; i < dataL; i++){
+            var _genes = data[i].nonSangerGenes.concat(data[i].sangerGenes);
+            
+            _genes.forEach(function(e){
+                var _key = e + '#*#*#' + (data[i].ampdel?'amp':'del');
+                if(genePair.hasOwnProperty(_key)) {
+                    genePair[_key]++;
+                }else {
+                    genePair[_key] = 1;
+                }
+            });
+        }
+        for(var key in genePair) {
+            var _pair = key.split('#*#*#'),
+                _gene = _pair[0],
+                _ampDel = _pair[1];
+        
+            genes.push({
+                gene: _gene,
+                ampDel: _ampDel,
+                count: genePair[key]
+            });
+        }
+        return genes;
     }
     
-    function redrawWordCloud(){
-        var _selectedCases = getSelectedCases(),
-        _selectedCasesLength = _selectedCases.length,
-        _selectedGeneMutatedInfo = [],
-        _filteredMutatedGenes = {},
-        _selectedCasesIds = [];
+    function redraw(data){
+        var selectedCasesL = data.selectedCases.length;
+        //Start loaders
+        workers.forEach(function(e, i){
+            e.tableInstance.startLoading();
+        });
         
-        if(_selectedCasesLength !== 0){
-            for( var i = 0; i < _selectedCasesLength; i++){
-                _selectedCasesIds.push(_selectedCases[i].CASE_ID);
+        workers.forEach(function(e, i){
+            if(selectedCasesL !== 0){
+                $.ajax(data.webService[e.opts.name])
+                    .done(function(d){
+                        switch (e.opts.name) {
+                            case 'mutatedGenes':
+                                workers[i].data.arr = mutatedGenesData(d, selectedCasesL);
+                                break;
+                            case 'cna':
+                                workers[i].data.arr = cnaData(d, selectedCasesL);
+                                break;
+                            default:
+                                break;
+                        }
+                        
+                        e.tableInstance.redraw(workers[i].data, function(){
+                            e.tableInstance.stopLoading();
+                        });
+                    });
+
+            }else{
+                workers[i].data.arr = [];
+                e.tableInstance.redraw(workers[i].data);;
             }
-
-            var mutatedGenesObject = {
-                cmd: 'get_smg',
-                case_list: _selectedCasesIds.join(' '),
-                mutation_profile: StudyViewParams.params.mutationProfileId
-            };
-
-            $.when($.ajax({type: "POST", url: "mutations.json", data: mutatedGenesObject}))
-            .done(function(a1){
-                var i, dataLength = a1.length;
-
-                for( i = 0; i < dataLength; i++){
-                    _selectedGeneMutatedInfo.push(a1[i]);
-                }
-
-                _filteredMutatedGenes = wordCloudDataProcess(_selectedGeneMutatedInfo, _selectedCasesLength);
-                StudyViewInitWordCloud.redraw(_filteredMutatedGenes);
-                callBackFunctions();
-                $("#study-view-word-cloud-loader").css('display', 'none');
-                $("#study-view-word-cloud").css('opacity', '1');
-            });
-        }else{
-            _filteredMutatedGenes = wordCloudDataProcess([], 1);
-            StudyViewInitWordCloud.redraw(_filteredMutatedGenes);
-            $("#study-view-word-cloud-loader").css('display', 'none');
-            $("#study-view-word-cloud").css('opacity', '1');
-        }     
+        });
     }
     
     return {
-        init: init
+        init: init,
+        redraw: redraw,
+        getInitStatus: function() {
+            if(workers.length > 0) {
+                return true;
+            }else {
+                return false;
+            }
+        },
+        resizeTable: function() {
+            workers.forEach(function(e, i) {
+                e.tableInstance.resize();
+            });
+        }
     };
     
 })();

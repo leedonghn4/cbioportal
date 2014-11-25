@@ -127,7 +127,7 @@ var StudyViewInitCharts = (function(){
             _studyDesc = "",
             //table chart will always put ahead, and the higher prioirty, the bigger index(later will use array unshift for table charts)
             _priorityAttrs = ['CANCER_TYPE_DETAILED', 'CANCER_TYPE', 'PATIENT_ID', 'CASE_ID'];
-        
+        console.log(dataObtained);
         mutatedGenes = dataObtained.mutatedGenes || '';
         cna = dataObtained.cna || '';
         numOfCases = _arr.length;        
@@ -416,11 +416,38 @@ var StudyViewInitCharts = (function(){
     function initTables() {
         StudyViewInitTables.init({
             data: {
-                'mutatedGenes': mutatedGenes
-//                'cna': cna
+                attr: [
+                    {
+                        name: 'mutatedGenes',
+                        displayName: 'Mutated Genes',
+                        webService: {
+                            type: 'POST',
+                            url: "mutations.json",
+                            data: {
+                                cmd: 'get_smg',
+                                case_list: '',
+                                mutation_profile: StudyViewParams.params.mutationProfileId
+                            }
+                        }
+                    },{
+                        name: 'cna',
+                        displayName: 'CNA',
+                        webService: {
+                            type: 'POST',
+                            url: "Gistic.json",
+                            data: {
+                                selected_cancer_type: StudyViewParams.params.studyId
+                            }
+                        }
+                    }
+                ],
+                arr: {
+                    'mutatedGenes': mutatedGenes,
+                    'cna': cna
+                }
             },
             numOfCases: numOfCases
-        }, callBackFunctions);
+        });
 //        $(".study-view-word-cloud-delete").unbind('click');
 //        $(".study-view-word-cloud-delete").click(function (){
 //            $("#study-view-word-cloud").css('display','none');
@@ -542,6 +569,7 @@ var StudyViewInitCharts = (function(){
         $("#study-view-charts").html("");
         initSpecialCharts(_data.arr);
         initDcCharts(_data);
+        console.log(varChart);
     }
     
     function initDcCharts() {
@@ -659,10 +687,10 @@ var StudyViewInitCharts = (function(){
         removeContentsAndStartLoading();
         changeHeader();
         
-        if(StudyViewInitWordCloud.getInitStatus()){
-            //redrawSurvival has been added in redrawWordCloud as callback func
-            redrawWordCloud();
-        }else if(StudyViewSurvivalPlotView.getInitStatus()){
+        if(StudyViewInitTables.getInitStatus()){
+            redrawTables();
+        }
+        if(StudyViewSurvivalPlotView.getInitStatus()){
             //The timeout is set equal to the transition duration of dc charts.
             setTimeout(function() {
                 redrawSurvival();
@@ -670,10 +698,37 @@ var StudyViewInitCharts = (function(){
         }
     }
     
+    function redrawTables() {
+        var _selectedCases = getSelectedCases().map(function(e){
+            return e.CASE_ID;
+        });
+        
+        console.log("----Called----")
+        StudyViewInitTables.redraw({
+            selectedCases: _selectedCases,
+            webService: {
+                'mutatedGenes': {
+                    type: 'POST',
+                    url: "mutations.json",
+                    data: {
+                        cmd: 'get_smg',
+                        case_list: _selectedCases.join(' '),
+                        mutation_profile: StudyViewParams.params.mutationProfileId
+                    }
+                },
+                'cna': {
+                    type: 'POST',
+                    url: "Gistic.json",
+                    data: {
+                        selected_cancer_type: StudyViewParams.params.studyId
+                    }
+                }
+            }
+        });
+    }
     
     function redrawSpecialPlots(_casesInfo, _selectedAttr){
         var _scatterInit = StudyViewInitScatterPlot.getInitStatus(),
-            _wordCloudInit = StudyViewInitWordCloud.getInitStatus(),
             _timeout = 0;
         
         if(StudyViewSurvivalPlotView.getInitStatus()) {
@@ -691,11 +746,6 @@ var StudyViewInitCharts = (function(){
         if(_scatterInit){
             $("#study-view-scatter-plot-loader").css('display', 'block');
             $("#study-view-scatter-plot-body").css('opacity', '0.3');
-        }
-
-        if(_wordCloudInit) {
-            $("#study-view-word-cloud-loader").css('display', 'block');
-            $("#study-view-word-cloud").css('opacity', '0.3');
         }
         
         //When redraw plots, the page will be stuck before loader display, 

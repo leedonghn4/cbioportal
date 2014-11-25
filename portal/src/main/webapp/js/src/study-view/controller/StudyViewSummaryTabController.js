@@ -7,7 +7,7 @@ var StudyViewSummaryTabController = (function() {
         StudyViewWindowEvents.init();
         $('#dc-plots-loading-wait').hide();
         $('#study-view-main').show();
-        StudyViewInitWordCloud.getTable().fnAdjustColumnSizing();
+        StudyViewInitTables.resizeTable();
     };
     
     function initPage(){

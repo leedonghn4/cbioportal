@@ -31,11 +31,12 @@
 
 var Table = function() {
     var divs = {},
+        attr = [],
+        arr = [],
         dataTable = '',
         initStatus = false;
     
     function init(input,callback) {
-        console.log(input);
         initData(input.data, input.opts);
         initDiv();
         initTable(input.data);
@@ -59,12 +60,12 @@ var Table = function() {
            divs.reloadId = tableId + '-reload-icon';
            divs.downloadId = tableId + '-download-icon';
            divs.downloadWrapperId = tableId + '-download-icon-wrapper'
-           divs.loaderId = tableId + '-header';
+           divs.loaderId = tableId + '-loader';
        }
     }
     
     function initDiv() {
-        var _div = "<div id='"+divs.mainId+"' class='study-view-dc-chart h1half w2'>"+
+        var _div = "<div id='"+divs.mainId+"' class='study-view-dc-chart study-view-tables h1half w2'>"+
             "<div id='"+divs.titleWrapperId+"'style='height: 16px; width:100%; float:left; text-align:center;'>"+
                 "<div style='height:16px;float:right;' id='"+divs.titleWrapperId+"'>"+
                     "<img id='"+divs.reloadId+"' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
@@ -78,27 +79,30 @@ var Table = function() {
             "</div>"+
             "<div id='"+divs.tableId+"'>"+
             "</div>"+
-            "<div id='"+divs.loaderId+"' class='study-view-loader' style='top:20%;left:20%'><img src='images/ajax-loader.gif'/></div>"+
+            "<div id='"+divs.loaderId+"' class='study-view-loader' style='top:30%;left:30%'><img src='images/ajax-loader.gif'/></div>"+
         "</div>"
         $('#' + divs.attachedId).append(_div);
     }
     
     function initTable(data) {
-        var arr = data.arr,
-            attr = data.attr,
-            table = $('#' + divs.tableId);
+        var table = $('#' + divs.tableId)
+        
+        arr = data.arr;
+        attr = data.attr;
     
         var tableHtml = '<table><thead><tr></tr></thead><tbody></tbody></table>';
         table.html(tableHtml);
         
         var tableHeader = table.find('table thead tr');
         
+        //Append table header
         attr.forEach(function(e, i) {
             tableHeader.append('<th>'+ e.displayName +'</th>');
         });
         
         var tableBody = table.find('tbody');
         
+        //Append table body
         arr.forEach(function(e, i){
             var _row= '<tr>';
             attr.forEach(function(e1, i1){
@@ -110,9 +114,9 @@ var Table = function() {
     }
     
     function initDataTable() {
-        dataTable = $('#'+ divs.tableId +' table').dataTable({
+        var dataTableOpts = {
             "sDom": 'rt<f>',
-            "sScrollY": '255',
+            "sScrollY": '240',
             "bPaginate": false,
             "aaSorting": [[1, 'desc']],
             "bAutoWidth": true,
@@ -128,15 +132,57 @@ var Table = function() {
                         .find('input')
                         .attr('placeholder', 'Search...');
             }
+        };
+        
+        var geneIndex = -1;
+        
+        attr.forEach(function(e, i){
+            if(e.name === 'gene') {
+                geneIndex = i;
+            }
         });
+        
+        if(geneIndex !== -1) {
+            dataTableOpts.aoColumnDefs = [
+                {
+                    "aTargets": [geneIndex],
+                    "mDataProp": function(source,type) {
+                        var _gene = source[geneIndex];
+                        if (type==='display') {
+                            var str = '';
+                            if(_gene.toString().length > 8) {
+                                str += '<span class="hasQtip" qtip="'+_gene+'">'+_gene.substring(0,5) + '...'+'</span>';
+                            }else {
+                                str = _gene;
+                            }
+                            return str;
+                        }
+                        return _gene;
+                    }
+                }
+            ];
+            dataTableOpts.fnDrawCallback = function() {
+                $('#'+ divs.tableId).find('span.hasQtip').each(function(e, i) {
+                    $(this).qtip('destroy', true);
+                    $(this).qtip({
+                        content: {text: $(this).attr('qtip')},
+                        hide: { fixed: true, delay: 100 },
+                        style: { classes: 'qtip-light qtip-rounded qtip-shadow', tip: true },
+                        position: {my:'center right',at:'center left',viewport: $(window)}
+                    });
+                });
+            };
+        }
+        dataTable = $('#'+ divs.tableId +' table').dataTable(dataTableOpts);
     }
     
-    function redraw(data) {
+    function redraw(data, callback) {
         dataTable.api().destroy();
         $('#' + divs.tableId).empty();
         initData(data);
         initTable(data);
         initDataTable();
+        callback();
     }
     
     return {
@@ -147,6 +193,17 @@ var Table = function() {
         redraw: redraw,
         getInitStatus: function(){
             return initStatus;
+        },
+        resize: function() {
+            dataTable.fnAdjustColumnSizing();
+        },
+        startLoading: function() {
+            $('#' + divs.loaderId).css('display', 'block');
+            $('#' + divs.tableId).css('opacity', '0.3');
+        },
+        stopLoading: function() {
+            $('#' + divs.loaderId).css('display', 'none');
+            $('#' + divs.tableId).css('opacity', '1');
         }
     };
 };

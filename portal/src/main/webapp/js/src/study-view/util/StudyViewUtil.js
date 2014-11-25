@@ -207,6 +207,7 @@ var StudyViewUtil = (function(){
         changePosition: changePosition,
         testM: testM,
         changeTitle: changeTitle,
-        addQtip: addQtip
+        addQtip: addQtip,
+        showHideTitle: showHideTitle
     };
 })();
