@@ -55,7 +55,6 @@ var StudyViewInitTables = (function() {
             
             switch (e.name) {
                 case 'mutatedGenes':
-                    _worker.opts.title = 'Mutated Genes';
                     _worker.data.attr = [{
                             name: 'gene',
                             displayName: 'Gene'
@@ -67,31 +66,28 @@ var StudyViewInitTables = (function() {
                             displayName: 'Mutated Samples'
                         },{
                             name: 'sampleRate',
-                            displayName: 'Smaple Mutated Frequency'
+                            displayName: 'Smaple Mutated Freq'
                         } 
                     ];
                     _worker.data.arr = mutatedGenesData(_datum, numOfCases);
                     break;
                 case 'cna':
-                console.log(_datum);
-                    _worker.opts.title = 'CNA';
                     _worker.data.attr = [{
                             name: 'gene',
                             displayName: 'Gene'
                         },{
-                            name: 'ampDel',
-                            displayName: 'AMP/DEL'
+                            name: 'altType',
+                            displayName: 'CNA'
                         },{
-                            name: 'count',
-                            displayName: 'Count'
+                            name: 'altrate',
+                            displayName: '# Alt'
+                        },{
+                            name: 'altSample',
+                            displayName: 'Altered Samples'
+                        },{
+                            name: 'altrateInSample',
+                            displayName: 'Altered Samples Freq'
                         }
-                        
-//                            name: 'mutatedSamples',
-//                            displayName: 'Mutated Samples'
-//                        },{
-//                            name: 'sampleRate',
-//                            displayName: 'Smaple Mutated Frequency'
-//                        } 
                     ];
                     _worker.data.arr = cnaData(_datum, numOfCases);
                     break;
@@ -99,6 +95,7 @@ var StudyViewInitTables = (function() {
                     _worker.opts.title = 'Unknown';
                     break;
             }
+            _worker.opts.title = e.displayName || '';
             _worker.opts.name = e.name;
             _worker.opts.tableId = 'study-view-table-' + e.name;
             _worker.opts.parentId = 'study-view-charts';
@@ -134,52 +131,50 @@ var StudyViewInitTables = (function() {
     }
     
     function cnaData(data, numOfCases) {
-        var genePair = {},
-            genes = [];
+
+        var genes = [];
         
-        for(var i = 0, dataL = data.length; i < dataL; i++){
-            var _genes = data[i].nonSangerGenes.concat(data[i].sangerGenes);
+        for(var i = 0, dataL = data.gene.length; i < dataL; i++){
+            var datum = {},
+                _altType = '';
             
-            _genes.forEach(function(e){
-                var _key = e + '#*#*#' + (data[i].ampdel?'amp':'del');
-                if(genePair.hasOwnProperty(_key)) {
-                    genePair[_key]++;
-                }else {
-                    genePair[_key] = 1;
-                }
-            });
-        }
-        for(var key in genePair) {
-            var _pair = key.split('#*#*#'),
-                _gene = _pair[0],
-                _ampDel = _pair[1];
-        
-            genes.push({
-                gene: _gene,
-                ampDel: _ampDel,
-                count: genePair[key]
-            });
+            switch(data.alter[i]) {
+                case -2: 
+                    _altType = 'DEL';
+                    break;
+                case 2: 
+                    _altType = 'AMP';
+                    break;
+                default:
+                    break;
+            }
+            datum.gene = data.gene[i];
+            datum.altType = _altType;
+            datum.altrate = data.altrate[i];
+            datum.altSample = data.caseIds[i].length;
+            datum.altrateInSample = (datum.altSample / numOfCases * 100).toFixed(1) + '%';
+            genes.push(datum);
         }
         return genes;
     }
     
     function redraw(data){
-        var selectedCasesL = data.selectedCases.length;
+        var numSelectedCasesL = data.selectedCases.length;
         //Start loaders
         workers.forEach(function(e, i){
             e.tableInstance.startLoading();
         });
         
         workers.forEach(function(e, i){
-            if(selectedCasesL !== 0){
+            if(numSelectedCasesL.length !== 0){
                 $.ajax(data.webService[e.opts.name])
                     .done(function(d){
                         switch (e.opts.name) {
                             case 'mutatedGenes':
-                                workers[i].data.arr = mutatedGenesData(d, selectedCasesL);
+                                workers[i].data.arr = mutatedGenesData(d, numSelectedCasesL);
                                 break;
                             case 'cna':
-                                workers[i].data.arr = cnaData(d, selectedCasesL);
+                                workers[i].data.arr = cnaData(d, numSelectedCasesL);
                                 break;
                             default:
                                 break;

@@ -72,6 +72,7 @@ public class CnaJSON extends HttpServlet {
                 
         GeneticProfile cnaProfile;
         CancerStudy cancerStudy = null;
+        DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
         List<CnaEvent> cnaEvents = Collections.emptyList();
         Map<Long, Set<String>> drugs = Collections.emptyMap();
         Map<Long, Integer>  contextMap = Collections.emptyMap();
@@ -80,7 +81,8 @@ public class CnaJSON extends HttpServlet {
         try {
             cnaProfile = DaoGeneticProfile.getGeneticProfileByStableId(cnaProfileId);
             cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(cnaProfile.getCancerStudyId());
-            cnaEvents = DaoCnaEvent.getCnaEvents(caseIds, cnaProfile.getGeneticProfileId(), Arrays.asList((short)-2,(short)2));
+            cnaEvents = DaoCnaEvent.getCnaEventsByCbioGeneIds(caseIds,
+                    daoGeneOptimized.getEntrezGeneIds(daoGeneOptimized.getCbioCancerGenes()), cnaProfile.getGeneticProfileId(), Arrays.asList((short)-2,(short)2));
             String concatEventIds = getConcatEventIds(cnaEvents);
             int profileId = cnaProfile.getGeneticProfileId();
             drugs = getDrugs(cnaEvents, fdaOnly, cancerDrug);
@@ -94,7 +96,6 @@ public class CnaJSON extends HttpServlet {
         
         Map<String,List> data = initMap();
         Map<Long, Integer> mapEventIndex = new HashMap<Long, Integer>();
-        DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
         for (CnaEvent cnaEvent : cnaEvents) {
             Set<String> drug = Collections.emptySet();
             try {

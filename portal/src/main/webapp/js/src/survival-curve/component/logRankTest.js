@@ -140,7 +140,7 @@ var LogRankTest = function() {
             mergeGrps(inputGrp1, inputGrp2);
             calcExpection();
             calcVariance();
-            calcPval(calcChi2(), _callBackFunc);
+            calcPval(_callBackFunc);
         },
         calcList: function(_jobKey, input, _callBackFunc) {
             var _inputLength = input.length,
@@ -154,7 +154,7 @@ var LogRankTest = function() {
                 mergeGrps(_inputDatumGrp1, _inputDatumGrp2);
                 calcExpection();
                 calcVariance();
-                _chi_square_score_list.push(calcChi2());
+                _chi_square_score_list.push();
             }
             
             calcPvalList(_jobKey, _chi_square_score_list.join(","), _callBackFunc);

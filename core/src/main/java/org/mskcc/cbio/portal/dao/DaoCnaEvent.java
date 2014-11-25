@@ -128,6 +128,42 @@ public final class DaoCnaEvent {
                     + " AND case_cna_event.CNA_EVENT_ID=cna_event.CNA_EVENT_ID"
                     + " AND ALTERATION IN (" + StringUtils.join(cnaLevels,",") + ")"
                     + " AND CASE_ID in ('"+StringUtils.join(caseIds, "','")+"')");
+            
+            rs = pstmt.executeQuery();
+            List<CnaEvent> events = new ArrayList<CnaEvent>();
+            while (rs.next()) {
+                try {
+                    CnaEvent event = new CnaEvent(rs.getString("CASE_ID"),
+                            rs.getInt("GENETIC_PROFILE_ID"),
+                            rs.getLong("ENTREZ_GENE_ID"), rs.getShort("ALTERATION"));
+                    event.setEventId(rs.getLong("CNA_EVENT_ID"));
+                    events.add(event);
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoCnaEvent.class, con, pstmt, rs);
+        }
+    }
+    
+    public static List<CnaEvent> getCnaEventsByCbioGeneIds(String[] caseIds, Collection<Long> entrezGeneIds , int profileId, Collection<Short> cnaLevels) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoCnaEvent.class);
+            pstmt = con.prepareStatement
+		("SELECT case_cna_event.CNA_EVENT_ID, CASE_ID, GENETIC_PROFILE_ID,"
+                    + " ENTREZ_GENE_ID, ALTERATION FROM case_cna_event, cna_event"
+                    + " WHERE `GENETIC_PROFILE_ID`=?"
+                    + " AND case_cna_event.CNA_EVENT_ID=cna_event.CNA_EVENT_ID"
+                    + " AND ENTREZ_GENE_ID IN(" + StringUtils.join(entrezGeneIds,",") + ")"
+                    + " AND ALTERATION IN (" + StringUtils.join(cnaLevels,",") + ")"
+                    + " AND CASE_ID in ('"+StringUtils.join(caseIds, "','")+"')");
             pstmt.setInt(1, profileId);
             rs = pstmt.executeQuery();
             List<CnaEvent> events = new ArrayList<CnaEvent>();

@@ -53,6 +53,7 @@ var Table = function() {
            
            divs.attachedId = opts.parentId;
            divs.mainId = tableId + '-main';
+           divs.title = opts.title;
            divs.titleId = tableId + '-title';
            divs.titleWrapperId = divs.titleId + '-wrapper';
            divs.tableId = tableId;
@@ -69,13 +70,13 @@ var Table = function() {
             "<div id='"+divs.titleWrapperId+"'style='height: 16px; width:100%; float:left; text-align:center;'>"+
                 "<div style='height:16px;float:right;' id='"+divs.titleWrapperId+"'>"+
                     "<img id='"+divs.reloadId+"' class='study-view-title-icon hidden hover' src='images/reload-alt.svg'/>"+    
-                    "<div id='"+divs.downloadWrapperId+"' class='study-view-download-icon'>" +
-                        "<img id='"+divs.downloadId+"' style='float:left' src='images/in.svg'/>"+
-                    "</div>"+
+//                    "<div id='"+divs.downloadWrapperId+"' class='study-view-download-icon'>" +
+//                        "<img id='"+divs.downloadId+"' style='float:left' src='images/in.svg'/>"+
+//                    "</div>"+
                     "<img class='study-view-drag-icon' src='images/move.svg'/>"+
                     "<span chartID='"+divs.tableId+"' class='study-view-dc-chart-delete'>x</span>"+
                 "</div>"+
-                "<chartTitleH4 id='"+divs.titleId+"'>Mutated Genes</chartTitleH4>" +
+                "<chartTitleH4 id='"+divs.titleId+"'>"+divs.title+"</chartTitleH4>" +
             "</div>"+
             "<div id='"+divs.tableId+"'>"+
             "</div>"+
@@ -120,6 +121,7 @@ var Table = function() {
             "bPaginate": false,
             "aaSorting": [[1, 'desc']],
             "bAutoWidth": true,
+            aoColumnDefs: [],
             "fnInitComplete": function(oSettings, json) {
                 $('#'+ divs.tableId +' .dataTables_filter')
                         .find('label')
@@ -134,33 +136,55 @@ var Table = function() {
             }
         };
         
-        var geneIndex = -1;
+        var geneIndex = -1,
+            altType = -1;
         
         attr.forEach(function(e, i){
             if(e.name === 'gene') {
                 geneIndex = i;
             }
+            if(e.name === 'altType') {
+                altType = i;
+            }
         });
         
-        if(geneIndex !== -1) {
-            dataTableOpts.aoColumnDefs = [
-                {
-                    "aTargets": [geneIndex],
-                    "mDataProp": function(source,type) {
-                        var _gene = source[geneIndex];
-                        if (type==='display') {
-                            var str = '';
-                            if(_gene.toString().length > 8) {
-                                str += '<span class="hasQtip" qtip="'+_gene+'">'+_gene.substring(0,5) + '...'+'</span>';
-                            }else {
-                                str = _gene;
-                            }
-                            return str;
+        if(altType !== -1) {
+            dataTableOpts.aoColumnDefs.push({
+                "aTargets": [altType],
+                "mDataProp": function(source,type) {
+                    var _altType = source[altType];
+                    if (type==='display') {
+                        var str = '';
+                        if(_altType === 'AMP') {
+                            str += '<span style="color:red;font-weight:bold">'+_altType+'</span>';
+                        }else {
+                            str += '<span style="color:blue;font-weight:bold">'+_altType+'</span>';
                         }
-                        return _gene;
+                        return str;
                     }
+                    return _altType;
                 }
-            ];
+            });
+            dataTableOpts.aaSorting = [[2, 'desc']];
+        }
+        if(geneIndex !== -1) {
+            dataTableOpts.aoColumnDefs.push({
+                "aTargets": [geneIndex],
+                "mDataProp": function(source,type) {
+                    var _gene = source[geneIndex];
+                    if (type==='display') {
+                        var str = '';
+                        if(_gene.toString().length > 8) {
+                            str += '<span class="hasQtip" qtip="'+_gene+'">'+_gene.substring(0,5) + '...'+'</span>';
+                        }else {
+                            str = _gene;
+                        }
+                        return str;
+                    }
+                    return _gene;
+                }
+            });
+                
             dataTableOpts.fnDrawCallback = function() {
                 $('#'+ divs.tableId).find('span.hasQtip').each(function(e, i) {
                     $(this).qtip('destroy', true);

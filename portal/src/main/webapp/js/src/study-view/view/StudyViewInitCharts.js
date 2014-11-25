@@ -91,7 +91,6 @@ var StudyViewInitCharts = (function(){
         displayedID = [], //Displayed Charts ID number
         varDisplay = [], //Displayed Charts Name -- the display_name in each attribute   
         
-        WORDCLOUDTEXTSIZECONSTANT = 200,
         barOriginalColor = "#1F77B4",
        
         // Color scale from GOOGLE charts
@@ -343,13 +342,6 @@ var StudyViewInitCharts = (function(){
         StudyViewSurvivalPlotView.redraw(_passedCases, false);
     }
     
-    //This function defined all of callback functions.
-    function callBackFunctions(){
-        if(StudyViewSurvivalPlotView.getInitStatus()){
-            redrawSurvival();
-        }
-    }
-    
     function createLayout() {
         var container = document.querySelector('#study-view-charts');
         msnry = new Packery( container, {
@@ -569,7 +561,6 @@ var StudyViewInitCharts = (function(){
         $("#study-view-charts").html("");
         initSpecialCharts(_data.arr);
         initDcCharts(_data);
-        console.log(varChart);
     }
     
     function initDcCharts() {
@@ -703,7 +694,6 @@ var StudyViewInitCharts = (function(){
             return e.CASE_ID;
         });
         
-        console.log("----Called----")
         StudyViewInitTables.redraw({
             selectedCases: _selectedCases,
             webService: {
@@ -718,9 +708,10 @@ var StudyViewInitCharts = (function(){
                 },
                 'cna': {
                     type: 'POST',
-                    url: "Gistic.json",
+                    url: "cna.json",
                     data: {
-                        selected_cancer_type: StudyViewParams.params.studyId
+                        case_id: _selectedCases.join(' '),
+                        cna_profile:  StudyViewParams.params.cnaProfileId
                     }
                 }
             }
