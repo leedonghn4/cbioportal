@@ -25,16 +25,15 @@
    }
 %>
 
-   
+
 <div id="right_side">
     
     
     <h3>What's New</h3>
 
     <p>
-    &bull;<a href="jobs.jsp"> We are hiring a <b>Front End Engineer</b></a><br>
-    &bull;<a href="jobs.jsp"> We are hiring a <b>Data Curator</b></a><br>
-    &bull;<a href="news.jsp"> <b>New data and features released</b></a>
+    &bull;<a href="news.jsp"> <b>New data and features released</b></a><br/>
+    &bull;<a href="tools.jsp"> <b>New tools released</b></a>
     </p>
     
     <form action="http://groups.google.com/group/cbioportal-news/boxsubscribe">

@@ -37,6 +37,7 @@
     background: #e6e6e6;
     font-weight: normal;
     color: #555555;
+    max-width: 500px;
 }
 #study-view-tutorial {
     right: 0;
@@ -254,6 +255,9 @@
 #dataTables_filter {
     width:auto;
     float: right;
+}
+#clinical-data-table-div .dataTables_filter {
+    width: 30%;
 }
 .study-view-pie-label .dataTables_filter {
     width: 100%;
@@ -971,4 +975,21 @@ ul li a:hover, ul li a:focus {
 }
 #clinical_table_wrapper table.dataTable>tbody>tr>td {
     white-space: nowrap;
+}
+#clinical_table_wrapper .DTTT_container.ui-buttonset.ui-buttonset-multi a {
+    width: 50px;
+    height: 20px;
+    line-height: 20px;
+}
+#clinical_table_wrapper .DTTT_container.ui-buttonset.ui-buttonset-multi {
+    float: left;
+}
+div.DTTT_print_info {
+    position: absolute;
+    top: 30%;
+    /*print info div width around 280px*/
+    left: calc(50% - 140px);
+    background: white;
+    border: 1px solid black;
+    padding: 0 5px;
 }
