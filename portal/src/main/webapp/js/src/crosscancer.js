@@ -950,8 +950,9 @@
                             };
                             var servletName = "crosscancermutation.json";
                             // init mutation data proxy with the data servlet config
-                            var proxy = new MutationDataProxy(genes.join(" "));
-                            proxy.initWithoutData(servletName, servletParams);
+                            var proxy = new MutationDataProxy({geneList: genes.join(" "),
+	                                                           params: servletParams});
+                            proxy.initWithoutData(servletName);
 
                             // init default mutation details view
 
@@ -961,11 +962,10 @@
 	                        var options = {
 		                        el: el,
 		                        data: {
-			                        geneList: proxy.getRawGeneList(),
 			                        sampleList: []
 		                        },
 		                        proxy: {
-			                        mutation: {
+			                        mutationProxy: {
 				                        instance: proxy
 			                        }
 		                        },
@@ -979,6 +979,18 @@
 					                        "cancerStudy": "visible",
 					                        // exclude tumor type for now
 					                        "tumorType": "excluded"
+				                        },
+				                        dataTableOpts: {
+					                        "sDom": '<"H"<"mutation_datatables_filter"f>C<"mutation_datatables_info"i>>t<"F"<"datatable-paging"pl>>',
+					                        "deferRender": true,
+					                        "bPaginate": true,
+					                        "sPaginationType": "two_button",
+					                        "bLengthChange": true,
+					                        "iDisplayLength": 50,
+					                        "aLengthMenu": [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"]],
+					                        "oLanguage": {
+						                        "sLengthMenu": "Show _MENU_ per page"
+					                        }
 				                        }
 			                        }
 		                        }
@@ -1100,6 +1112,11 @@
                     ]
                 });
 
+	            // TODO this is a workaround to remove the sort icons,
+	            // we should fix this thru the data tables API
+	            this.$el.find("span.DataTables_sort_icon").remove();
+	            this.$el.find("table.cc-tip-table th").removeClass("sorting_desc");
+
                 return this;
             }
         });
@@ -1151,24 +1168,25 @@
 //                    formElement.submit();
 
 	                // request download
-	                cbio.util.requestDownload("svgtopdf.do",
-						{filetype: "pdf",
-		                    filename: "crosscancerhistogram.pdf",
-		                    svgelement: $("#cchistogram").html()}
-	                );
+//	                cbio.download.requestDownload("svgtopdf.do",
+//						{filetype: "pdf",
+//		                    filename: "crosscancerhistogram.pdf",
+//		                    svgelement: $("#cchistogram").html()}
+//	                );
+
+	                var downloadOptions = {
+		                filename: "crosscancerhistogram.pdf",
+		                contentType: "application/pdf",
+		                servletName: "svgtopdf.do"
+	                };
+
+	                cbio.download.initDownload(
+		                $("#cchistogram svg")[0], downloadOptions);
                 });
 
                 $("#histogram-download-svg").click(function() {
-//                    var formElement = $("form.svg-to-file-form");
-//                    formElement.find("input[name=svgelement]").val($("#cchistogram").html());
-//                    formElement.submit();
-
-	                  // request download
-	                cbio.util.requestDownload("svgtopdf.do",
-						{filetype: "svg",
-		                    filename: "crosscancerhistogram.svg",
-		                    svgelement: $("#cchistogram").html()}
-	                );
+	                cbio.download.initDownload(
+		                $("#cchistogram svg")[0], {filename: "crosscancerhistogram.svg"});
                 });
 
                 $("#histogram-customize").click(function() {

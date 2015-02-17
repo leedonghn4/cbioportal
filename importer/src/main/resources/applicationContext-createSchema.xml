@@ -4,13 +4,24 @@
 		 xmlns:tx="http://www.springframework.org/schema/tx"
 		 xmlns:context="http://www.springframework.org/schema/context"
 		 xmlns:util="http://www.springframework.org/schema/util"
-		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-							 http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-							 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-							 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+							 http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+							 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+							 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
  
   <context:annotation-config />
-  <context:property-placeholder location="classpath:/portal.properties"/>
+  <!--<context:property-placeholder location="classpath:/importer.properties"/>-->
+  <b:bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <b:property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+      <b:property name="searchSystemEnvironment" value="true" />
+      <b:property name="ignoreResourceNotFound" value="true" />
+      <b:property name="locations">
+          <b:list>
+              <b:value>classpath:/importer.properties</b:value>
+              <b:value>file:///${PORTAL_HOME}/importer.properties</b:value>
+          </b:list>
+      </b:property>
+  </b:bean>
 
   <!-- hibernate session factory -->
   <b:bean id="importerSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">

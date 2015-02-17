@@ -24,16 +24,12 @@ import org.mskcc.cbio.importer.util.ClassLoader;
 
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
-import org.mskcc.cbio.portal.util.ProgressMonitor;
-import org.mskcc.cbio.portal.util.CancerStudyReader;
-import org.mskcc.cbio.portal.scripts.ImportCaseList;
-import org.mskcc.cbio.portal.scripts.ImportTypesOfCancers;
+import org.mskcc.cbio.portal.util.*;
+import org.mskcc.cbio.portal.scripts.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.*;
 
 import org.apache.commons.io.*;
 import org.apache.commons.io.filefilter.*;
@@ -46,7 +42,6 @@ class CancerStudyImporterImpl implements Importer, Validator {
 
     private static final String DATA_FILE_PREFIX = "data_";
     private static final String META_FILE_PREFIX = "meta_";
-    private static final String CASE_LIST_DIRECTORY_NAME = "case_lists";
     private static final String CASE_LIST_WILDCARD = "*.txt";
     private static final String CANCER_STUDY_FILENAME = "meta_study.txt";
     private static final String CANCER_TYPE_FILENAME = "cancer_type.txt";
@@ -125,6 +120,12 @@ class CancerStudyImporterImpl implements Importer, Validator {
 	public void importData(String portal, Boolean initPortalDatabase, Boolean initTumorTypes, Boolean importReferenceData) throws Exception
     {
 		throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateCancerStudy(String portal, CancerStudyMetadata cancerStudyMetadata) throws Exception
+    {
+        throw new UnsupportedOperationException();
     }
 
 	@Override
@@ -345,11 +346,11 @@ class CancerStudyImporterImpl implements Importer, Validator {
 
     private void importCancerStudyCaseLists(String cancerStudyDirectoryName) throws Exception
     {
-        File caseListDirectory = FileUtils.getFile(cancerStudyDirectoryName, CASE_LIST_DIRECTORY_NAME);
+        File caseListDirectory = FileUtils.getFile(cancerStudyDirectoryName, org.mskcc.cbio.importer.FileUtils.CASE_LIST_DIRECTORY_NAME);
         if (caseListDirectory.exists()) {
             logMessage("Importing case lists found in directory: " + caseListDirectory.getCanonicalPath());
             String[] args = new String[] { caseListDirectory.getCanonicalPath() };
-            ImportCaseList.main(args);
+            ImportPatientList.main(args);
         }
         else {
             logMessage("Cannot find case list directory, skipping case list import: " + caseListDirectory.getCanonicalPath());
@@ -435,7 +436,7 @@ class CancerStudyImporterImpl implements Importer, Validator {
     {
         boolean status = true;
 
-        File caseListDirectory = FileUtils.getFile(cancerStudyDirectoryName, CASE_LIST_DIRECTORY_NAME);
+        File caseListDirectory = FileUtils.getFile(cancerStudyDirectoryName, org.mskcc.cbio.importer.FileUtils.CASE_LIST_DIRECTORY_NAME);
         if (caseListDirectory.exists()) {
             logMessage("Validating case list files found in: " + caseListDirectory.getCanonicalPath());
             Collection<File> caseListFiles = listFiles(caseListDirectory.getCanonicalPath(), new WildcardFileFilter(CASE_LIST_WILDCARD));

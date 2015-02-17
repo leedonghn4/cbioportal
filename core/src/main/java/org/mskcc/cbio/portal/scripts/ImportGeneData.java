@@ -150,13 +150,13 @@ public class ImportGeneData {
         return bitSet.cardinality();
     }
     
-    private static void importSuppGeneData(ProgressMonitor pMonitor, File suppGeneFile) throws IOException, DaoException {
-        MySQLbulkLoader.bulkLoadOn();
+    static void importSuppGeneData(ProgressMonitor pMonitor, File suppGeneFile) throws IOException, DaoException {
+        MySQLbulkLoader.bulkLoadOff();
         FileReader reader = new FileReader(suppGeneFile);
         BufferedReader buf = new BufferedReader(reader);
-        String line = buf.readLine();
+        String line;
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-        while (line != null) {
+        while ((line = buf.readLine()) != null) {
             if (pMonitor != null) {
                 pMonitor.incrementCurValue();
                 ConsoleUtil.showProgress(pMonitor);
@@ -176,6 +176,7 @@ public class ImportGeneData {
                 daoGene.addGene(gene);
             }
         }
+        reader.close(); 
     }
 
     public static void main(String[] args) throws Exception {
@@ -214,7 +215,7 @@ public class ImportGeneData {
             System.out.println(" --> total number of lines:  " + numLines);
             pMonitor.setMaxValue(numLines);
             ImportMicroRNAIDs.importData(pMonitor, miRNAFile);
-        }
+    }
         
         if (args.length>=4) {
             File lociFile = new File(args[3]);

@@ -217,6 +217,8 @@
                     addNoteTooltip("."+table_id+"-tip");
                     addDrugsTooltip("."+table_id+"-drug-tip", 'top right', 'bottom center');
                 },
+                "bPaginate": true,
+                "sPaginationType": "two_button",
                 "aaSorting": [[cnaTableIndices['altrate'],'desc']],
                 "oLanguage": {
                     "sInfo": "&nbsp;&nbsp;(_START_ to _END_ of _TOTAL_)&nbsp;&nbsp;",
@@ -323,7 +325,7 @@
     $(document).ready(function(){
         $('#cna_wrapper_table').hide();
         $('#cna_id_filter_msg').hide();
-        var params = {<%=PatientView.CASE_ID%>:caseIdsStr,
+        var params = {<%=PatientView.SAMPLE_ID%>:caseIdsStr,
             <%=PatientView.CNA_PROFILE%>:cnaProfileId
         };
         

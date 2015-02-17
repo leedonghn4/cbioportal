@@ -1837,7 +1837,7 @@ NetworkVis.prototype._defaultOptsArray = function()
  */
 NetworkVis.prototype._xrefArray = function()
 {
-    var linkMap = new Array();
+    var linkMap = {};
 
     // TODO find missing links (Nucleotide Sequence Database)
     //linkMap["refseq"] =   "http://www.genome.jp/dbget-bin/www_bget?refseq:";
@@ -1879,7 +1879,7 @@ NetworkVis.prototype._xrefArray = function()
  */
 NetworkVis.prototype._edgeTypeArray = function()
 {
-    var typeArray = new Array();
+    var typeArray = {};
 
     // by default every edge type is visible
     typeArray[this.IN_SAME_COMPONENT] = true;
@@ -1898,7 +1898,7 @@ NetworkVis.prototype._edgeTypeArray = function()
  */
 NetworkVis.prototype._edgeSourceArray = function()
 {
-    var sourceArray = new Array();
+    var sourceArray = {};
 
     // dynamically collect all sources
 
@@ -1934,7 +1934,7 @@ NetworkVis.prototype._edgeSourceArray = function()
  */
 NetworkVis.prototype._geneWeightArray = function(coeff)
 {
-    var weightArray = new Array();
+    var weightArray = {};
 
     if (coeff > 1)
     {
@@ -2760,7 +2760,7 @@ NetworkVis.prototype._refreshRelationsTab = function()
     var edges = this._vis.edges();
 
     // initialize percentages of each edge type
-    var percentages = new Array();
+    var percentages = {};
 
     percentages[this.IN_SAME_COMPONENT] = 0;
     percentages[this.REACTS_WITH] = 0;
@@ -2950,6 +2950,10 @@ NetworkVis.prototype._initControlFunctions = function()
         self._saveAsPng();
     };
 
+	var saveAsSvg = function() {
+		self._saveAsSvg();
+	};
+
     var openProperties = function() {
         self._openProperties();
     };
@@ -3006,7 +3010,7 @@ NetworkVis.prototype._initControlFunctions = function()
         self.handleMenuEvent(evt.target.id);
     };
 
-    this._controlFunctions = new Array();
+    this._controlFunctions = {};
 
     //_controlFunctions["hide_selected"] = _hideSelected;
     this._controlFunctions["hide_selected"] = filterSelectedGenes;
@@ -3020,7 +3024,7 @@ NetworkVis.prototype._initControlFunctions = function()
     this._controlFunctions["remove_disconnected"] = toggleRemoveDisconnected;
     this._controlFunctions["show_profile_data"] = toggleProfileData;
     this._controlFunctions["save_as_png"] = saveAsPng;
-    //_controlFunctions["save_as_svg"] = _saveAsSvg;
+	//this._controlFunctions["save_as_svg"] = saveAsSvg;
     this._controlFunctions["layout_properties"] = openProperties;
     this._controlFunctions["highlight_neighbors"] = highlightNeighbors;
     this._controlFunctions["remove_highlights"] = removeHighlights;
@@ -3365,7 +3369,8 @@ NetworkVis.prototype._toggleProfileData = function()
  */
 NetworkVis.prototype._saveAsPng = function()
 {
-    this._vis.exportNetwork('png', 'export_network.jsp?type=png');
+	var content = cbio.util.b64ToByteArrays(this._vis.png());
+	cbio.download.clientSideDownload(content, "network.png", "image/png");
 };
 
 /**
@@ -3373,7 +3378,12 @@ NetworkVis.prototype._saveAsPng = function()
  */
 NetworkVis.prototype._saveAsSvg = function()
 {
-    this._vis.exportNetwork('svg', 'export_network.jsp?type=svg');
+	var downloadOpts = {
+		filename: "network.svg",
+		preProcess: null
+	};
+
+	cbio.download.initDownload(this._vis.svg(), downloadOpts);
 };
 
 /**

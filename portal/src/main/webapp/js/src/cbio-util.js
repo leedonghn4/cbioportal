@@ -1,4 +1,7 @@
-var cbio = {};
+if (cbio === undefined)
+{
+	var cbio = {};
+}
 
 cbio.util = (function() {
 
@@ -121,6 +124,35 @@ cbio.util = (function() {
 
         return str1.substring(0, i);
     };
+
+	/**
+	 * Converts base 64 encoded string into an array of byte arrays.
+	 *
+	 * @param b64Data   base 64 encoded string
+	 * @param sliceSize size of each byte array (default: 512)
+	 * @returns {Array} an array of byte arrays
+	 */
+	function b64ToByteArrays(b64Data, sliceSize) {
+		sliceSize = sliceSize || 512;
+
+		var byteCharacters = atob(b64Data);
+		var byteArrays = [];
+
+		for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+			var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+			var byteNumbers = new Array(slice.length);
+			for (var i = 0; i < slice.length; i++) {
+				byteNumbers[i] = slice.charCodeAt(i);
+			}
+
+			var byteArray = new Uint8Array(byteNumbers);
+
+			byteArrays.push(byteArray);
+		}
+
+		return byteArrays;
+	}
 
 	/**
 	 * Detects browser and its version.
@@ -262,62 +294,6 @@ cbio.util = (function() {
     }
 
 	/**
-	 * Submits the download form.
-	 * This will send a request to the server.
-	 *
-	 * @param servletName       name of the action servlet
-	 * @param servletParams     params to send with the form submit
-	 * @param form              jQuery selector for the download form
-	 */
-	function submitDownload(servletName, servletParams, form)
-	{
-		// remove all previous input fields (if any)
-		$(form).find("input").remove();
-
-		// add new input fields
-		for (var name in servletParams)
-		{
-			var value = servletParams[name];
-			$(form).append('<input type="hidden" name="' + name + '">');
-			$(form).find('input[name="' + name + '"]').val(value);
-		}
-
-		// update target servlet for the action
-		$(form).attr("action", servletName);
-		// submit the form
-		$(form).submit();
-	}
-
-	/**
-	 * Sends a download request to the hidden frame dedicated to file download.
-	 *
-	 * This function is implemented as a workaround to prevent JSmol crash
-	 * due to window.location change after a download request.
-	 *
-	 * @param servletName
-	 * @param servletParams
-	 */
-	function requestDownload(servletName, servletParams)
-	{
-		// TODO this is a workaround, frame download doesn't work for IE
-		if (detectBrowser().msie)
-		{
-			initDownloadForm();
-			submitDownload(servletName, servletParams, "#global_file_download_form");
-			return;
-		}
-
-		initDownloadFrame(function() {
-			var targetWindow = getTargetWindow("global_file_download_frame");
-
-			targetWindow.postMessage(
-				{servletName: servletName,
-					servletParams: servletParams},
-				getOrigin());
-		});
-	}
-
-	/**
 	 * Returns the content window for the given target frame.
 	 *
 	 * @param id    id of the target frame
@@ -353,49 +329,14 @@ cbio.util = (function() {
 		return targetDocument;
 	}
 
-	/**
-	 * Initializes the hidden download frame for the entire document.
-	 * This is to isolate download requests from the main window.
-	 */
-	function initDownloadFrame(callback)
-	{
-		var frame = '<iframe id="global_file_download_frame" ' +
-		            'src="file_download_frame.jsp" ' +
-		            'seamless="seamless" width="0" height="0" ' +
-		            'frameBorder="0" scrolling="no">' +
-		            '</iframe>';
+    function getLinkToPatientView(cancerStudyId, patientId) {
+        return "case.do?cancer_study_id=" + cancerStudyId + "&case_id=" + patientId;
+    }
+    
+    function getLinkToSampleView(cancerStudyId, sampleId) {
+        return "case.do?cancer_study_id=" + cancerStudyId + "&sample_id=" + sampleId;
+    }
 
-		// only initialize if the frame doesn't exist
-		if ($("#global_file_download_frame").length === 0)
-		{
-			$(document.body).append(frame);
-
-			// TODO a workaround to enable target frame to get ready to listen messages
-			setTimeout(callback, 500);
-		}
-		else
-		{
-			callback();
-		}
-	}
-
-	/**
-	 * This form is initialized only for IE
-	 */
-	function initDownloadForm()
-	{
-		var form = '<form id="global_file_download_form"' +
-		           'style="display:inline-block"' +
-		           'action="" method="post" target="_blank">' +
-		           '</form>';
-
-		// only initialize if the form doesn't exist
-		if ($("#global_file_download_form").length === 0)
-		{
-			$(document.body).append(form);
-		}
-	}
-        
     return {
         toPrecision: toPrecision,
         getObjectLength: getObjectLength,
@@ -404,6 +345,7 @@ cbio.util = (function() {
         arrayToAssociatedArrayIndices: arrayToAssociatedArrayIndices,
         alterAxesAttrForPDFConverter: alterAxesAttrForPDFConverter,
         lcss: lcss,
+	    b64ToByteArrays: b64ToByteArrays,
         browser: detectBrowser(), // returning the browser object, not the function itself
         getWindowOrigin: getOrigin,
         sortByAttribute: sortByAttribute,
@@ -411,9 +353,9 @@ cbio.util = (function() {
         autoHideOnMouseLeave: autoHideOnMouseLeave,
         swapElement: swapElement,
 	    getTargetWindow: getTargetWindow,
-	    submitDownload: submitDownload,
-	    requestDownload: requestDownload,
-	    getTargetDocument: getTargetDocument
+	    getTargetDocument: getTargetDocument,
+        getLinkToPatientView: getLinkToPatientView,
+        getLinkToSampleView: getLinkToSampleView
     };
 
 })();
