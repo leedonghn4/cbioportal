@@ -63,7 +63,7 @@ public class TestDaoCancerStudy extends TestCase {
         assertEquals("colon,rectum,colorectal",
                 DaoTypeOfCancer.getTypeOfCancerById("COADREAD").getClinicalTrialKeywords());
 
-        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM Description", "gbm", "brca", false);
+        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM Description","","", "gbm", "brca", false);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 
         //   `CANCER_STUDY_ID` auto_increment counts from 1
@@ -116,15 +116,15 @@ public class TestDaoCancerStudy extends TestCase {
 		// TBD: change this to use getResourceAsStream()
         ImportTypesOfCancers.load(new ProgressMonitor(), new File("target/test-classes/cancers.txt"));
 
-        CancerStudy cancerStudy1 = new CancerStudy("GBM public study x", "GBM Description",
+        CancerStudy cancerStudy1 = new CancerStudy("GBM public study x", "GBM Description","","",
                 "tcga_gbm1", "brca", true);
         DaoCancerStudy.addCancerStudy(cancerStudy1);
 
-        CancerStudy cancerStudy = new CancerStudy("GBM private study x", "GBM Description 2",
+        CancerStudy cancerStudy = new CancerStudy("GBM private study x", "GBM Description 2","","",
                 "tcga_gbm2", "brca", false);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 
-        cancerStudy = new CancerStudy("Breast", "Breast Description",
+        cancerStudy = new CancerStudy("Breast", "Breast Description","","",
                 "tcga_gbm3", "brca", false);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 

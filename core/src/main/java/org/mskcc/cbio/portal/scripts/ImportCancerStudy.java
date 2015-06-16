@@ -43,15 +43,16 @@ import java.io.File;
 public class ImportCancerStudy {
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            System.out.println("command line usage: importCancerStudy.pl <cancer_study.txt>");
-            return;
-        }
+//        if (args.length == 0) {
+//            System.out.println("command line usage: importCancerStudy.pl <cancer_study.txt>");
+//            return;
+//        }
 
         ProgressMonitor pMonitor = new ProgressMonitor();
         pMonitor.setConsoleMode(true);
 
-        File file = new File(args[0]);
+//        File file = new File(args[0]);
+        File file = new File("brca-tcga-public.txt");
         CancerStudy cancerStudy = CancerStudyReader.loadCancerStudy(file);
         System.out.println ("Loaded the following cancer study:  ");
         System.out.println ("ID:  " + cancerStudy.getInternalId());

@@ -80,7 +80,7 @@ public class AccessControlImpl implements AccessControl {
             ArrayList<CancerStudy> finalCancerStudiesList = new ArrayList<CancerStudy>();
 			String allCancerStudyTitle = (GlobalProperties.usersMustBeAuthorized()) ?
 				"All Authorized Cancer Studies" : "All Cancer Studies";
-            CancerStudy cancerStudy = new CancerStudy(allCancerStudyTitle, allCancerStudyTitle,
+            CancerStudy cancerStudy = new CancerStudy(allCancerStudyTitle, allCancerStudyTitle,"","",
                                                       "all", "all", true);
             finalCancerStudiesList.add(cancerStudy);
             finalCancerStudiesList.addAll(accessibleCancerStudies);

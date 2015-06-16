@@ -1,0 +1,7 @@
+type_of_cancer: brca
+cancer_study_identifier: brca_mskcc_solitd_5065_g
+name: Study of BYL719 with Letrozole in ER+/EGFR2- Breast Cancer Patients - Solit (CMO 5065_g)
+date_of_last_update: 2015-03-25
+description: Genetic profiling of a mix of non-responders and responders to combination therapy in metastatic breast cancer patients (updated on 2015-03-25)
+groups: COMPONC;SOLITD
+short_name: BRCA (CMO 5065_g)

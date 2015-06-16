@@ -57,6 +57,8 @@ public class CancerStudy {
     private int studyID; // assigned by dbms auto increment
     private String name;
     private String description;
+    private String cancerStudyGroupIdentifier;
+    private String cancerStudyGroupRanking;
     private String cancerStudyIdentifier;
     private String typeOfCancerId;  // required
     private boolean publicStudy;  // if true, a public study, otherwise private
@@ -71,10 +73,12 @@ public class CancerStudy {
      * @param name                  Name of Cancer Study.
      * @param description           Description of Cancer Study.
      * @param cancerStudyIdentifier Cancer Study Stable Identifier.
+     * @param cancerStudyGroupIdentifier Cancer Study Group Identifier.
+     * @param cancerStudyGroupRanking Cancer Study version.
      * @param typeOfCancerId        Type of Cancer.
      * @param publicStudy           Flag to indicate if this is a public study.
      */
-    public CancerStudy(String name, String description, String cancerStudyIdentifier,
+    public CancerStudy(String name, String description, String cancerStudyIdentifier, String cancerStudyGroupIdentifier, String cancerStudyGroupRanking,
             String typeOfCancerId, boolean publicStudy) {
         super();
         this.studyID = CancerStudy.NO_SUCH_STUDY;
@@ -82,6 +86,8 @@ public class CancerStudy {
         this.shortName = "";
         this.description = description;
         this.cancerStudyIdentifier = cancerStudyIdentifier;
+        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+        this.cancerStudyGroupRanking = cancerStudyGroupRanking;
         this.typeOfCancerId = typeOfCancerId;
         this.publicStudy = publicStudy;
     }
@@ -156,6 +162,38 @@ public class CancerStudy {
      */
     public void setName(String name) {
         this.name = name;
+    }
+    
+        /**
+     * Gets the Cancer Study Group Name.
+     * @return cancer study group name.
+     */
+    public String getGroupName() {
+        return cancerStudyGroupIdentifier;
+    }
+
+    /**
+     * Sets the Cancer Study Group Name.
+     * @param cancerStudyGroupIdentifier cancer study group name.
+     */
+    public void setGroupName(String cancerStudyGroupIdentifier) {
+        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+    }
+    
+        /**
+     * Gets the Cancer Study Ranking.
+     * @return cancer study ranking.
+     */
+    public String getRanking() {
+        return cancerStudyGroupRanking;
+    }
+
+    /**
+     * Sets the Cancer Study Ranking.
+     * @param cancerStudyGroupRanking cancer study ranking.
+     */
+    public void setRanking(String cancerStudyGroupRanking) {
+        this.cancerStudyGroupRanking = cancerStudyGroupRanking;
     }
 
     /**

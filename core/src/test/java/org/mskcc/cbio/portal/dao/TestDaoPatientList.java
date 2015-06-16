@@ -68,7 +68,7 @@ public class TestDaoPatientList extends TestCase {
 
     private void createSmallDbms() throws DaoException {
         ResetDatabase.resetDatabase();
-        CancerStudy study = new CancerStudy("study", "description", "id", "brca", true);
+        CancerStudy study = new CancerStudy("study", "description","","", "id", "brca", true);
         Patient p = new Patient(study, "TCGA-1");
         int pId = DaoPatient.addPatient(p);
         p = new Patient(study, "TCGA-2");

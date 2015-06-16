@@ -101,7 +101,7 @@ public class TestGetTypesOfCancer extends TestCase {
         // then, load one sample cancer study
 		// TBD: change this to use getResourceAsStream()
         ImportTypesOfCancers.load(new ProgressMonitor(), new File("target/test-classes/cancers.txt"));
-        CancerStudy tcgaGbm = new CancerStudy("TCGA GBM", "TCGA GBM Project", "tcga_gbm" ,
+        CancerStudy tcgaGbm = new CancerStudy("TCGA GBM", "TCGA GBM Project","","", "tcga_gbm" ,
                 "GBM", true);
 
         DaoCancerStudy.addCancerStudy(tcgaGbm);

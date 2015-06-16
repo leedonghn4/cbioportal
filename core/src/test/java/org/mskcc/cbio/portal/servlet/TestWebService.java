@@ -279,12 +279,12 @@ public class TestWebService extends TestCase {
       ImportTypesOfCancers.load(new ProgressMonitor(), new File("target/test-classes/cancers.txt"));
 
       // make a couple of private studies (1 and 2)
-      privateCancerStudy1 = new CancerStudy( "name", "description", "study1", "brca", false );
+      privateCancerStudy1 = new CancerStudy( "name", "description","","", "study1", "brca", false );
       DaoCancerStudy.addCancerStudy(privateCancerStudy1);  // 1
-      privateCancerStudy2 = new CancerStudy( "other name", "other description", "study2", "brca", false );
+      privateCancerStudy2 = new CancerStudy( "other name", "other description","","", "study2", "brca", false );
       DaoCancerStudy.addCancerStudy(privateCancerStudy2);  // 2
       
-      publicCancerStudy = new CancerStudy( "public name", "description", "study3", "brca", true );
+      publicCancerStudy = new CancerStudy( "public name", "description","","", "study3", "brca", true );
       DaoCancerStudy.addCancerStudy(publicCancerStudy);  // 3
       
       UserAuthorities authorities = new UserAuthorities(user1.getEmail(), java.util.Arrays.asList("ROLE_USER"));

@@ -59,7 +59,7 @@ public class TestGeneticProfileReader extends TestCase {
 
         DaoCancerStudy.deleteAllRecords();
 
-        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM Description",
+        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM Description","","",
                 "gbm", "gbm", true);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 		// TBD: change this to use getResourceAsStream()

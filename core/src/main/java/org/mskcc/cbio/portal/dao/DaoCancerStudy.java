@@ -139,24 +139,42 @@ public final class DaoCancerStudy {
         try {
             con = JdbcUtil.getDbConnection(DaoCancerStudy.class);
             pstmt = con.prepareStatement("INSERT INTO cancer_study " +
-                    "( `CANCER_STUDY_IDENTIFIER`, `NAME`, "
+                    "( `CANCER_STUDY_IDENTIFIER`,`CANCER_STUDY_GROUP_IDENTIFIER`,`CANCER_STUDY_GROUP_RANKING`, `NAME`, "
                     + "`DESCRIPTION`, `PUBLIC`, `TYPE_OF_CANCER_ID`, "
-                    + "`PMID`, `CITATION`, `GROUPS`, `SHORT_NAME` ) VALUES (?,?,?,?,?,?,?,?,?)",
+                    + "`PMID`, `CITATION`, `GROUPS`, `SHORT_NAME` ) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, stableId);
-            pstmt.setString(2, cancerStudy.getName());
-            pstmt.setString(3, cancerStudy.getDescription());
-            pstmt.setBoolean(4, cancerStudy.isPublicStudy());
-            pstmt.setString(5, cancerStudy.getTypeOfCancerId());
-            pstmt.setString(6, cancerStudy.getPmid());
-            pstmt.setString(7, cancerStudy.getCitation());
+            String groupname = cancerStudy.getGroupName();
+            if(groupname == null)
+            {
+              pstmt.setString(2, stableId);  
+            }
+            else
+            {
+                pstmt.setString(2, cancerStudy.getGroupName());
+            }
+            String ranking = cancerStudy.getRanking();
+            if(ranking == null)
+            {
+               pstmt.setString(3, "primary"); 
+            }
+            else
+            {
+                pstmt.setString(3, cancerStudy.getRanking());
+            }
+            pstmt.setString(4, cancerStudy.getName());
+            pstmt.setString(5, cancerStudy.getDescription());
+            pstmt.setBoolean(6, cancerStudy.isPublicStudy());
+            pstmt.setString(7, cancerStudy.getTypeOfCancerId());
+            pstmt.setString(8, cancerStudy.getPmid());
+            pstmt.setString(9, cancerStudy.getCitation());
             Set<String> groups = cancerStudy.getGroups();
             if (groups==null) {
-                pstmt.setString(8, null);
+                pstmt.setString(10, null);
             } else {
-                pstmt.setString(8, StringUtils.join(groups, ";"));
+                pstmt.setString(10, StringUtils.join(groups, ";"));
             }
-            pstmt.setString(9, cancerStudy.getShortName());
+            pstmt.setString(11, cancerStudy.getShortName());
 
             pstmt.executeUpdate();
             rs = pstmt.getGeneratedKeys();
@@ -347,6 +365,8 @@ public final class DaoCancerStudy {
         CancerStudy cancerStudy = new CancerStudy(rs.getString("NAME"),
                 rs.getString("DESCRIPTION"),
                 rs.getString("CANCER_STUDY_IDENTIFIER"),
+                rs.getString("CANCER_STUDY_GROUP_IDENTIFIER"),
+                rs.getString("CANCER_STUDY_GROUP_RANKING"),
                 rs.getString("TYPE_OF_CANCER_ID"),
                 rs.getBoolean("PUBLIC"));
         cancerStudy.setPmid(rs.getString("PMID"));

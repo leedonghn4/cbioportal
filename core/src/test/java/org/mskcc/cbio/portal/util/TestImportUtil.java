@@ -54,7 +54,7 @@ public class TestImportUtil {
        aTypeOfCancer.setShortName("shortname");
        DaoTypeOfCancer.addTypeOfCancer(aTypeOfCancer);
 
-       CancerStudy cancerStudy = new CancerStudy("GBM", "description", "gbm", "gbm", true);
+       CancerStudy cancerStudy = new CancerStudy("GBM", "description","","", "gbm", "gbm", true);
        DaoCancerStudy.addCancerStudy(cancerStudy);
 
        GeneticProfile profile1 = new GeneticProfile();
