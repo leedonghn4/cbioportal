@@ -557,57 +557,6 @@ define("Oncoprint",
                                 return 'black';
                             }
                         }
-//                        else
-//                        {
-//                            var mutationSplit;
-//                            
-//                            if(mutation !== undefined)//multiple mutations
-//                            {
-//                                mutationSplit = mutation.split(',');
-//
-//                                if(mutationSplit.length > 1)
-//                                {
-//                                    for(var i = 0; i < mutationSplit.length; i++)
-//                                    {
-//                                        if((/^[A-z]([0-9]+)[A-z]$/g).test(mutationSplit[i]))
-//                                        {
-//                                            continue;
-//                                        }
-//                                        else
-//                                        {
-//                                            return '#FF00FF';
-//                                        }
-//                                    }
-//                                    
-//                                    return 'green';
-//                                }
-//                            }
-//                            
-//                            if((/^[A-z]([0-9]+)[A-z]$/g).test(mutationSplit))
-//                            {
-//                                return 'green';//Missense_mutation
-//                            }
-//                                else if((/^[A-z*]([0-9]+)[A-z]{2}$/g).test(mutationSplit))
-//                            {
-//                                return 'black'; //Frame_shift_del
-//                            }
-//                                else if((/^[A-Z]([0-9]+)[*]$/g).test(mutationSplit))
-//                            {
-//                                return 'Yellow'; //Nonsense_Mutation
-//                            }
-//                                else if((/^[A-Z]([0-9]+)_splice$/g).test(mutationSplit))
-//                            {
-//                                return 'white'; //Splice_Site
-//                            }
-//                                else if((/^([A-Z]+)([0-9]+)del$/g).test(mutationSplit))
-//                            {
-//                                return 'Pink'; //IN_frame_del
-//                            }
-//                                else 
-//                            {
-//                                return 'blue';
-//                            }
-//                        }
                     };
                     var mut = enter.append('rect')
                         .attr('fill', function (d){ return seperateMuation(d.mutation);})
@@ -648,11 +597,11 @@ define("Oncoprint",
 
                     var mrna = enter.append('rect')
                         .attr('y', function(d) { 
-                                    if(params.clinical_attrs.length === 0) //to check are there clinic data input
-                                    {
-                                        gapSpaceGeneClinic = 0;
-                                    }
-                                    return vertical_pos(utils.get_attr(d)) + gapSpaceGeneClinic; })
+                                if(params.clinical_attrs.length === 0) //to check are there clinic data input
+                                {
+                                    gapSpaceGeneClinic = 0;
+                                }
+                                return vertical_pos(utils.get_attr(d)) + gapSpaceGeneClinic; })
                         .attr('height', dims.rect_height)
                         .attr('width', dims.rect_width)
                         .attr('stroke-width', 2)
