@@ -88,7 +88,49 @@ public class DaoPatient {
             JdbcUtil.closeAll(DaoPatient.class, con, pstmt, rs);
         }
     }
-
+    
+    public static ArrayList<Patient> getAllPatient() throws DaoException{
+        ArrayList<Patient> list = new ArrayList<Patient>();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoPatient.class);
+            pstmt = con.prepareStatement("SELECT * FROM patient");
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                    list.add(extractPatient(rs));
+            }
+            
+            return list;
+        }
+        catch (SQLException e) {
+            throw new DaoException(e);
+        }
+        finally {
+            JdbcUtil.closeAll(DaoPatient.class, con, pstmt, rs);
+        }
+    }
+    public static void updatePatient(Patient patient) throws DaoException{
+            Connection con = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+            try {
+                con = JdbcUtil.getDbConnection(DaoPatient.class);
+                pstmt = con.prepareStatement("UPDATA patient SET (`CANCER_STUDY_GROUP_IDENTIFIER`) VALUES (?) WHERE `CANCER_STUDY_ID`= ?");
+                pstmt.setString(1, patient.getCancerStudy().getGroupName());
+                pstmt.setInt(2, patient.getCancerStudy().getInternalId());
+                pstmt.executeUpdate();
+                rs = pstmt.getGeneratedKeys();
+            }
+            catch (SQLException e) {
+                throw new DaoException(e);
+            }
+            finally {
+                JdbcUtil.closeAll(DaoPatient.class, con, pstmt, rs);
+            }
+    }
     public static void cachePatient(Patient patient, int cancerStudyId)
     {
         if (!byInternalId.containsKey(patient.getInternalId())) {
@@ -115,10 +157,11 @@ public class DaoPatient {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoPatient.class);
-            pstmt = con.prepareStatement("INSERT INTO patient (`STABLE_ID`, `CANCER_STUDY_ID`) VALUES (?,?)",
+            pstmt = con.prepareStatement("INSERT INTO patient (`STABLE_ID`, `CANCER_STUDY_ID`, `CANCER_STUDY_GROUP_IDENTIFIER`) VALUES (?,?,?)",
                                          Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, patient.getStableId());
             pstmt.setInt(2, patient.getCancerStudy().getInternalId());
+            pstmt.setString(3, patient.getCancerStudy().getGroupName());
             pstmt.executeUpdate();
             rs = pstmt.getGeneratedKeys();
             if (rs.next()) {

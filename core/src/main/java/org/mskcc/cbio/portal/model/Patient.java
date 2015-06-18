@@ -65,7 +65,7 @@ public class Patient {
         this.cancerStudy = cancerStudy;
         this.stableId = stableId;
         this.internalId = internalId;
-		this.clinicalDataMap = clinicalDataMap;
+	this.clinicalDataMap = clinicalDataMap;
     }
 
     @Override

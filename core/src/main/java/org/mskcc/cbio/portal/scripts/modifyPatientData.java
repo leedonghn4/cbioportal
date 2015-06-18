@@ -9,6 +9,16 @@ import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.model.*;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import org.mskcc.cbio.portal.dao.DaoException;
+import org.mskcc.cbio.portal.dao.DaoPatient;
+import static org.mskcc.cbio.portal.dao.DaoPatient.cachePatient;
+import org.mskcc.cbio.portal.dao.JdbcUtil;
 /**
  *
  * @author dongli
@@ -20,19 +30,16 @@ public class modifyPatientData {
 //            System.out.println("command line usage: importCancerStudy.pl <cancer_study.txt>");
 //            return;
 //        }
-
-        ProgressMonitor pMonitor = new ProgressMonitor();
-        pMonitor.setConsoleMode(true);
-
-//        File file = new File(args[0]);
-        File file = new File("brca-tcga-public.txt");
-        CancerStudy cancerStudy = CancerStudyReader.loadCancerStudy(file);
-        System.out.println ("Loaded the following cancer study:  ");
-        System.out.println ("ID:  " + cancerStudy.getInternalId());
-        System.out.println ("Name:  " + cancerStudy.getName());
-        System.out.println ("Description:  " + cancerStudy.getDescription());
-        ConsoleUtil.showWarnings(pMonitor);
-        System.err.println("Done.");
+            
+        ArrayList<Patient> list = DaoPatient.getAllPatient();
+        
+        
+        for(int i = 0; i<list.size();i++)
+        {
+            Patient patientValue = list.get(i);
+            String cancerstudyid = patientValue.getStableId();
+            DaoPatient.updatePatient(patientValue);
+        }
     }
     
 }
