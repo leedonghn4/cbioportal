@@ -73,6 +73,7 @@ public class DaoPatient {
             con = JdbcUtil.getDbConnection(DaoPatient.class);
             pstmt = con.prepareStatement("SELECT * FROM patient");
             rs = pstmt.executeQuery();
+            
             ArrayList<Patient> list = new ArrayList<Patient>();
             while (rs.next()) {
                 Patient p = extractPatient(rs);
@@ -89,21 +90,21 @@ public class DaoPatient {
         }
     }
     
-    public static ArrayList<Patient> getAllPatient() throws DaoException{
-        ArrayList<Patient> list = new ArrayList<Patient>();
+    public static List<Patient> getAllPatient() throws DaoException{
+        List<Patient> list = new ArrayList<Patient>();
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        
         try {
             con = JdbcUtil.getDbConnection(DaoPatient.class);
             pstmt = con.prepareStatement("SELECT * FROM patient");
             rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                    list.add(extractPatient(rs));
-            }
-            
-            return list;
+
+                    list.add(extractAllPatient(rs));
+            }       
         }
         catch (SQLException e) {
             throw new DaoException(e);
@@ -111,6 +112,8 @@ public class DaoPatient {
         finally {
             JdbcUtil.closeAll(DaoPatient.class, con, pstmt, rs);
         }
+        
+        return list;
     }
     public static void updatePatient(Patient patient) throws DaoException{
             Connection con = null;
@@ -118,9 +121,10 @@ public class DaoPatient {
             ResultSet rs = null;
             try {
                 con = JdbcUtil.getDbConnection(DaoPatient.class);
-                pstmt = con.prepareStatement("UPDATA patient SET (`CANCER_STUDY_GROUP_IDENTIFIER`) VALUES (?) WHERE `CANCER_STUDY_ID`= ?");
+                pstmt = con.prepareStatement("UPDATE `patient` SET CANCER_STUDY_GROUP_IDENTIFIER=? WHERE INTERNAL_ID=?  AND CANCER_STUDY_ID=?;");
                 pstmt.setString(1, patient.getCancerStudy().getGroupName());
-                pstmt.setInt(2, patient.getCancerStudy().getInternalId());
+                pstmt.setInt(3, patient.getCancerStudy().getInternalId());
+                pstmt.setInt(2, patient.getInternalId());
                 pstmt.executeUpdate();
                 rs = pstmt.getGeneratedKeys();
             }
@@ -223,6 +227,14 @@ public class DaoPatient {
     {
         CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(rs.getInt("CANCER_STUDY_ID"));
         if (cancerStudy == null) return null;
+        return new Patient(cancerStudy,
+                           rs.getString("STABLE_ID"),
+                           rs.getInt("INTERNAL_ID"));
+    }
+    
+    private static Patient extractAllPatient(ResultSet rs) throws SQLException
+    {
+        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(rs.getInt("CANCER_STUDY_ID"));
         return new Patient(cancerStudy,
                            rs.getString("STABLE_ID"),
                            rs.getInt("INTERNAL_ID"));

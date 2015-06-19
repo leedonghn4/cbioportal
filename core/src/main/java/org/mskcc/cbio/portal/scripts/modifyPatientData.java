@@ -7,6 +7,7 @@
 package org.mskcc.cbio.portal.scripts;
 import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.model.*;
+import org.mskcc.cbio.portal.dao.DaoDrug;
 
 import java.io.File;
 import java.sql.Connection;
@@ -15,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
 import static org.mskcc.cbio.portal.dao.DaoPatient.cachePatient;
@@ -30,16 +32,19 @@ public class modifyPatientData {
 //            System.out.println("command line usage: importCancerStudy.pl <cancer_study.txt>");
 //            return;
 //        }
-            
-        ArrayList<Patient> list = DaoPatient.getAllPatient();
+     
+        List<Patient> list = DaoPatient.getAllPatient();
         
         
         for(int i = 0; i<list.size();i++)
         {
             Patient patientValue = list.get(i);
-            String cancerstudyid = patientValue.getStableId();
-            DaoPatient.updatePatient(patientValue);
-        }
+            if(patientValue.getCancerStudy()!= null)
+            {
+                String cancerstudyid = patientValue.getStableId();
+                DaoPatient.updatePatient(patientValue);
+            }
+        }      
     }
     
 }
