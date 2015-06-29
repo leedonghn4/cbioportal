@@ -712,16 +712,127 @@ function addMetaDataToPage() {
     console.log("Adding Meta Data to Query Form");
     json = window.metaDataJson;
 
-
+    //add divide cancer studies into groups according to cancer study group id
+    var studies_groups = [];
+    for (var study in json.cancer_studies) {
+        if (json.cancer_studies.hasOwnProperty(study) && study !== 'all') { // don't re-add 'all'
+        try{
+                var groupId = json.cancer_studies[study].group.toLowerCase();
+                
+                if(groupId === "")
+                {
+                    if(studies_groups[study] === undefined)
+                    {
+                        studies_groups[study] = {};
+                    }
+                }
+                else
+                {
+                    if(studies_groups[groupId] === undefined)
+                    {
+                        studies_groups[groupId] = {};
+                    } 
+                }
+                
+                var ranking = json.cancer_studies[study].ranking.toLowerCase();
+                if(ranking === "")
+                {   
+                    studies_groups[study].primary = study;
+                }
+                else if(ranking.toLowerCase()==="primary")
+                {
+                    studies_groups[groupId].primary = study;
+                }
+                else
+                {
+                    if(studies_groups[groupId].secondary === undefined)
+                    {
+                        studies_groups[groupId].secondary = study;
+                    }
+                    else
+                    {
+                        var tempSecondary = studies_groups[groupId].secondary;
+                        tempSecondary = tempSecondary + ","+ study;
+                        studies_groups[groupId].secondary = tempSecondary; 
+                    }
+                }
+            } catch (err) {
+                console.log("Unable to add study");
+                console.log(json.cancer_studies[study]);
+            }
+        }
+    }
+    //cancer study of group
+    var groups_studies = {};
+    for (var study in json.cancer_studies) {
+        groups_studies[study]={group:'',rank:''};
+    }
+    for (var study in json.cancer_studies) {
+        if (json.cancer_studies.hasOwnProperty(study) && study !== 'all') { // don't re-add 'all'
+        try{
+                var groupId = json.cancer_studies[study].group.toLowerCase();
+                groups_studies[study].group = groupId === "" ? study:groupId;
+                if(json.cancer_studies[study].ranking === '' || json.cancer_studies[study].ranking === 'primary')
+                {
+                    groups_studies[study].rank = 'primary';
+                }
+                else
+                {
+                    groups_studies[study].rank = 'secondary';
+                }
+            } catch (err) {
+                console.log("Unable to add study");
+                console.log(json.cancer_studies[study]);
+            }
+        }
+    }
+    
+    
+    //build groups
+    var groups = {};
+    for(var studygroup in studies_groups)
+    {
+        groups[studygroup] = {type_of_cancer:'', partial:true, description:'',name:'', children:[], datavalue:{}};
+    }
+    for(var study in json.cancer_studies)
+    {
+        if(json.cancer_studies[study].group !== "all")
+        {
+            if(json.cancer_studies[study].group === "")
+            {
+                groups[study].type_of_cancer = json.cancer_studies[study].type_of_cancer;
+                groups[study].description = json.cancer_studies[study].description; 
+                groups[study].datavalue = json.cancer_studies[study]; 
+                groups[study].name = json.cancer_studies[study].name;
+            }
+            else
+            {
+                var groupValue = json.cancer_studies[study].group === "" ? study : json.cancer_studies[study].group;
+                if(studies_groups[groupValue].primary !== undefined)
+                {
+                    groups[groupValue].type_of_cancer = json.cancer_studies[study].type_of_cancer;
+                    groups[groupValue].description = json.cancer_studies[study].description; 
+                    groups[groupValue].datavalue = json.cancer_studies[study]; 
+                    groups[groupValue].children.push(json.cancer_studies[study]);
+                    groups[groupValue].name = json.cancer_studies[study].name;
+                }
+                else if(studies_groups[groupValue].secondary !== undefined)
+                {
+                    groups[groupValue].children.push(json.cancer_studies[study]);  
+                }
+            }
+        }
+    }
     // Construct oncotree
-    var oncotree = {'tissue':{code:'tissue', studies:[], children:[], parent: false, desc_studies_count:0, tissue:''}};
+    var oncotree = {'tissue':{code:'tissue', studies:[], children:[], parent: false, rank:'primary', desc_studies_count:0, tissue:''}};
     var parents = json.parent_type_of_cancers;
     // First add everything to the tree
     for (var tumortype in parents) {
 	if (parents.hasOwnProperty(tumortype)) {
-		oncotree[tumortype] = {code:tumortype, studies:[], children:[], parent: false, desc_studies_count: 0, tissue: false};
-	}
+            oncotree[tumortype] = {code:tumortype, studies:[], children:[], parent: false, rank:'primary', desc_studies_count: 0, tissue: false};
+        }
     }
+    
     // Link parents and insert initial tissue info
     for (var tumortype in oncotree) {
 	if (oncotree.hasOwnProperty(tumortype) && tumortype !== 'tissue') {
@@ -732,6 +843,7 @@ function addMetaDataToPage() {
 		}
 	}
     }
+    
     // Insert tissue information in a "union-find" type way
     for (var elt in oncotree) {
         if (oncotree.hasOwnProperty(elt) && elt !== 'tissue') {
@@ -746,6 +858,7 @@ function addMetaDataToPage() {
             }
         }
     }
+
     // Add studies to tree, and climb up adding one to each level's descendant studies
     // DMP hack
     var dmp_studies = [];
@@ -755,25 +868,51 @@ function addMetaDataToPage() {
 		dmp_studies.push(study);
 	} else if (json.cancer_studies.hasOwnProperty(study) && study !== 'all') { // don't re-add 'all'
             try {
-                var code = json.cancer_studies[study].type_of_cancer.toLowerCase();
-		var lineage = [];
-		var currCode = code;
-		while (currCode !== 'tissue') {
-			lineage.push(currCode);
-			currCode = oncotree[currCode].parent.code;
-		}
-                oncotree[code].studies.push({id:study, lineage:lineage});
-                var node = oncotree[code];
-                while (node) {
-                    node.desc_studies_count += 1;
-                    node = node.parent;
-                }
+                    var code = json.cancer_studies[study].type_of_cancer.toLowerCase();
+                    var lineage = [];
+                    var currCode = code;
+                    while (currCode !== 'tissue') {
+                            lineage.push(currCode);
+                            currCode = oncotree[currCode].parent.code;
+                    }
+                    oncotree[code].studies.push({id:study, lineage:lineage,rank:groups_studies[study]});
+                    var node = oncotree[code];
+                    while (node) {
+                        node.desc_studies_count += 1;
+                        node = node.parent;
+                    }
             } catch (err) {
                 console.log("Unable to add study");
                 console.log(json.cancer_studies[study]);
             }
         }
     }
+//    var dmpgroups=[]
+//    for (var group in groups) {
+//	if (study.indexOf("mskimpact") !== -1) {
+//		// DMP hack
+//		dmpgroups.push(group);
+//	} else if (groups.hasOwnProperty(group) && group !== 'all') { // don't re-add 'all'
+//            try {
+//                var code = groups[group].type_of_cancer.toLowerCase();
+//		var lineage = [];
+//		var currCode = code;
+//		while (currCode !== 'tissue') {
+//			lineage.push(currCode);
+//			currCode = oncotree[currCode].parent.code;
+//		}
+//                oncotree[code].studies.push({id:group, lineage:lineage});
+//                var node = oncotree[code];
+//                while (node) {
+//                    node.desc_studies_count += 1;
+//                    node = node.parent;
+//                }
+//            } catch (err) {
+//                console.log("Unable to add study");
+//                console.log(json.cancer_studies[study]);
+//            }
+//        }
+//    }
     // Sort dmp by number if there is one in the name
     dmp_studies.sort(function(a,b) {
 	var matchA = a.match(/\d+/);
