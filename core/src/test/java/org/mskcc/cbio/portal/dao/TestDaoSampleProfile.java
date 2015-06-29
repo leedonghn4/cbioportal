@@ -68,7 +68,7 @@ public class TestDaoSampleProfile extends TestCase {
     }
 
     private void createSamples() throws DaoException {
-        CancerStudy study = new CancerStudy("study", "description", "id", "brca", true);
+        CancerStudy study = new CancerStudy("study", "description", "id","","", "brca", true);
         Patient p = new Patient(study, "TCGA-12345");
         int pId = DaoPatient.addPatient(p);
         Sample s = new Sample("TCGA-12345-01", pId, "type");

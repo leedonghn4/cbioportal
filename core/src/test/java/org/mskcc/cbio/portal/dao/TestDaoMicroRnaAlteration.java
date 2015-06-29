@@ -88,7 +88,7 @@ public class TestDaoMicroRnaAlteration extends TestCase {
 
     private ArrayList<Integer> createSamples() throws DaoException {
         ArrayList<Integer> toReturn = new ArrayList<Integer>();
-        CancerStudy study = new CancerStudy("study", "description", "id", "brca", true);
+        CancerStudy study = new CancerStudy("study", "description", "id","","", "brca", true);
         Patient p = new Patient(study, "TCGA-1");
         int pId = DaoPatient.addPatient(p);
         Sample s = new Sample("TCGA-1-1-01", pId, "type");

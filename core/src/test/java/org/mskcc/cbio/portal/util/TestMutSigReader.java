@@ -65,7 +65,7 @@ public class TestMutSigReader extends TestCase {
         // Add cancers to a fresh database
         // Add a cancer study whose standardId is "tcga_gbm"
         // In accordance with /testCancerStudy.txt
-        CancerStudy cancerStudy = new CancerStudy("Glioblastoma TCGA", "GBM Description", "tcga_gbm", "GBM", false);
+        CancerStudy cancerStudy = new CancerStudy("Glioblastoma TCGA", "GBM Description", "tcga_gbm","","", "GBM", false);
         DaoCancerStudy.addCancerStudy(cancerStudy);
         assertEquals(1, cancerStudy.getInternalId());
 

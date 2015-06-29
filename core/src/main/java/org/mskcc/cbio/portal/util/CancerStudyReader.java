@@ -78,6 +78,10 @@ public class CancerStudyReader {
             throw new IllegalArgumentException("cancer_study_identifier is not specified.");
         }
 
+        String cancerStudyGroupIdendifier = properties.getProperty("cancer_study_group_identifier");
+        
+        String cancerStudyGroupRanking = properties.getProperty("cancer_study_group_ranking");
+        
         String name = properties.getProperty("name");
         if (name == null) {
             throw new IllegalArgumentException("name is not specified.");
@@ -98,7 +102,7 @@ public class CancerStudyReader {
             throw new IllegalArgumentException("short_name is not specified.");
         }
 
-        CancerStudy cancerStudy = new CancerStudy(name, description, cancerStudyIdentifier,
+        CancerStudy cancerStudy = new CancerStudy(name, description, cancerStudyIdentifier,cancerStudyGroupIdendifier,cancerStudyGroupRanking,
                                                   typeOfCancer, publicStudy(properties));
         cancerStudy.setPmid(properties.getProperty("pmid"));
         cancerStudy.setCitation(properties.getProperty("citation"));

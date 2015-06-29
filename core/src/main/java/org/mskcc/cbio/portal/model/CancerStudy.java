@@ -58,12 +58,15 @@ public class CancerStudy {
     private String name;
     private String description;
     private String cancerStudyIdentifier;
+    private String cancerStudyGroupIdentifier;
+    private String cancerStudyGroupRanking;
     private String typeOfCancerId;  // required
     private boolean publicStudy;  // if true, a public study, otherwise private
     private String pmid;
     private String citation;
     private Set<String> groups;
     private String shortName;
+
     
 
     /**
@@ -74,7 +77,7 @@ public class CancerStudy {
      * @param typeOfCancerId        Type of Cancer.
      * @param publicStudy           Flag to indicate if this is a public study.
      */
-    public CancerStudy(String name, String description, String cancerStudyIdentifier,
+    public CancerStudy(String name, String description, String cancerStudyIdentifier,String cancerStudyGroupIdentifier, String cancerStudyGroupRanking,
             String typeOfCancerId, boolean publicStudy) {
         super();
         this.studyID = CancerStudy.NO_SUCH_STUDY;
@@ -82,6 +85,8 @@ public class CancerStudy {
         this.shortName = "";
         this.description = description;
         this.cancerStudyIdentifier = cancerStudyIdentifier;
+        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+        this.cancerStudyGroupRanking = cancerStudyGroupRanking;
         this.typeOfCancerId = typeOfCancerId;
         this.publicStudy = publicStudy;
     }
@@ -109,6 +114,22 @@ public class CancerStudy {
     public String getCancerStudyStableId() {
         return cancerStudyIdentifier;
     }
+    
+        /**
+     * Gets the Cancer Study Group Identifier.
+     * @return cancer study Group Identifier.
+     */
+    public String getCancerStudyGroupIdentifier() {
+        return cancerStudyGroupIdentifier;
+    }
+    
+    /**
+     * Gets the Cancer Study Group Ranking.
+     * @return cancer study Group Ranking.
+     */
+    public String getCancerStudyGroupRanking() {
+        return cancerStudyGroupRanking;
+    }
 
     /**
      * Gets the Type of Cancer.
@@ -124,6 +145,22 @@ public class CancerStudy {
      */
     public void setCancerStudyStablId(String cancerStudyIdentifier) {
         this.cancerStudyIdentifier = cancerStudyIdentifier;
+    }
+    
+    /**
+     * Sets the Cancer Study Stable Identifier.
+     * @param cancerStudyIdentifier Cancer Study Stable Identifier.
+     */
+    public void setCancerStudyGroupIdentifier(String cancerStudyGroupIdentifier) {
+        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+    }
+    
+    /**
+     * Sets the Cancer Study Stable Identifier.
+     * @param cancerStudyIdentifier Cancer Study Stable Identifier.
+     */
+    public void setCancerStudyGroupRanking(String cancerStudyGroupRanking) {
+        this.cancerStudyGroupRanking = cancerStudyGroupRanking;
     }
 
     /**

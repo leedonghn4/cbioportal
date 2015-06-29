@@ -347,6 +347,8 @@ public final class DaoCancerStudy {
         CancerStudy cancerStudy = new CancerStudy(rs.getString("NAME"),
                 rs.getString("DESCRIPTION"),
                 rs.getString("CANCER_STUDY_IDENTIFIER"),
+                rs.getString("CANCER_STUDY_GROUP_IDENTIFIER"),
+                rs.getString("CANCER_STUDY_GROUP_RANKING"),
                 rs.getString("TYPE_OF_CANCER_ID"),
                 rs.getBoolean("PUBLIC"));
         cancerStudy.setPmid(rs.getString("PMID"));
