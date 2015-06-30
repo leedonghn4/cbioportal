@@ -991,6 +991,7 @@ function addMetaDataToPage() {
 		});
 		
 		$.each(currNode.studies, function(ind, elt) {
+                    if(elt.rank === 'primary'){
 			    name = truncateStudyName(splitAndCapitalize(metaDataJson.cancer_studies[elt.id].name));
 			    jstree_data.push({'id':elt.id, 
 				    'parent':currNode.code, 
@@ -1000,6 +1001,7 @@ function addMetaDataToPage() {
 				    'parent':jstree_root_id,
 				    'text':name,
 				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description, search_terms: elt.lineage.join(" ")}});
+                            }
 		});
 		node_queue = node_queue.concat(currNode.children);
 	    }
