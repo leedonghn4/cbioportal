@@ -1,6 +1,7 @@
 type_of_cancer: brca
 cancer_study_identifier: brca_tcga_pub
 cancer_study_group_identifier: brca_tcga
+cancer_study_group_name: Breast Invasive Carcinoma (TCGA)
 cancer_study_group_ranking: secondary
 name: Breast Invasive Carcinoma (TCGA, Nature 2012)
 date_of_last_update: 2015-03-25

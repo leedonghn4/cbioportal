@@ -39,6 +39,8 @@ drop table IF EXISTS cancer_study;
 CREATE TABLE `cancer_study` (
   `CANCER_STUDY_ID` int(11) NOT NULL auto_increment,
   `CANCER_STUDY_IDENTIFIER` varchar(255),
+  `CANCER_STUDY_GROUP_ID` int(11),
+  `CANCER_STUDY_GROUP_RANKING` varchar(255),
   `TYPE_OF_CANCER_ID` varchar(25) NOT NULL,
   `NAME` varchar(255) NOT NULL,
   `SHORT_NAME` varchar(64) NOT NULL,
@@ -50,6 +52,21 @@ CREATE TABLE `cancer_study` (
   PRIMARY KEY  (`CANCER_STUDY_ID`),
   UNIQUE (`CANCER_STUDY_IDENTIFIER`),
   FOREIGN KEY (`TYPE_OF_CANCER_ID`) REFERENCES `type_of_cancer` (`TYPE_OF_CANCER_ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cancer_study_group`
+--
+drop table IF EXISTS cancer_study_group;
+CREATE TABLE `cancer_study_group` (
+  `CANCER_STUDY_GROUP_ID` int(11) NOT NULL auto_increment,
+  `CANCER_STUDY_GROUP_IDENTIFIER` varchar(255) NOT NULL,
+  `GROUPNAME` varchar(255) DEFAULT NULL,
+  PRIMARY KEY  (`CANCER_STUDY_GROUP_ID`),
+  UNIQUE (`CANCER_STUDY_GROUP_IDENTIFIER`),
+  FOREIGN KEY (`CANCER_STUDY_GROUP_ID`) REFERENCES `group_of_cancer` (`CANCER_STUDY_GROUP_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
