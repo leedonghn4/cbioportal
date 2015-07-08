@@ -2907,10 +2907,10 @@
 			}
 			obj.children('.jstree-external-node-decorator').show();
 			obj.children('.jstree-node-decorator').remove();
-			if (node.children.length === 0) {
+			if (node.children.length === 0) {// modified by dongli@cbio.mskcc.org
 				if (node.li_attr && node.li_attr.description) {
 					var $descriptionIcon = $('<i class="fa fa-lg fa-info-circle jstree-node-decorator" style="cursor:pointer; padding-left:0.4em"></i>');
-					obj.append($descriptionIcon);
+                                        obj.append($descriptionIcon);
 					$descriptionIcon.mousedown(function(e) {
 						e.preventDefault();
 					});
@@ -2924,7 +2924,12 @@
 				}
                                 
                                 var $linkOutIcon = $('<i class="btn btn-default btn-sm jstree-node-decorator" style="cursor:pointer;  padding: 0px 5px; font-weight: normal;font-style: normal;margin-left: 10px; color:white; background-color:#2986e2">Summary</i>');
-				obj.append($linkOutIcon);
+                                obj.append($linkOutIcon); 
+//                                if(node.original.primarystudy)
+//                                {
+//                                    var $primarystudyIcon = $('<i style="color:red">*</i>')
+//                                    $linkOutIcon.after($primarystudyIcon);
+//                                }
 				$linkOutIcon.mouseenter(function() {
 					$linkOutIcon.fadeTo('fast', 0.7);
 				});
@@ -2936,6 +2941,8 @@
 				});
 				$linkOutIcon.click(function(e) {
 					e.preventDefault();
+                                        var rank=node.original.rank;// modified by dongli@cbio.mskcc.org
+                                        var group=node.original.group;// modified by dongli@cbio.mskcc.org
 					window.open('study.do?cancer_study_id='+node.id);
 				});
 			} else {
@@ -3063,6 +3070,11 @@
 				return false;
 			}
 			dom = this.get_node(obj, true);
+                        
+                        if(obj.state.selected) {
+                            obj.parents;
+                        }
+                        
 			if(!obj.state.selected) {
 				//obj.state.selected = true;
 				//this._data.core.selected.push(obj.id);
@@ -3091,6 +3103,15 @@
 					 * @param {Array} selected the current selection
 					 * @param {Object} event the event (if any) that triggered this changed event
 					 */
+                                        
+                                        //enable select current all other nodes under current parent nodes
+                                        var parentnode = this.get_node(this.get_parent(obj));
+                                        for(var i=0 ; i < parentnode.children.length; i++){
+                                            if(parentnode.children[i] !== obj.id)
+                                            {
+                                                this.get_node(parentnode.children[i]).state.disabled= true;
+                                            }
+                                        }
 					this.trigger('changed', { 'action' : 'select_node', 'node' : obj, 'selected' : this._data.core.selected, 'event' : e });
 				}
 			}
@@ -3132,6 +3153,14 @@
 				 */
 				this.trigger('deselect_node', { 'node' : obj, 'selected' : this._data.core.selected, 'event' : e });
 				if(!supress_event) {
+                                        //enable select current all nodes under current parent nodes
+                                        var parentnode = this.get_node(this.get_parent(obj));
+                                        for(var i=0 ; i < parentnode.children.length; i++){
+                                            if(parentnode.children[i] !== obj.id)
+                                            {
+                                                this.get_node(parentnode.children[i]).state.disabled= false;
+                                            }
+                                        }
 					this.trigger('changed', { 'action' : 'deselect_node', 'node' : obj, 'selected' : this._data.core.selected, 'event' : e });
 				}
 			}

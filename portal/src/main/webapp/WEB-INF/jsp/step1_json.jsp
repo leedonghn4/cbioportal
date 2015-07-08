@@ -97,7 +97,11 @@
 </div>-->
 
 <input id="select_multiple_studies" name="<%= QueryBuilder.CANCER_STUDY_LIST %>" style="display:none">
+<input id="select_multiple_studies_groups" name="<%= QueryBuilder.CANCER_STUDY_LIST %>" style="display:none">
+<input id="select_multiple_studies_ranks" name="<%= QueryBuilder.CANCER_STUDY_LIST %>" style="display:none">
 <input id="select_single_study" name="<%= QueryBuilder.CANCER_STUDY_ID %>" style="display:none">
+<input id="select_single_study_group" name="<%= QueryBuilder.CANCER_STUDY_ID %>" style="display:none">
+<input id="select_single_study_rank" name="<%= QueryBuilder.CANCER_STUDY_ID %>" style="display:none">
 <script type="text/javascript">
 $('#select_cancer_type_help').qtip({
                     content: { text: $('#jstree_search_examples') },

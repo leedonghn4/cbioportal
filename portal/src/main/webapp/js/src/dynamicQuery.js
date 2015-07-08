@@ -72,7 +72,6 @@ $(document).ready(function(){
          caseSetSelectionOverriddenByUser = false; // reset
          console.log("#select_single_study change ( cancerStudySelected() )");
          cancerStudySelected();
-         
          caseSetSelected();
          $('#custom_case_set_ids').empty(); // reset the custom case set textarea
 	 $('#select_single_study').trigger('doneChanging');
@@ -311,11 +310,11 @@ function chooseAction(evt) {
     while (selected_studies.length === 0 && !window.changingTabs) {
 	    // select all by default
 	    $("#jstree").jstree(true).select_node(window.jstree_root_id);
-	    selected_studies = $("#jstree").jstree(true).get_selected_leaves()
+	    selected_studies = $("#jstree").jstree(true).get_selected_leaves();
     }    
     if (selected_studies.length > 1) {
 	$("#main_form").find("#select_multiple_studies").val("");
-        if ($("#tab_index").val() == 'tab_download') {
+        if ($("#tab_index").val() === 'tab_download') {
             $("#main_form").get(0).setAttribute('action','index.do');
         }
         else {
@@ -772,7 +771,7 @@ function addMetaDataToPage() {
         try{
                 var groupId = json.cancer_studies[study].group.toLowerCase();
                 groups_studies[study].group = groupId === "" ? study:groupId;
-                if(json.cancer_studies[study].ranking === '' || json.cancer_studies[study].ranking === 'primary')
+                if(json.cancer_studies[study].ranking === '' || json.cancer_studies[study].ranking.toLowerCase() === 'primary')
                 {
                     groups_studies[study].rank = 'primary';
                 }
@@ -887,32 +886,7 @@ function addMetaDataToPage() {
             }
         }
     }
-//    var dmpgroups=[]
-//    for (var group in groups) {
-//	if (study.indexOf("mskimpact") !== -1) {
-//		// DMP hack
-//		dmpgroups.push(group);
-//	} else if (groups.hasOwnProperty(group) && group !== 'all') { // don't re-add 'all'
-//            try {
-//                var code = groups[group].type_of_cancer.toLowerCase();
-//		var lineage = [];
-//		var currCode = code;
-//		while (currCode !== 'tissue') {
-//			lineage.push(currCode);
-//			currCode = oncotree[currCode].parent.code;
-//		}
-//                oncotree[code].studies.push({id:group, lineage:lineage});
-//                var node = oncotree[code];
-//                while (node) {
-//                    node.desc_studies_count += 1;
-//                    node = node.parent;
-//                }
-//            } catch (err) {
-//                console.log("Unable to add study");
-//                console.log(json.cancer_studies[study]);
-//            }
-//        }
-//    }
+    
     // Sort dmp by number if there is one in the name
     dmp_studies.sort(function(a,b) {
 	var matchA = a.match(/\d+/);
@@ -980,6 +954,48 @@ function addMetaDataToPage() {
 			'li_attr':{name: studyName, description: metaDataJson.cancer_studies[id].description, search_terms: 'MSKCC DMP'}});
 	});
     }
+    
+    var longestCommonSubstring = function(a,b) {
+    var table = [],
+        aLen = a.length,
+        bLen = b.length;
+        squareLen = Math.max(aLen,bLen);
+    // Initialize a table of zeros
+    for (var i = 0; i <= squareLen ; i++) {
+        table.push([]);
+        for (var j = 0; j <= squareLen; j++) {
+            table[i][j] = 0;
+        }
+    }
+    // Create a table of counts
+    for (var i = 1; i <= aLen; i++) {
+        for (var j = 1; j <= bLen; j++) {
+            if (a[i-1] == b[j-1]) {
+                table[i][j] = table[i - 1][j - 1] + 1;
+            } else {
+                table[i][j] = Math.max(table[i-1][j], table[i][j-1]);
+            }
+        }
+    }
+ 
+    // Move backwards along the table
+    i = aLen, j = bLen, LCS = [];
+    while (i > 0 && j > 0) {
+        if (a[i-1] == b[j-1]) {
+            LCS.push(a[i-1]);
+            i -= 1;
+            j -= 1;
+        } else {
+            if (table[i][j-1] >= table[i-1][j]) {
+                j -= 1;
+            } else {
+                i -= 1;
+            }
+        }
+    }
+    return LCS.reverse().join('');
+}
+    
     while (node_queue.length > 0) {
 	    currNode = node_queue.shift();
 	    if (currNode.desc_studies_count > 0) {
@@ -990,16 +1006,109 @@ function addMetaDataToPage() {
 			'li_attr':{name:name}
 		});
 		
+                var parentnotes = []; 
+                
 		$.each(currNode.studies, function(ind, elt) {
-                    if(elt.rank === 'primary'){
-			    name = truncateStudyName(splitAndCapitalize(metaDataJson.cancer_studies[elt.id].name));
-			    jstree_data.push({'id':elt.id, 
+                    if(elt.rank.rank === 'primary'){
+                            
+                            var with_secondary_keys = false;
+                            var secondary_key_name = "";
+                            for(var i = 0; i < currNode.studies.length; i++)
+                            {
+                                if(currNode.studies[i].rank.group === elt.rank.group && currNode.studies[i].rank.rank === "secondary")
+                                {
+                                    secondary_key_name = truncateStudyName(splitAndCapitalize(metaDataJson.cancer_studies[currNode.studies[i].id].name))
+                                    with_secondary_keys = true;
+                                }
+                            }
+
+                            name = truncateStudyName(splitAndCapitalize(metaDataJson.cancer_studies[elt.id].name));
+                            
+                            if(with_secondary_keys)
+                            {
+//                                var parentname = longestCommonSubstring(secondary_key_name,name);
+                                var parentname = name.split(",")[0] + (")");
+                                var parentid = (elt.id).substring(0, elt.id.length - 1);
+                                parentnotes[elt.rank.group] = parentid;
+                                var parentnotevalue = {'id':parentid, 
+                                    'parent':currNode.code, 
+                                    'text':parentname,
+                                    'li_attr':{name:parentname}
+                                };
+                                var flat_parentnotvalue = {'id':parentid, 
+				    'parent':parentid,
+				    'text':parentname,
+                                    'group':elt.rank.group,
+                                    'rank':'primary',
+				    'li_attr':{name: parentname, description:metaDataJson.cancer_studies[elt.id].description, search_terms: elt.lineage.join(" ")}
+                                  };
+
+                                parentnotevalue.a_attr = {class: 'jstree-search'};
+                                flat_parentnotvalue.a_attr = {class: 'jstree-search'};
+                                jstree_data.push(parentnotevalue);
+                                flat_jstree_data.push(flat_parentnotvalue);
+                            }
+
+                            var notevalue;
+                            var flat_notvalue;
+                            if(parentid !== undefined)
+                            {
+                                name = (name.split(", ")[1]).split(")")[0];
+                                    notevalue= {'id':elt.id, 
+				    'parent':parentid, 
+//				    'text':name + '<span style="color:red">*</span>',
+                                    'text':name,
+                                    'group':elt.rank.group,
+                                    'rank':'primary',
+                                    'primarystudy':true,
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description}}; 
+                                flat_notvalue = {'id':elt.id, 
+				    'parent':parentid,
+//				    'text':name  + '<span style="color:red">*</span>',
+                                    'text':name,
+                                    'group':elt.rank.group,
+                                    'rank':'primary',
+                                    'primarystudy':true,
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description, search_terms: elt.lineage.join(" ")}};
+
+                            }
+                            else
+                            {
+                                    notevalue= {'id':elt.id, 
 				    'parent':currNode.code, 
 				    'text':name,
-				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description}});
-			    flat_jstree_data.push({'id':elt.id, 
+                                    'group':elt.rank.group,
+                                    'rank':'primary',
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description}}; 
+                                
+                                    flat_notvalue = {'id':elt.id, 
 				    'parent':jstree_root_id,
 				    'text':name,
+                                    'group':elt.rank.group,
+                                    'rank':'primary',
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description, search_terms: elt.lineage.join(" ")}};
+                            }
+                            jstree_data.push(notevalue);
+			    flat_jstree_data.push(flat_notvalue);
+                            }
+		});
+                
+                $.each(currNode.studies, function(ind, elt) {
+                    if(elt.rank.rank === 'secondary'){
+                            var parentNote = parentnotes[elt.rank.group];
+			    name = truncateStudyName(splitAndCapitalize(metaDataJson.cancer_studies[elt.id].name));
+                            name = (name.split(", ")[1]).split(")")[0];
+			    jstree_data.push({'id':elt.id, 
+				    'parent':parentNote, 
+				    'text':name,
+                                    'group':elt.rank.group,
+                                    'rank':'secondary',
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description}});
+			    flat_jstree_data.push({'id':elt.id, 
+				    'parent':parentNote,
+				    'text':name,
+                                    'group':elt.rank.group,
+                                    'rank':'secondary',
 				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt.id].description, search_terms: elt.lineage.join(" ")}});
                             }
 		});
@@ -1162,11 +1271,17 @@ function addMetaDataToPage() {
 				"icons": false,
 				"url": "../../css/jstree.style.css"
 			},
-			"plugins": ['checkbox','search'],
+			"plugins": ['checkbox','search','types'],
 			"search": {'show_only_matches': true,
 				'search_callback': jstree_search,
 				'search_leaves_only': true},
 			"checkbox": {},
+                        "types": {
+                            "disabled": {
+                                "check_node": false,
+                                "uncheck_node": false
+                            }
+                        }, 
 			'core': {'data': data, 'check_callback': true, 'dblclick_toggle': false, 'multiple': (window.tab_index !== "tab_download")}
 		});
 		$('#jstree').on('ready.jstree', function () {
@@ -1278,18 +1393,41 @@ initialize_jstree(window.tab_index === "tab_download" ? flat_jstree_data : jstre
 	var onJSTreeChange = function () {
 		$("#error_box").remove();
 		var select_single_study = $("#main_form").find("#select_single_study");
+                var select_single_study_group = $("#main_form").find("#select_single_study_group");
+                var select_single_study_rank = $("#main_form").find("#select_single_study_rank");
 		var select_multiple_studies = $("#main_form").find("#select_multiple_studies");
+                var select_multiple_studies_groups = $("#main_form").find("#select_multiple_studies_groups");
+                var select_multiple_studies_ranks = $("#main_form").find("#select_multiple_studies_ranks");
+                
+                var selected_studies_group = [];
+                var selected_studies_rank = [];
 		var selected_studies = $("#jstree").jstree(true).get_selected_leaves();
-		var selected_ct = selected_studies.length;
+                var selected_ct = selected_studies.length;
+                if(selected_ct > 0)
+                for(var i = 0; i < selected_ct; i++)
+                {
+                    selected_studies_group.push($("#jstree").jstree(true).get_selected(true)[i].original.group);
+                    selected_studies_rank.push($("#jstree").jstree(true).get_selected(true)[i].original.rank);
+                }
+                
+		
 		$('#jstree_selected_study_count').html((selected_ct === 0 ? "No" : (selected_ct === $('#jstree').jstree(true).num_leaves ? "All" : selected_ct)) + " stud" + (selected_ct === 1 ? "y" : "ies") + " selected.");
 		$('#jstree_deselect_all_btn')[selected_ct > 0 ? 'show' : 'hide']();
 		var old_select_single_study_val = select_single_study.val();
 		if (selected_studies.length === 1) {
 			select_single_study.val(selected_studies[0]);
+                        select_single_study_group.val(selected_studies_group[0]);
+                        select_single_study_rank.val(selected_studies_rank[0]);
 		} else {
 			select_single_study.val("all");
+                        select_single_study_group.val("all");
+                        select_single_study_rank.val("all");
 		}
+                
 		select_multiple_studies.val(selected_studies.join(","));
+                select_multiple_studies_groups.val(selected_studies_group.join(","));
+                select_multiple_studies_ranks.val(selected_studies_rank.join(","));
+                
 		if (select_single_study.val() !== old_select_single_study_val) {
 			select_single_study.trigger('change');
 		}
