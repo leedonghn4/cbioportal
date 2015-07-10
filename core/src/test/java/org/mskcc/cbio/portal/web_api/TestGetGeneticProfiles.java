@@ -55,7 +55,7 @@ public class TestGetGeneticProfiles extends TestCase {
         typeOfCancer.setTypeOfCancerId("GBM");
         DaoTypeOfCancer.addTypeOfCancer(typeOfCancer);
 
-        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM", "GBM","","","GBM", true);
+        CancerStudy cancerStudy = new CancerStudy("GBM", "GBM", "GBM",-1,"","GBM", true);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 
         cancerStudy = DaoCancerStudy.getCancerStudyByStableId("GBM");

@@ -33,8 +33,10 @@
 package org.mskcc.cbio.portal.util;
 
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
+import org.mskcc.cbio.portal.dao.DaoCancerStudyGroup;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.model.CancerStudy;
+import org.mskcc.cbio.portal.model.CancerStudyGroup;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,17 +73,22 @@ public class CancerStudyReader {
         return cancerStudy;
     }
 
-    private static CancerStudy getCancerStudy(Properties properties)
+    private static CancerStudy getCancerStudy(Properties properties) throws IOException, DaoException
     {
         String cancerStudyIdentifier = properties.getProperty("cancer_study_identifier");
         if (cancerStudyIdentifier == null) {
             throw new IllegalArgumentException("cancer_study_identifier is not specified.");
         }
-
-        String cancerStudyGroupIdendifier = properties.getProperty("cancer_study_group_identifier");
         
         String cancerStudyGroupRanking = properties.getProperty("cancer_study_group_ranking");
         
+        String cancerStudyGroupIdendifier = properties.getProperty("cancer_study_group_identifier");
+        
+        String cancerStudyGroupName = properties.getProperty("cancer_study_group_name");
+
+        CancerStudyGroup cancerstudygroup = new CancerStudyGroup(cancerStudyGroupIdendifier,cancerStudyGroupName);
+        int autogroupid = DaoCancerStudyGroup.addCancerStudyGroup(cancerstudygroup);
+
         String name = properties.getProperty("name");
         if (name == null) {
             throw new IllegalArgumentException("name is not specified.");
@@ -102,7 +109,7 @@ public class CancerStudyReader {
             throw new IllegalArgumentException("short_name is not specified.");
         }
 
-        CancerStudy cancerStudy = new CancerStudy(name, description, cancerStudyIdentifier,cancerStudyGroupIdendifier,cancerStudyGroupRanking,
+        CancerStudy cancerStudy = new CancerStudy(name, description, cancerStudyIdentifier,autogroupid,cancerStudyGroupRanking,
                                                   typeOfCancer, publicStudy(properties));
         cancerStudy.setPmid(properties.getProperty("pmid"));
         cancerStudy.setCitation(properties.getProperty("citation"));

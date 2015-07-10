@@ -390,7 +390,7 @@ public class PatientView extends HttpServlet {
     
     private void setNumCases(HttpServletRequest request) throws DaoException {
         CancerStudy cancerStudy = (CancerStudy)request.getAttribute(CANCER_STUDY);
-        request.setAttribute(NUM_CASES_IN_SAME_STUDY,DaoPatient.getPatientsByCancerStudyId(cancerStudy.getInternalId()).size());
+        request.setAttribute(NUM_CASES_IN_SAME_STUDY,DaoPatient.getPatientsByCancerStudyGroupId(cancerStudy.getCancerStudyGroupId()).size());
     }
     
     private void setClinicalInfo(HttpServletRequest request) throws DaoException {

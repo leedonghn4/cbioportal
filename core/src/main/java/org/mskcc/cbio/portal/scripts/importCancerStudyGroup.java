@@ -34,12 +34,8 @@ public class importCancerStudyGroup {
             properties.load(new FileInputStream(file));
 
             CancerStudyGroup cancerstudygroup = getCancerStudyGroup(properties);
-
-//            if (null==DaoTypeOfCancer.getTypeOfCancerById(cancerstudygroup.getTypeOfCancerId())) {
-//                throw new IllegalArgumentException(cancerstudygroup.getTypeOfCancerId()+" is not a supported cancer type.");
-//            }
             
-            DaoCancerStudyGroup.addCancerStudyGroup(cancerstudygroup, true); // overwrite if exist
+            int autogroupid = DaoCancerStudyGroup.addCancerStudyGroup(cancerstudygroup); // overwrite if exist
             
             return cancerstudygroup;
         }

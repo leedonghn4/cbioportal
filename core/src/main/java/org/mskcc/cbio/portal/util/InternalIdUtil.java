@@ -49,10 +49,10 @@ public class InternalIdUtil
         return sampleIds;
     }
     
-    public static List<Integer> getInternalPatientIds(int cancerStudyId) {
+    public static List<Integer> getInternalPatientIds(int cancerStudyGroupId) {
         List<Integer> patientIds = new ArrayList<Integer>();
-        for (Patient patient : DaoPatient.getPatientsByCancerStudyId(cancerStudyId)) {
-            patientIds.add(patient.getInternalId());
+        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(cancerStudyGroupId)) {
+            patientIds.add(patient.getCancerStudyGroupId());
         }
         return patientIds;
     }

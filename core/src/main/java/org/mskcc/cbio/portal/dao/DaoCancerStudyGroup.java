@@ -21,57 +21,13 @@ import org.mskcc.cbio.portal.util.ImportDataUtil;
 public class DaoCancerStudyGroup {
     private DaoCancerStudyGroup() {}
     
-    private static final Map<String,CancerStudyGroup> byStudyGroupIdentifier = new HashMap<String,CancerStudyGroup>();
-    private static final Map<Integer,CancerStudyGroup> byInternalId = new HashMap<Integer,CancerStudyGroup>();
-    
-    static {
-       reCache();
-    }
-    
-    private static synchronized void reCache() {
-        byStudyGroupIdentifier.clear();
-        byInternalId.clear();
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoCancerStudyGroup.class);
-            pstmt = con.prepareStatement("SELECT * FROM cancer_study_group");
-            rs = pstmt.executeQuery();
-            while (rs.next()) {
-                CancerStudyGroup cancerStudygroup = extractCancerStudyGroup(rs);
-                cacheCancerStudyGroup(cancerStudygroup);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeAll(DaoCancerStudyGroup.class, con, pstmt, rs);
-        }
-    }
-    
-    private static void cacheCancerStudyGroup(CancerStudyGroup studygroup) {
-        byStudyGroupIdentifier.put(studygroup.getCancerStudyGroupIdentifier(), studygroup);
-        byInternalId.put(studygroup.getInternalId(), studygroup);
-    }
-
-    /**
-     * Adds a cancer study to the Database.
-     * Updates cancerStudy with its auto incremented uid, in studyID.
-     *
-     * @param cancerStudy   Cancer Study Object.
-     * @throws DaoException Database Error.
-     */
-    public static void addCancerStudyGroup(CancerStudyGroup cancerStudyGroup) throws DaoException {
-        addCancerStudyGroup(cancerStudyGroup, false);
-    }
-    
     /**
      * Adds a cancer study to the Database.
      * @param cancerStudy
      * @param overwrite if true, overwrite if exist.
      * @throws DaoException 
      */
-    public static void addCancerStudyGroup(CancerStudyGroup cancerStudyGroup, boolean overwrite) throws DaoException {
+    public static int addCancerStudyGroup(CancerStudyGroup cancerStudyGroup) throws DaoException {
 
         // CANCER_STUDY_IDENTIFIER cannot be null
         String groupIdentifier = cancerStudyGroup.getCancerStudyGroupIdentifier();
@@ -81,7 +37,7 @@ public class DaoCancerStudyGroup {
         
         CancerStudyGroup existing = getCancerStudyGroupByIndentifier(groupIdentifier);
         if (existing!=null) {
-            if (overwrite) {
+            if (false) {
                 System.out.println("Overwrite cancer study " + groupIdentifier);
                 deleteCancerStudyGroup(existing.getInternalId());
             } else {
@@ -92,6 +48,8 @@ public class DaoCancerStudyGroup {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        
+        int autoid;
         try {
             con = JdbcUtil.getDbConnection(DaoCancerStudyGroup.class);
             pstmt = con.prepareStatement("select LAST_INSERT_ID() as last_id from cancer_study_group");
@@ -114,13 +72,16 @@ public class DaoCancerStudyGroup {
 
             pstmt.executeUpdate();
 
+            rs = pstmt.getGeneratedKeys();
+            rs.next();
+            autoid =rs.getInt(1);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             JdbcUtil.closeAll(DaoCancerStudyGroup.class, con, pstmt, rs);
         }
         
-        reCache();
+        return autoid;
     }
 
     /**
@@ -129,8 +90,30 @@ public class DaoCancerStudyGroup {
      * @param cancerStudyGroupID     Internal (int) Cancer Study ID.
      * @return Cancer Study Object, or null if there's no such study.
      */
-    public static CancerStudyGroup getCancerStudyGroupByInternalId(int cancerStudyGroupID) {
-        return byInternalId.get(cancerStudyGroupID);
+    public static CancerStudyGroup getCancerStudyGroupByInternalId(int cancerStudyGroupID) throws DaoException {
+        
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        
+        CancerStudyGroup cancerstudygroup;
+        
+        try {
+            con = JdbcUtil.getDbConnection(DaoCancerStudyGroup.class);         
+            pstmt = con.prepareStatement("SELECT * FROM cancer_study_group WHERE CANCER_STUDY_GROUP_ID = ?");
+            pstmt.setInt(1, cancerStudyGroupID);
+
+            rs = pstmt.executeQuery();
+
+            cancerstudygroup = extractCancerStudyGroup(rs);
+            
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoCancerStudyGroup.class, con, pstmt, rs);
+        }
+                
+        return cancerstudygroup;
     }
 
     /**
@@ -139,46 +122,30 @@ public class DaoCancerStudyGroup {
      * @param cancerStudyStableId Cancer Study Stable ID.
      * @return the CancerStudy, or null if there's no such study.
      */
-    public static CancerStudyGroup getCancerStudyGroupByIndentifier(String cancerStudyGroupIdentifier) {
-        return byStudyGroupIdentifier.get(cancerStudyGroupIdentifier);
-    }
+    public static CancerStudyGroup getCancerStudyGroupByIndentifier(String cancerStudyGroupIdentifier) throws DaoException {
+        
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        
+        CancerStudyGroup cancerstudygroup;
+        
+        try {
+            con = JdbcUtil.getDbConnection(DaoCancerStudyGroup.class);   
 
-    /**
-     * Indicates whether the cancerStudy identified by the stable ID exists.
-     *
-     * @param cancerStudyStableId Cancer Study Stable ID.
-     * @return true if the CancerStudy exists, otherwise false
-     */
-    public static boolean doesCancerStudyGroupExistByGroupIdentifier(String cancerStudyGroupIdentifier) {
-        return byStudyGroupIdentifier.containsKey(cancerStudyGroupIdentifier);
-    }
+            pstmt = con.prepareStatement("SELECT * FROM cancer_study_group WHERE CANCER_STUDY_GROUP_IDENTIFIER = ?", Statement.RETURN_GENERATED_KEYS);
+            pstmt.setString(1, cancerStudyGroupIdentifier);
 
-    /**
-     * Indicates whether the cancerStudy identified by internal study ID exist.
-     * does no access control, so only returns a boolean.
-     *
-     * @param internalCancerStudyId Internal Cancer Study ID.
-     * @return true if the CancerStudy exists, otherwise false
-     */
-    public static boolean doesCancerStudyGroupExistByInternalId(int internalCancerStudyGroupId) {
-        return byInternalId.containsKey(internalCancerStudyGroupId);
-    }
+            rs = pstmt.executeQuery();
 
-    /**
-     * Returns all the cancerStudies.
-     *
-     * @return ArrayList of all CancerStudy Objects.
-     */
-    public static ArrayList<CancerStudyGroup> getAllCancerStudyGroups() {
-        return new ArrayList<CancerStudyGroup>(byStudyGroupIdentifier.values());
-    }
-
-    /**
-     * Gets Number of Cancer Studies.
-     * @return number of cancer studies.
-     */
-    public static int getCount() {
-        return byStudyGroupIdentifier.size();
+            cancerstudygroup = extractCancerStudyGroup(rs);      
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoCancerStudyGroup.class, con, pstmt, rs);
+        }
+                
+        return cancerstudygroup;
     }
 
     /**
@@ -186,8 +153,6 @@ public class DaoCancerStudyGroup {
      * @throws DaoException Database Error.
      */
     public static void deleteAllRecords() throws DaoException {
-        byStudyGroupIdentifier.clear();
-        byInternalId.clear();
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -267,16 +232,22 @@ public class DaoCancerStudyGroup {
         } finally {
             JdbcUtil.closeAll(DaoCancerStudy.class, con, pstmt, rs);
         }
-        reCache();
+
     }
 
     /**
      * Extracts Cancer Study JDBC Results.
      */
     private static CancerStudyGroup extractCancerStudyGroup(ResultSet rs) throws SQLException {
-        CancerStudyGroup cancerStudygroup = new CancerStudyGroup(rs.getString("CANCER_STUDY_IDENTIFIER"),rs.getString("GROUPNAME"));
         
-        cancerStudygroup.setInternalId(rs.getInt("CANCER_STUDY_GROUP_ID"));
-        return cancerStudygroup;
+        if(rs.next())
+        {
+            CancerStudyGroup cancerStudygroup = new CancerStudyGroup(rs.getString("CANCER_STUDY_GROUP_IDENTIFIER"),rs.getString("GROUPNAME"));
+
+            cancerStudygroup.setInternalId(rs.getInt("CANCER_STUDY_GROUP_ID"));
+            return cancerStudygroup;
+        }
+        
+        return null;
     }
 }

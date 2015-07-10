@@ -61,7 +61,7 @@ public class TestImportClinicalData extends TestCase {
         ProgressMonitor pMonitor = new ProgressMonitor();
 		// TBD: change this to use getResourceAsStream()
         File clinicalFile = new File("target/test-classes/clinical_data.txt");
-        CancerStudy cancerStudy = new CancerStudy("test","test","test","test","test","test",true);
+        CancerStudy cancerStudy = new CancerStudy("test","test","test",-1,"test","test",true);
         cancerStudy.setInternalId(CANCER_STUDY_ID);
         ImportClinicalData importClinicalData = new ImportClinicalData(cancerStudy, clinicalFile);
         importClinicalData.importData();

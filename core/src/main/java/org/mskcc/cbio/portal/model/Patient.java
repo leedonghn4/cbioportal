@@ -45,27 +45,29 @@ public class Patient {
 
     private int internalId;
     private String stableId;
-    private CancerStudy cancerStudy;
+//    private CancerStudy cancerStudy;
+    private int cancerStudyGroupId;
 
-	private Map<String, ClinicalData> clinicalDataMap;
+    private Map<String, ClinicalData> clinicalDataMap;
     private static final Logger logger = Logger.getLogger(Patient.class);
 
-    public Patient(CancerStudy cancerStudy, String stableId)
+    public Patient(String stableId)
     {
-        this(cancerStudy, stableId, -1, new HashMap<String, ClinicalData>());
+        this(stableId, -1, -1, new HashMap<String, ClinicalData>());
     }
 
-    public Patient(CancerStudy cancerStudy, String stableId, int internalId)
+    public Patient(String stableId, int internalId, int cancerStudyGroupId)
     {
-        this(cancerStudy, stableId, internalId, new HashMap<String, ClinicalData>());
+        this(stableId, internalId, cancerStudyGroupId, new HashMap<String, ClinicalData>());
     }
 
-    public Patient(CancerStudy cancerStudy, String stableId, int internalId, Map<String, ClinicalData> clinicalDataMap)
+    public Patient(String stableId, int internalId,int cancerStudyGroupId, Map<String, ClinicalData> clinicalDataMap)
     {
-        this.cancerStudy = cancerStudy;
+//        this.cancerStudy = cancerStudy;
         this.stableId = stableId;
         this.internalId = internalId;
-		this.clinicalDataMap = clinicalDataMap;
+        this.cancerStudyGroupId = cancerStudyGroupId;
+	this.clinicalDataMap = clinicalDataMap;
     }
 
     @Override
@@ -85,7 +87,11 @@ public class Patient {
             return false;
         }
         
-        if (this.cancerStudy.getInternalId() != anotherPatient.getCancerStudy().getInternalId()) {
+//        if (this.cancerStudy.getCancerStudyGroupId() != anotherPatient.getCancerStudy().getCancerStudyGroupId()) {
+//            return false;
+//        }
+        
+        if (this.cancerStudyGroupId != anotherPatient.getCancerStudyGroupId()) {
             return false;
         }
         
@@ -96,18 +102,23 @@ public class Patient {
     public int hashCode() {
         int hash = 3;
         hash = 41 * hash + (this.stableId != null ? this.stableId.hashCode() : 0);
-        hash = 41 * hash + this.cancerStudy.getInternalId();
+        hash = 41 * hash + this.getCancerStudyGroupId();
         return hash;
     }
 
-    public CancerStudy getCancerStudy()
-    {
-        return cancerStudy;
-    }
+//    public CancerStudy getCancerStudy()
+//    {
+//        return cancerStudy;
+//    }
 
     public int getInternalId()
     {
         return internalId;
+    }
+    
+    public int getCancerStudyGroupId()
+    {
+        return cancerStudyGroupId;
     }
 
     public String getStableId()

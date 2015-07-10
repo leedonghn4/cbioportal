@@ -62,7 +62,7 @@ public class TestGetMutSig extends TestCase {
 		// TBD: change this to use getResourceAsStream()
         ImportTypesOfCancers.load(new ProgressMonitor(), new File("target/test-classes/cancers.txt"));
         // changed GBM_portal to tcga_gbm
-        CancerStudy cancerStudy = new CancerStudy("Glioblastoma TCGA", "GBM Description", "tcga_gbm","","", "GBM", false);
+        CancerStudy cancerStudy = new CancerStudy("Glioblastoma TCGA", "GBM Description", "tcga_gbm",-1,"", "GBM", false);
         DaoCancerStudy.addCancerStudy(cancerStudy);
         assertEquals(1, cancerStudy.getInternalId());
 

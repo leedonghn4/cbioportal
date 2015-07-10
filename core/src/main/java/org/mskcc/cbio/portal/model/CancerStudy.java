@@ -58,7 +58,7 @@ public class CancerStudy {
     private String name;
     private String description;
     private String cancerStudyIdentifier;
-    private String cancerStudyGroupIdentifier;
+    private int cancerStudyGroupId;
     private String cancerStudyGroupRanking;
     private String typeOfCancerId;  // required
     private boolean publicStudy;  // if true, a public study, otherwise private
@@ -77,7 +77,7 @@ public class CancerStudy {
      * @param typeOfCancerId        Type of Cancer.
      * @param publicStudy           Flag to indicate if this is a public study.
      */
-    public CancerStudy(String name, String description, String cancerStudyIdentifier,String cancerStudyGroupIdentifier, String cancerStudyGroupRanking,
+    public CancerStudy(String name, String description, String cancerStudyIdentifier,int cancerStudyGroupId, String cancerStudyGroupRanking,
             String typeOfCancerId, boolean publicStudy) {
         super();
         this.studyID = CancerStudy.NO_SUCH_STUDY;
@@ -85,7 +85,7 @@ public class CancerStudy {
         this.shortName = "";
         this.description = description;
         this.cancerStudyIdentifier = cancerStudyIdentifier;
-        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+        this.cancerStudyGroupId = cancerStudyGroupId;
         this.cancerStudyGroupRanking = cancerStudyGroupRanking;
         this.typeOfCancerId = typeOfCancerId;
         this.publicStudy = publicStudy;
@@ -119,8 +119,8 @@ public class CancerStudy {
      * Gets the Cancer Study Group Identifier.
      * @return cancer study Group Identifier.
      */
-    public String getCancerStudyGroupIdentifier() {
-        return cancerStudyGroupIdentifier;
+    public int getCancerStudyGroupId() {
+        return cancerStudyGroupId;
     }
     
     /**
@@ -151,8 +151,8 @@ public class CancerStudy {
      * Sets the Cancer Study Stable Identifier.
      * @param cancerStudyIdentifier Cancer Study Stable Identifier.
      */
-    public void setCancerStudyGroupIdentifier(String cancerStudyGroupIdentifier) {
-        this.cancerStudyGroupIdentifier = cancerStudyGroupIdentifier;
+    public void setCancerStudyGroupId(int cancerStudyGroupId) {
+        this.cancerStudyGroupId = cancerStudyGroupId;
     }
     
     /**

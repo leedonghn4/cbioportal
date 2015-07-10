@@ -270,12 +270,12 @@ public class ImportClinicalData {
     {
         int internalPatientId = -1;
         if (validPatientId(patientId)) {
-            Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
+            Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getCancerStudyGroupId(), patientId);
             if (patient != null) {
                 internalPatientId = patient.getInternalId();
             }
             else {
-                patient = new Patient(cancerStudy, patientId);
+                patient = new Patient(patientId);
                 internalPatientId = DaoPatient.addPatient(patient);
             }
         }
@@ -289,14 +289,14 @@ public class ImportClinicalData {
         if (validSampleId(sampleId) && !StableIdUtil.isNormal(sampleId)) {
             String stablePatientId = getStablePatientId(sampleId, fields, columnAttrs);
             if (validPatientId(stablePatientId)) {
-                Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), stablePatientId);
+                Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getCancerStudyGroupId(), stablePatientId);
                 if (patient == null) {
                     addPatientToDatabase(stablePatientId);
-                    patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), stablePatientId);
+                    patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getCancerStudyGroupId(), stablePatientId);
                 }
                 sampleId = StableIdUtil.getSampleId(sampleId);
                 if (patient != null) {
-                    Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), sampleId);
+                    Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getCancerStudyGroupId(), sampleId);
                     if (sample != null) {
                         internalSampleId = sample.getInternalId();
                     }

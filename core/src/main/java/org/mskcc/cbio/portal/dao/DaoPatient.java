@@ -48,8 +48,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DaoPatient {
 
     private static final Map<Integer, Patient> byInternalId = new ConcurrentHashMap<Integer, Patient>();
-    private static final Map<Integer, Set<Patient>> byInternalCancerStudyId = new ConcurrentHashMap<Integer, Set<Patient>>();
-    private static final MultiKeyMap byCancerIdAndStablePatientId = new MultiKeyMap();
+    private static final Map<Integer, Set<Patient>> byCancerStudyGroupId = new ConcurrentHashMap<Integer, Set<Patient>>();
+    private static final MultiKeyMap byCancerGroupIdAndStablePatientId = new MultiKeyMap();
 
     static {
         reCache();
@@ -58,8 +58,8 @@ public class DaoPatient {
     private static void clearCache()
     {
         byInternalId.clear();
-        byInternalCancerStudyId.clear();
-        byCancerIdAndStablePatientId.clear();
+        byCancerStudyGroupId.clear();
+        byCancerGroupIdAndStablePatientId.clear();
     }
 
     public static synchronized void reCache()
@@ -77,7 +77,7 @@ public class DaoPatient {
             while (rs.next()) {
                 Patient p = extractPatient(rs);
                 if (p != null) {
-                    cachePatient(p, p.getCancerStudy().getInternalId());
+                    cachePatient(p, p.getCancerStudyGroupId());
                 }
             }
         }
@@ -89,22 +89,22 @@ public class DaoPatient {
         }
     }
 
-    public static void cachePatient(Patient patient, int cancerStudyId)
+    public static void cachePatient(Patient patient, int cancerStudyGroupId)
     {
         if (!byInternalId.containsKey(patient.getInternalId())) {
             byInternalId.put(patient.getInternalId(), patient);
         } 
-        if (byInternalCancerStudyId.containsKey(patient.getCancerStudy().getInternalId())) {
-            byInternalCancerStudyId.get(patient.getCancerStudy().getInternalId()).add(patient);
+        if (byCancerStudyGroupId.containsKey(patient.getCancerStudyGroupId())) {
+            byCancerStudyGroupId.get(patient.getCancerStudyGroupId()).add(patient);
         }
         else {
             Set<Patient> patientList = new HashSet<Patient>();
             patientList.add(patient);
-            byInternalCancerStudyId.put(patient.getCancerStudy().getInternalId(), patientList);
+            byCancerStudyGroupId.put(patient.getCancerStudyGroupId(), patientList);
         }
 
-        if (!byCancerIdAndStablePatientId.containsKey(cancerStudyId, patient.getStableId())) {
-            byCancerIdAndStablePatientId.put(cancerStudyId, patient.getStableId(), patient);
+        if (!byCancerGroupIdAndStablePatientId.containsKey(cancerStudyGroupId, patient.getStableId())) {
+            byCancerGroupIdAndStablePatientId.put(cancerStudyGroupId, patient.getStableId(), patient);
         }
     }
 
@@ -115,14 +115,14 @@ public class DaoPatient {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoPatient.class);
-            pstmt = con.prepareStatement("INSERT INTO patient (`STABLE_ID`, `CANCER_STUDY_ID`) VALUES (?,?)",
+            pstmt = con.prepareStatement("INSERT INTO patient (`STABLE_ID`, `CANCER_STUDY_GROUP_ID`) VALUES (?,?)",
                                          Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, patient.getStableId());
-            pstmt.setInt(2, patient.getCancerStudy().getInternalId());
+            pstmt.setInt(2, patient.getCancerStudyGroupId());
             pstmt.executeUpdate();
             rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                cachePatient(new Patient(patient.getCancerStudy(), patient.getStableId(), rs.getInt(1)), patient.getCancerStudy().getInternalId());
+                cachePatient(new Patient(patient.getStableId(), rs.getInt(1),patient.getCancerStudyGroupId()), patient.getCancerStudyGroupId());
                 return rs.getInt(1);
             }
             return -1;
@@ -140,14 +140,14 @@ public class DaoPatient {
         return byInternalId.get(internalId);
     }
 
-    public static Patient getPatientByCancerStudyAndPatientId(int cancerStudyId, String stablePatientId) 
+    public static Patient getPatientByCancerStudyAndPatientId(int cancerStudyGroupId, String stablePatientId) 
     {
-        return (Patient)byCancerIdAndStablePatientId.get(cancerStudyId, stablePatientId);
+        return (Patient)byCancerGroupIdAndStablePatientId.get(cancerStudyGroupId, stablePatientId);
     }
 
-    public static Set<Patient> getPatientsByCancerStudyId(int cancerStudyId)
+    public static Set<Patient> getPatientsByCancerStudyGroupId(int cancerStudyGroupId)
     {
-        return byInternalCancerStudyId.get(cancerStudyId);
+        return byCancerStudyGroupId.get(cancerStudyGroupId);
     }
 
     public static List<Patient> getAllPatients()
@@ -178,10 +178,10 @@ public class DaoPatient {
 
     private static Patient extractPatient(ResultSet rs) throws SQLException
     {
-        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(rs.getInt("CANCER_STUDY_ID"));
+        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(rs.getInt("CANCER_STUDY_Group_ID"));
         if (cancerStudy == null) return null;
-        return new Patient(cancerStudy,
-                           rs.getString("STABLE_ID"),
-                           rs.getInt("INTERNAL_ID"));
+        return new Patient(rs.getString("STABLE_ID"),
+                           rs.getInt("INTERNAL_ID"),
+                           rs.getInt("CANCER_STUDY_Group_ID"));
     }
 }

@@ -142,7 +142,7 @@ public class TumorMapServlet extends HttpServlet {
                     if (citation!=null) {
                         row.put("citation", citation);
                     }
-                    row.put("cases", DaoPatient.getPatientsByCancerStudyId(cancerStudy.getInternalId()).size());
+                    row.put("cases", DaoPatient.getPatientsByCancerStudyGroupId(cancerStudy.getCancerStudyGroupId()).size());
                 }
                 
                 if (includeMut) {

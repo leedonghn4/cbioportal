@@ -89,7 +89,7 @@ public class TestImportCaisesClinicalXML {
     //
      @Test
      public void test() throws Exception {
-        CancerStudy cancerStudy = new CancerStudy("prad","prad","prad","","","prad",true);
+        CancerStudy cancerStudy = new CancerStudy("prad","prad","prad",-1,"","prad",true);
         cancerStudy.setInternalId(1);
         DaoCancerStudy.addCancerStudy(cancerStudy);
 

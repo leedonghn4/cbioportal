@@ -188,7 +188,7 @@ public class TestDaoMutation extends TestCase {
 	}
 
     private void createSamples() throws DaoException {
-        CancerStudy study = new CancerStudy("study", "description", "id","","", "brca", true);
+        CancerStudy study = new CancerStudy("study", "description", "id", -1 ,"", "brca", true);
         Patient p = new Patient(study, "TCGA-1");
         int pId = DaoPatient.addPatient(p);
         Sample s = new Sample("1234", pId, "type");

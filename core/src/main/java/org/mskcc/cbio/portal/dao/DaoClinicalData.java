@@ -244,13 +244,13 @@ public final class DaoClinicalData {
     public static List<ClinicalData> getData(int cancerStudyId) throws DaoException
     {
         
-        return getDataByInternalIds(cancerStudyId, PATIENT_TABLE, getPatientIdsByCancerStudy(cancerStudyId));
+        return getDataByInternalIds(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId(), PATIENT_TABLE, getPatientIdsByCancerStudy(cancerStudyId));
     }
 
     private static List<Integer> getPatientIdsByCancerStudy(int cancerStudyId)
     {
         List<Integer> patientIds = new ArrayList<Integer>();
-        for (Patient patient : DaoPatient.getPatientsByCancerStudyId(cancerStudyId)) {
+        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId())) {
             patientIds.add(patient.getInternalId());
         }
         return patientIds;
@@ -259,7 +259,7 @@ public final class DaoClinicalData {
     private static List<Integer> getSampleIdsByCancerStudy(int cancerStudyId)
     {
         List<Integer> sampleIds = new ArrayList<Integer>();
-        for (Patient patient : DaoPatient.getPatientsByCancerStudyId(cancerStudyId)) {
+        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(cancerStudyId)) {
             for (Sample s : DaoSample.getSamplesByPatientId(patient.getInternalId())) {
                 sampleIds.add(s.getInternalId());
             }
@@ -278,7 +278,7 @@ public final class DaoClinicalData {
             patientIdsInt.add(DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudyId, patientId).getInternalId());
         }
 
-            return getDataByInternalIds(cancerStudyId, PATIENT_TABLE, patientIdsInt);
+            return getDataByInternalIds(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId(), PATIENT_TABLE, patientIdsInt);
     }
 
     public static List<ClinicalData> getSampleAndPatientData(int cancerStudyId, Collection<String> sampleIds) throws DaoException
@@ -301,7 +301,7 @@ public final class DaoClinicalData {
         }
         List<ClinicalData> sampleClinicalData =  getDataByInternalIds(cancerStudyId, SAMPLE_TABLE, sampleIdsInt);
         
-        List<ClinicalData> patientClinicalData = getDataByInternalIds(cancerStudyId, PATIENT_TABLE, patientIdsInt);
+        List<ClinicalData> patientClinicalData = getDataByInternalIds(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId(), PATIENT_TABLE, patientIdsInt);
         for (ClinicalData cd : patientClinicalData) {
             String stablePatientId = cd.getStableId();
             Set<String> sampleIdsForPatient = mapPatientIdSampleIds.get(stablePatientId);
@@ -335,7 +335,7 @@ public final class DaoClinicalData {
         }
         List<ClinicalData> sampleClinicalData =  getDataByInternalIds(cancerStudyId, SAMPLE_TABLE, sampleIdsInt, Collections.singletonList(attr.getAttrId()));
         
-        List<ClinicalData> patientClinicalData = getDataByInternalIds(cancerStudyId, PATIENT_TABLE, patientIdsInt, Collections.singletonList(attr.getAttrId()));
+        List<ClinicalData> patientClinicalData = getDataByInternalIds(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId(), PATIENT_TABLE, patientIdsInt, Collections.singletonList(attr.getAttrId()));
         for (ClinicalData cd : patientClinicalData) {
             String stablePatientId = cd.getStableId();
             Set<String> sampleIdsForPatient = mapPatientIdSampleIds.get(stablePatientId);
@@ -375,7 +375,7 @@ public final class DaoClinicalData {
             patientIdsInt.add(DaoPatient.getPatientByCancerStudyAndPatientId(internalCancerStudyId, patientId).getInternalId());
         }
 
-		return getDataByInternalIds(internalCancerStudyId, PATIENT_TABLE, patientIdsInt, Collections.singletonList(attr.getAttrId()));
+		return getDataByInternalIds(DaoCancerStudy.getCancerStudyByInternalId(internalCancerStudyId).getCancerStudyGroupId(), PATIENT_TABLE, patientIdsInt, Collections.singletonList(attr.getAttrId()));
     }
 
     private static List<ClinicalData> getDataByInternalIds(int internalCancerStudyId, String table, List<Integer> internalIds, Collection<String> attributeIds) throws DaoException
@@ -501,7 +501,7 @@ public final class DaoClinicalData {
             ArrayList<Patient> toReturn = new ArrayList<Patient>();
             for (Map.Entry<String,Map<String,ClinicalData>> entry : clinicalData.entrySet()) {
                 Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudyId, entry.getKey());
-                toReturn.add(new Patient(cancerStudy, patient.getStableId(), patient.getInternalId(), entry.getValue()));
+                toReturn.add(new Patient( patient.getStableId(), patient.getInternalId(),cancerStudy.getCancerStudyGroupId(), entry.getValue()));
             }
             return toReturn;
 	}
