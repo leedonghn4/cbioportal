@@ -55,7 +55,7 @@ public class ImportDataUtil
         for (String barcode : barcodes) {
             String patientId = StableIdUtil.getPatientId(barcode);
             if (unknownPatient(cancerStudy, patientId)) {
-                addPatient(patientId, cancerStudy);
+                addPatient(patientId);
             }
         }
     }
@@ -74,9 +74,9 @@ public class ImportDataUtil
         }
     }
 
-    private static void addPatient(String stableId, CancerStudy cancerStudy) throws DaoException
+    private static void addPatient(String stableId) throws DaoException
     {
-        DaoPatient.addPatient(new Patient(cancerStudy, stableId));
+        DaoPatient.addPatient(new Patient(stableId));
     }
 
     public static void addSamples(String barcodes[], int geneticProfileId) throws DaoException
@@ -107,7 +107,7 @@ public class ImportDataUtil
         String patientId = StableIdUtil.getPatientId(sampleId);
         Patient p = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
         int pId = (p == null) ?
-            DaoPatient.addPatient(new Patient(cancerStudy, patientId)) : p.getInternalId();
+            DaoPatient.addPatient(new Patient(patientId)) : p.getInternalId();
         DaoSample.addSample(new Sample(sampleId, pId,
                                        cancerStudy.getTypeOfCancerId()));
     }
