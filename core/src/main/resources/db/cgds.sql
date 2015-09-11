@@ -151,6 +151,19 @@ CREATE TABLE `sample` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sample_cancerstudy`
+--
+drop table IF EXISTS sample_cancerstudy;
+CREATE TABLE `sample_cancerstudy` (
+  `SAMPLE_INTERNAL_ID` int(11) NOT NULL,
+  `CANCER_STUDY_ID` int(11) NOT NULL,
+  PRIMARY KEY (`SAMPLE_INTERNAL_ID`),
+  FOREIGN KEY (`CANCER_STUDY_ID`) REFERENCES `cancer_study` (`CANCER_STUDY_ID`) ON DELETE CASCADE
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `patient_list`
 --
 drop table IF EXISTS patient_list;

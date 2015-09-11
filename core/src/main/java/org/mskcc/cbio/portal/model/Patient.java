@@ -46,27 +46,26 @@ public class Patient {
     private int internalId;
     private String stableId;
 //    private CancerStudy cancerStudy;
-    private int cancerStudyGroupId;
+//    private int cancerStudyGroupId;
 
     private Map<String, ClinicalData> clinicalDataMap;
     private static final Logger logger = Logger.getLogger(Patient.class);
 
     public Patient(String stableId)
     {
-        this(stableId, -1, -1, new HashMap<String, ClinicalData>());
+        this(stableId,-1, new HashMap<String, ClinicalData>());
     }
 
-    public Patient(String stableId, int internalId, int cancerStudyGroupId)
+    public Patient(String stableId, int internalId)
     {
-        this(stableId, internalId, cancerStudyGroupId, new HashMap<String, ClinicalData>());
+        this(stableId, internalId, new HashMap<String, ClinicalData>());
     }
 
-    public Patient(String stableId, int internalId,int cancerStudyGroupId, Map<String, ClinicalData> clinicalDataMap)
+    public Patient(String stableId, int internalId, Map<String, ClinicalData> clinicalDataMap)
     {
 //        this.cancerStudy = cancerStudy;
         this.stableId = stableId;
         this.internalId = internalId;
-        this.cancerStudyGroupId = cancerStudyGroupId;
 	this.clinicalDataMap = clinicalDataMap;
     }
 
@@ -91,9 +90,9 @@ public class Patient {
 //            return false;
 //        }
         
-        if (this.cancerStudyGroupId != anotherPatient.getCancerStudyGroupId()) {
-            return false;
-        }
+//        if (this.cancerStudyGroupId != anotherPatient.getCancerStudyGroupId()) {
+//            return false;
+//        }
         
         return true;
     }
@@ -102,7 +101,6 @@ public class Patient {
     public int hashCode() {
         int hash = 3;
         hash = 41 * hash + (this.stableId != null ? this.stableId.hashCode() : 0);
-        hash = 41 * hash + this.getCancerStudyGroupId();
         return hash;
     }
 
@@ -114,11 +112,6 @@ public class Patient {
     public int getInternalId()
     {
         return internalId;
-    }
-    
-    public int getCancerStudyGroupId()
-    {
-        return cancerStudyGroupId;
     }
 
     public String getStableId()
@@ -145,7 +138,7 @@ public class Patient {
     public Double getAgeAtDiagnosis()
     {
 		return getDoubleValue(ClinicalAttribute.AGE_AT_DIAGNOSIS);
-	}
+    }
 
 	private Double getDoubleValue(String attribute)
     {

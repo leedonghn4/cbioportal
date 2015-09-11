@@ -53,6 +53,7 @@ public final class DaoCancerStudy {
     
     private static final Map<String,CancerStudy> byStableId = new HashMap<String,CancerStudy>();
     private static final Map<Integer,CancerStudy> byInternalId = new HashMap<Integer,CancerStudy>();
+    private static final Map<Integer,Integer> byCancerStudyGroup = new HashMap<Integer,Integer>();
     
     static {
        reCache();
@@ -82,6 +83,7 @@ public final class DaoCancerStudy {
     private static void cacheCancerStudy(CancerStudy study) {
         byStableId.put(study.getCancerStudyStableId(), study);
         byInternalId.put(study.getInternalId(), study);
+        byCancerStudyGroup.put(study.getInternalId(),study.getCancerStudyGroupId());
     }
 
     /**
@@ -192,6 +194,17 @@ public final class DaoCancerStudy {
      */
     public static CancerStudy getCancerStudyByInternalId(int cancerStudyID) {
         return byInternalId.get(cancerStudyID);
+    }
+    
+    
+    /**
+     * Return the cancerStudy identified by the internal cancer study ID, if it exists.
+     *
+     * @param cancerStudyID     Internal (int) Cancer Study ID.
+     * @return Cancer Study Object, or null if there's no such study.
+     */
+    public static int getCancerStudyGroupByCancerStudyId(int cancerStudyID) {
+        return byCancerStudyGroup.get(cancerStudyID);
     }
 
     /**

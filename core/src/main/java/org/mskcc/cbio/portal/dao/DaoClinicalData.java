@@ -250,16 +250,16 @@ public final class DaoClinicalData {
     private static List<Integer> getPatientIdsByCancerStudy(int cancerStudyId)
     {
         List<Integer> patientIds = new ArrayList<Integer>();
-        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(DaoCancerStudy.getCancerStudyByInternalId(cancerStudyId).getCancerStudyGroupId())) {
+        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId((DaoCancerStudy.getCancerStudyGroupByCancerStudyId(cancerStudyId)))) {
             patientIds.add(patient.getInternalId());
         }
         return patientIds;
-    }
+    }       
 
-    private static List<Integer> getSampleIdsByCancerStudy(int cancerStudyId)
+    private static List<Integer> getSampleIdsByCancerStudy(int cancerStudyGroupId)
     {
         List<Integer> sampleIds = new ArrayList<Integer>();
-        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(cancerStudyId)) {
+        for (Patient patient : DaoPatient.getPatientsByCancerStudyGroupId(cancerStudyGroupId)) {
             for (Sample s : DaoSample.getSamplesByPatientId(patient.getInternalId())) {
                 sampleIds.add(s.getInternalId());
             }
@@ -501,7 +501,7 @@ public final class DaoClinicalData {
             ArrayList<Patient> toReturn = new ArrayList<Patient>();
             for (Map.Entry<String,Map<String,ClinicalData>> entry : clinicalData.entrySet()) {
                 Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudyId, entry.getKey());
-                toReturn.add(new Patient( patient.getStableId(), patient.getInternalId(),cancerStudy.getCancerStudyGroupId(), entry.getValue()));
+                toReturn.add(new Patient( patient.getStableId(), patient.getInternalId(), entry.getValue()));
             }
             return toReturn;
 	}
@@ -548,24 +548,26 @@ public final class DaoClinicalData {
 
 		return toReturn;
 	}
-	public static HashSet<String> getAllPatients(int cancerStudyId) throws DaoException {
+    
+    public static HashSet<String> getAllPatients(int cancerStudyId) throws DaoException {
 
-		HashSet<String> toReturn = new HashSet<String>();
-		for (ClinicalData clinicalData : getData(cancerStudyId)) {
-			toReturn.add(clinicalData.getStableId());
-		}
+            HashSet<String> toReturn = new HashSet<String>();
+            for (ClinicalData clinicalData : getData(cancerStudyId)) {
+                    toReturn.add(clinicalData.getStableId());
+            }
 
-		return toReturn;
-	}
-	public static List<ClinicalData> getDataByCancerStudy(int cancerStudyId) throws DaoException {
+            return toReturn;
+    }
+    
+    public static List<ClinicalData> getDataByCancerStudy(int cancerStudyId) throws DaoException {
 
-		return DaoClinicalData.getData(cancerStudyId);
-	}
+            return DaoClinicalData.getData(cancerStudyId);
+    }
 
-	public static List<ClinicalData> getDataByPatientIds(int cancerStudyId, List<String> patientIds) throws DaoException {
+    public static List<ClinicalData> getDataByPatientIds(int cancerStudyId, List<String> patientIds) throws DaoException {
 
-		return DaoClinicalData.getData(cancerStudyId, patientIds);
-	}
+            return DaoClinicalData.getData(cancerStudyId, patientIds);
+    }
 
     public static List<Patient> getPatientsByAttribute(int cancerStudy, String paramName, String paramValue) throws DaoException
     {
